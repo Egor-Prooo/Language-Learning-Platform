@@ -3061,6 +3061,43 @@
             "rid": "win"
           }
         }
+      },
+      "LanguageLearningPlatform.Core/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "compile": {
+          "bin/placeholder/LanguageLearningPlatform.Core.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/LanguageLearningPlatform.Core.dll": {}
+        }
+      },
+      "LanguageLearningPlatform.Data/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "dependencies": {
+          "LanguageLearningPlatform.Core": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/LanguageLearningPlatform.Data.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/LanguageLearningPlatform.Data.dll": {}
+        }
+      },
+      "LanguageLearningPlatform.Services/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "dependencies": {
+          "LanguageLearningPlatform.Core": "1.0.0",
+          "LanguageLearningPlatform.Data": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/LanguageLearningPlatform.Services.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/LanguageLearningPlatform.Services.dll": {}
+        }
       }
     }
   },
@@ -8344,10 +8381,28 @@
         "system.windows.extensions.nuspec",
         "useSharedDesignerContext.txt"
       ]
+    },
+    "LanguageLearningPlatform.Core/1.0.0": {
+      "type": "project",
+      "path": "../LanguageLearningPlatform.Core/LanguageLearningPlatform.Core.csproj",
+      "msbuildProject": "../LanguageLearningPlatform.Core/LanguageLearningPlatform.Core.csproj"
+    },
+    "LanguageLearningPlatform.Data/1.0.0": {
+      "type": "project",
+      "path": "../LanguageLearningPlatform.Data/LanguageLearningPlatform.Data.csproj",
+      "msbuildProject": "../LanguageLearningPlatform.Data/LanguageLearningPlatform.Data.csproj"
+    },
+    "LanguageLearningPlatform.Services/1.0.0": {
+      "type": "project",
+      "path": "../LanguageLearningPlatform.Services/LanguageLearningPlatform.Services.csproj",
+      "msbuildProject": "../LanguageLearningPlatform.Services/LanguageLearningPlatform.Services.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net8.0": [
+      "LanguageLearningPlatform.Core >= 1.0.0",
+      "LanguageLearningPlatform.Data >= 1.0.0",
+      "LanguageLearningPlatform.Services >= 1.0.0",
       "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore >= 8.0.19",
       "Microsoft.AspNetCore.Identity.EntityFrameworkCore >= 8.0.19",
       "Microsoft.AspNetCore.Identity.UI >= 8.0.19",
@@ -8364,9 +8419,9 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\LanguageLearningPlatform.csproj",
-      "projectName": "LanguageLearningPlatform",
-      "projectPath": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\LanguageLearningPlatform.csproj",
+      "projectUniqueName": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj",
+      "projectName": "LanguageLearningPlatform.Web",
+      "projectPath": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj",
       "packagesPath": "C:\\Users\\epros\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\obj\\",
       "projectStyle": "PackageReference",
@@ -8388,7 +8443,17 @@
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Core\\LanguageLearningPlatform.Core.csproj": {
+              "projectPath": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Core\\LanguageLearningPlatform.Core.csproj"
+            },
+            "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\LanguageLearningPlatform.Data.csproj": {
+              "projectPath": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\LanguageLearningPlatform.Data.csproj"
+            },
+            "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Services\\LanguageLearningPlatform.Services.csproj": {
+              "projectPath": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Services\\LanguageLearningPlatform.Services.csproj"
+            }
+          }
         }
       },
       "warningProperties": {

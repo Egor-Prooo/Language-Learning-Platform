@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "rwWbyQGgcD4=",
+  "dgSpecHash": "MC+2CMiOgq4=",
   "success": true,
-  "projectFilePath": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\LanguageLearningPlatform.csproj",
+  "projectFilePath": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\epros\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\epros\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",

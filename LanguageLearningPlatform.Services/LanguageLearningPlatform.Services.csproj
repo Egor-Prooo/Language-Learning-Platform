@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\LanguageLearningPlatform.Core\LanguageLearningPlatform.Core.csproj" />
+    <ProjectReference Include="..\LanguageLearningPlatform.Data\LanguageLearningPlatform.Data.csproj" />
+  </ItemGroup>
+
 </Project>

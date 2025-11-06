@@ -17,6 +17,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\LanguageLearningPlatform.Core\LanguageLearningPlatform.Core.csproj" />
+    <ProjectReference Include="..\LanguageLearningPlatform.Data\LanguageLearningPlatform.Data.csproj" />
+    <ProjectReference Include="..\LanguageLearningPlatform.Services\LanguageLearningPlatform.Services.csproj" />
+    <ProjectReference Include="..\LanguageLearningPlatform\LanguageLearningPlatform.Web.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
 

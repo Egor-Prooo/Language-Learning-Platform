@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LanguageLearningPlatform.Data
 {
-    public class ApplicationDbContext : IdentityDbContext
+    public class ApplicationDbContext : IdentityDbContext<User>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -38,6 +38,18 @@ namespace LanguageLearningPlatform.Data
                 .WithMany(a => a.UserAchievements)
                 .HasForeignKey(ua => ua.AchievementId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ChatMessage>()
+                .HasOne(cm => cm.User)
+                .WithMany(u => u.SentMessages)
+                .HasForeignKey(cm => cm.UserId)
+                .OnDelete(DeleteBehavior.Restrict); 
+
+            modelBuilder.Entity<ChatMessage>()
+                .HasOne(cm => cm.Tutor)
+                .WithMany(t => t.ChatMessages)
+                .HasForeignKey(cm => cm.TutorId)
+                .OnDelete(DeleteBehavior.Restrict); 
 
             modelBuilder.Entity<Exercise>()
                 .HasIndex(e => e.CourseId);

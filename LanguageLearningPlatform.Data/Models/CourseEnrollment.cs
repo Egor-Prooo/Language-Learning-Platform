@@ -20,7 +20,7 @@ namespace LanguageLearningPlatform.Data.Models
 
         [Required]
         [ForeignKey("CourseId")]
-        public int CourseId { get; set; }
+        public Guid CourseId { get; set; }
         public virtual Course Course { get; set; }
 
         public DateTime EnrollmentDate { get; set; } = DateTime.UtcNow;

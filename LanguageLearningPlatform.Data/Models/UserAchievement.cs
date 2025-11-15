@@ -8,27 +8,21 @@ using System.Threading.Tasks;
 
 namespace LanguageLearningPlatform.Data.Models
 {
-    public class ChatMessage
+    public class UserAchievement
     {
         [Key]
         public Guid Id { get; set; }
 
-        [Required]
-        public string Message { get; set; } = string.Empty;
-
-        public bool IsFromUser { get; set; } = true; // true = user sent, false = tutor/system sent
-
-        public DateTime SentAt { get; set; } = DateTime.UtcNow;
-
-        public bool IsRead { get; set; } = false;
+        public DateTime UnlockedAt { get; set; } = DateTime.UtcNow;
 
         [Required]
         [ForeignKey(nameof(User))]
         public string UserId { get; set; } = string.Empty;
         public virtual User User { get; set; } = null!;
 
-        [ForeignKey(nameof(Tutor))]
-        public Guid? TutorId { get; set; }
-        public virtual Tutor? Tutor { get; set; }
+        [Required]
+        [ForeignKey(nameof(Achievement))]
+        public Guid AchievementId { get; set; }
+        public virtual Achievement Achievement { get; set; } = null!;
     }
 }

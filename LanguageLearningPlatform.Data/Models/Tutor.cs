@@ -1,12 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LanguageLearningPlatform.Data.Models
 {
-    internal class Tutor
+    public class Tutor
     {
+        [Key]
+        public Guid Id { get; set; }
+
+        public string Bio { get; set; }
+
+        public double Rating { get; set; }
     }
 }

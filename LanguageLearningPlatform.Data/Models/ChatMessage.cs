@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace LanguageLearningPlatform.Data.Models
 {
-    internal class ChatMessage
+    public class ChatMessage
     {
+
     }
 }

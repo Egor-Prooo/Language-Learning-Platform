@@ -1,12 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.Contracts;
 
 namespace LanguageLearningPlatform.Data.Models
 {
-    internal class Achievement
+    public class Achievement
     {
+        [Key]
+        public Guid Id { get; set; }
+
+        public string Title { get; set; }
+
+        public string Description { get; set; }
+
+        public int PointsRequired { get; set; }
     }
 }

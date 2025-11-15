@@ -1,12 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 namespace LanguageLearningPlatform.Data.Models
 {
-    internal class Course
+    public class Course
     {
+        [Key]
+        public Guid Id { get; set; }
+
+        [Required]
+        public string Title { get; set; }
+
+        [Required]
+        public string Language { get; set; }
+
+        public string Level { get; set; }
+
+        public string Description { get; set; }
     }
 }

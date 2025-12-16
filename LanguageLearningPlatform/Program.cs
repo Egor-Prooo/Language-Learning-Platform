@@ -1,5 +1,6 @@
 using LanguageLearningPlatform.Data;
 using LanguageLearningPlatform.Data.Models;
+using LanguageLearningPlatform.Data.Seeding;
 using LanguageLearningPlatform.Services;
 using LanguageLearningPlatform.Services.Contracts;
 using Microsoft.AspNetCore.Identity;
@@ -36,22 +37,13 @@ namespace LanguageLearningPlatform
 
             var app = builder.Build();
 
-            //// Seed the database
-            //using (var scope = app.Services.CreateScope())
-            //{
-            //    var services = scope.ServiceProvider;
-            //    try
-            //    {
-            //        var context = services.GetRequiredService<ApplicationDbContext>();
-            //        var userManager = services.GetRequiredService<UserManager<User>>();
-            //        await DatabaseSeeder.SeedAsync(context, userManager);
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        var logger = services.GetRequiredService<ILogger<Program>>();
-            //        logger.LogError(ex, "An error occurred while seeding the database.");
-            //    }
-            //}
+            using (var scope = app.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+
+                await DatabaseSeeder.SeedAsync(context, userManager);
+            }
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

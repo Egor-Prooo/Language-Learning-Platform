@@ -103,8 +103,7 @@
               "RelativeToolTip": "LanguageLearningPlatform.Data\\Models\\UserLevel.cs",
               "ViewState": "AgIAAAkAAAAAAAAAAAAAABMAAAA2AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-15T20:17:33.495Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-15T20:17:33.495Z"
             },
             {
               "$type": "Document",
@@ -116,8 +115,7 @@
               "RelativeToolTip": "LanguageLearningPlatform.Data\\Models\\UserAchievement.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-15T20:17:23.149Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-15T20:17:23.149Z"
             },
             {
               "$type": "Document",
@@ -129,8 +127,7 @@
               "RelativeToolTip": "LanguageLearningPlatform.Data\\Migrations\\20251115201659_Initial.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-15T20:17:00.881Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-15T20:17:00.881Z"
             },
             {
               "$type": "Document",
@@ -142,8 +139,7 @@
               "RelativeToolTip": "LanguageLearningPlatform.Data\\Models\\User.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAACYAAABAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-15T20:07:37.133Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-15T20:07:37.133Z"
             },
             {
               "$type": "Document",
@@ -155,21 +151,19 @@
               "RelativeToolTip": "LanguageLearningPlatform.Data\\Models\\ChatMessage.cs",
               "ViewState": "AgIAAAkAAAAAAAAAAAAAABAAAAAqAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-15T20:07:31.054Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-15T20:07:31.054Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 7,
-              "Title": "LanguageLearningPlatform.Data",
+              "Title": "LanguageLearningPlatform.Data.csproj",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\LanguageLearningPlatform.Data.csproj",
               "RelativeDocumentMoniker": "LanguageLearningPlatform.Data\\LanguageLearningPlatform.Data.csproj",
               "ToolTip": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\LanguageLearningPlatform.Data.csproj",
               "RelativeToolTip": "LanguageLearningPlatform.Data\\LanguageLearningPlatform.Data.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABwAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-11-15T19:35:50.94Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-15T19:35:50.94Z"
             },
             {
               "$type": "Document",
@@ -181,8 +175,7 @@
               "RelativeToolTip": "LanguageLearningPlatform.Data\\Models\\CourseEnrollment.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAcAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-12T09:56:17.707Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-12T09:56:17.707Z"
             },
             {
               "$type": "Document",
@@ -194,8 +187,7 @@
               "RelativeToolTip": "LanguageLearningPlatform.Data\\ApplicationDbContext.cs",
               "ViewState": "AgIAAB0AAAAAAAAAAAAwwCsAAAAmAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-06T10:33:49.771Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-06T10:33:49.771Z"
             },
             {
               "$type": "Document",
@@ -207,8 +199,7 @@
               "RelativeToolTip": "LanguageLearningPlatform\\Areas\\Identity\\Pages\\Account\\_ViewImports.cshtml",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-11-06T10:24:05.494Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-06T10:24:05.494Z"
             },
             {
               "$type": "Document",
@@ -220,8 +211,7 @@
               "RelativeToolTip": "LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAABAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-11-05T20:13:43.59Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-05T20:13:43.59Z"
             },
             {
               "$type": "Document",
@@ -233,8 +223,7 @@
               "RelativeToolTip": "LanguageLearningPlatform\\Program.cs",
               "ViewState": "AgIAAAwAAAAAAAAAAAAAAB0AAAA3AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-04T19:55:33.141Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-04T19:55:33.141Z"
             }
           ]
         }

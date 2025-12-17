@@ -1,0 +1,244 @@
+﻿@model LanguageLearningPlatform.Data.Models.User
+
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="container my-5">
+    <div class="row">
+        <!-- Profile Sidebar -->
+        <div class="col-lg-4 mb-4">
+            <div class="course-card">
+                <div class="course-card-body text-center">
+                    <!-- Avatar -->
+                    <div class="mb-3">
+                        <div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center"
+                             style="width: 100px; height: 100px; font-size: 2.5rem; color: white; font-weight: 700;">
+                            @Model.FirstName.Substring(0, 1)@Model.LastName.Substring(0, 1)
+                        </div>
+                    </div>
+
+                    <!-- User Info -->
+                    <h3 class="mb-1">@Model.FirstName @Model.LastName</h3>
+                    <p class="text-secondary mb-3">@Model.Email</p>
+
+                    <!-- User Level -->
+                    @if (Model.UserLevel != null)
+                    {
+                        <div class="mb-3">
+                            <span class="badge" style="background-color: @Model.UserLevel.Color; color: white; padding: 0.5rem 1rem; font-size: 0.9rem;">
+                                <i class="fas fa-star me-1"></i>
+                                Level @Model.UserLevel.Level - @Model.UserLevel.Name
+                            </span>
+                        </div>
+                    }
+
+                    <!-- Member Since -->
+                    <p class="small text-secondary">
+                        <i class="fas fa-calendar me-1"></i>
+                        Member since @Model.RegistrationDate.ToString("MMMM yyyy")
+                    </p>
+
+                    <hr />
+
+                    <!-- Quick Actions -->
+                    <div class="d-grid gap-2">
+                        <a asp-controller="Courses" asp-action="MyCourses" class="btn btn-outline-primary">
+                            <i class="fas fa-bookmark me-2"></i>My Courses
+                        </a>
+                        <a asp-action="Achievements" class="btn btn-outline-success">
+                            <i class="fas fa-trophy me-2"></i>Achievements
+                        </a>
+                        <a asp-action="Stats" class="btn btn-outline-info">
+                            <i class="fas fa-chart-bar me-2"></i>Learning Stats
+                        </a>
+                        <a asp-area="Identity" asp-page="/Account/Manage/Index" class="btn btn-outline-secondary">
+                            <i class="fas fa-cog me-2"></i>Settings
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Stats Overview -->
+            <h2 class="mb-4">
+                <i class="fas fa-chart-line me-2"></i>Learning Overview
+            </h2>
+
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <div class="stat-card">
+                        <div class="stat-icon success">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="stat-value">@ViewBag.TotalPoints</div>
+                        <div class="stat-label">Total Points</div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="stat-card">
+                        <div class="stat-icon primary">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <div class="stat-value">@ViewBag.EnrolledCourses</div>
+                        <div class="stat-label">Enrolled Courses</div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="stat-card">
+                        <div class="stat-icon warning">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-value">@ViewBag.CompletedLessons</div>
+                        <div class="stat-label">Lessons Completed</div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="stat-card">
+                        <div class="stat-icon success">
+                            <i class="fas fa-fire"></i>
+                        </div>
+                        <div class="stat-value">@ViewBag.LearningStreak</div>
+                        <div class="stat-label">Day Streak (7 days)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance -->
+            <div class="course-card mb-4">
+                <div class="course-card-body">
+                    <h4 class="mb-3">
+                        <i class="fas fa-bullseye me-2"></i>Performance
+                    </h4>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-2 text-secondary">Exercise Accuracy</p>
+                            <div class="progress-custom mb-3">
+                                <div class="progress-bar-custom" style="width: @ViewBag.AccuracyRate%"></div>
+                            </div>
+                            <p class="text-end small fw-bold text-success">@ViewBag.AccuracyRate.ToString("F1")%</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-2 text-secondary">Total Exercises</p>
+                            <h3 class="text-primary">@ViewBag.TotalExercises</h3>
+                            <p class="small text-secondary mb-0">
+                                <i class="fas fa-check text-success me-1"></i>
+                                @(ViewBag.TotalExercises - (ViewBag.TotalExercises - @ViewBag.TotalExercises * @ViewBag.AccuracyRate / 100)) correct
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Achievements -->
+            <div class="course-card mb-4">
+                <div class="course-card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="mb-0">
+                            <i class="fas fa-trophy me-2"></i>Recent Achievements
+                        </h4>
+                        <a asp-action="Achievements" class="btn btn-sm btn-outline-primary">
+                            View All
+                        </a>
+                    </div>
+
+                    @if (ViewBag.RecentAchievements != null && ((List<LanguageLearningPlatform.Data.Models.UserAchievement>)ViewBag.RecentAchievements).Any())
+                    {
+                        <div class="row g-3">
+                            @foreach (var ua in (List<LanguageLearningPlatform.Data.Models.UserAchievement>)ViewBag.RecentAchievements)
+                            {
+                                <div class="col-md-6">
+                                    <div class="p-3 border rounded @(ua.Achievement.IsRare ? "border-warning bg-light" : "")">
+                                        <div class="d-flex align-items-start gap-3">
+                                            <div style="font-size: 2rem;">
+                                                @if (ua.Achievement.IsRare)
+                                                {
+                                                    <i class="fas fa-medal" style="color: var(--accent-color);"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="fas fa-award" style="color: var(--secondary-color);"></i>
+                                                }
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-1">@ua.Achievement.Title</h6>
+                                                <p class="small text-secondary mb-1">@ua.Achievement.Description</p>
+                                                <span class="badge bg-success small">
+                                                    +@ua.Achievement.PointsReward pts
+                                                </span>
+                                                <p class="small text-secondary mb-0 mt-1">
+                                                    <i class="fas fa-clock me-1"></i>
+                                                    @ua.UnlockedAt.ToString("MMM dd, yyyy")
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4 text-secondary">
+                            <i class="fas fa-trophy" style="font-size: 3rem; opacity: 0.3;"></i>
+                            <p class="mt-2">No achievements yet. Keep learning to unlock them!</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Active Courses -->
+            <div class="course-card">
+                <div class="course-card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="mb-0">
+                            <i class="fas fa-graduation-cap me-2"></i>Active Courses
+                        </h4>
+                        <a asp-controller="Courses" asp-action="MyCourses" class="btn btn-sm btn-outline-primary">
+                            View All
+                        </a>
+                    </div>
+
+                    @if (Model.Progresses.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var progress in Model.Progresses.OrderByDescending(p => p.LastAccessedAt).Take(5))
+                            {
+                                <div class="list-group-item border-0 px-0">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <h6 class="mb-1">@progress.Course.Title</h6>
+                                            <p class="small text-secondary mb-0">
+                                                <i class="fas fa-clock me-1"></i>
+                                                Last accessed @progress.LastAccessedAt.ToString("MMM dd")
+                                            </p>
+                                        </div>
+                                        <span class="badge bg-primary">@progress.CompletionPercentage.ToString("F0")%</span>
+                                    </div>
+                                    <div class="progress-custom">
+                                        <div class="progress-bar-custom" style="width: @progress.CompletionPercentage%"></div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4 text-secondary">
+                            <i class="fas fa-book-open" style="font-size: 3rem; opacity: 0.3;"></i>
+                            <p class="mt-2 mb-3">You haven't enrolled in any courses yet</p>
+                            <a asp-controller="Courses" asp-action="Index" class="btn btn-primary">
+                                <i class="fas fa-compass me-2"></i>Explore Courses
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

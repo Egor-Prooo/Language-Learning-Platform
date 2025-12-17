@@ -1,0 +1,205 @@
+﻿@model LanguageLearningPlatform.Data.Models.Course
+
+@{
+    ViewData["Title"] = Model.Title;
+    var isEnrolled = ViewBag.IsEnrolled as bool? ?? false;
+    var progress = ViewBag.Progress as LanguageLearningPlatform.Data.Models.Progress;
+}
+
+<div class="container my-5">
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Course Header -->
+            <div class="mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-action="Index">Courses</a></li>
+                        <li class="breadcrumb-item active">@Model.Title</li>
+                    </ol>
+                </nav>
+
+                <span class="course-level-badge @(Model.Level.ToLower() == "beginner" ? "level-beginner" : Model.Level.ToLower() == "intermediate" ? "level-intermediate" : "level-advanced") mb-3 d-inline-block">
+                    @Model.Level
+                </span>
+
+                <h1 class="display-5 fw-bold mb-3">@Model.Title</h1>
+
+                <div class="d-flex gap-4 mb-3 text-secondary">
+                    <span><i class="fas fa-globe me-2"></i>@Model.Language</span>
+                    <span><i class="fas fa-clock me-2"></i>@Model.EstimatedHours hours</span>
+                    <span><i class="fas fa-book-open me-2"></i>@Model.Lessons.Count Lessons</span>
+                    <span><i class="fas fa-users me-2"></i>@Model.Enrollments.Count Students</span>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="course-card mb-4">
+                <div class="course-card-body">
+                    <h3><i class="fas fa-info-circle me-2"></i>About This Course</h3>
+                    <p class="text-secondary mb-0">@Model.Description</p>
+                </div>
+            </div>
+
+            <!-- Progress Section (if enrolled) -->
+            @if (isEnrolled && progress != null)
+            {
+                <div class="course-card mb-4">
+                    <div class="course-card-body">
+                        <h3><i class="fas fa-chart-line me-2"></i>Your Progress</h3>
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <div class="stat-value" style="color: var(--primary-color);">@progress.CompletionPercentage.ToString("F0")%</div>
+                                    <div class="stat-label">Completed</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <div class="stat-value" style="color: var(--secondary-color);">@progress.PointsEarned</div>
+                                    <div class="stat-label">Points Earned</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <div class="stat-value" style="color: var(--accent-color);">@progress.CompletedLessons/@Model.Lessons.Count</div>
+                                    <div class="stat-label">Lessons Done</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="progress-custom">
+                                <div class="progress-bar-custom" style="width: @(progress.CompletionPercentage)%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Lessons -->
+            <div class="course-card">
+                <div class="course-card-body">
+                    <h3><i class="fas fa-list me-2"></i>Course Content</h3>
+                    @if (!Model.Lessons.Any())
+                    {
+                        <p class="text-secondary">No lessons available yet.</p>
+                    }
+                    else
+                    {
+                        <div class="list-group list-group-flush mt-3">
+                            @foreach (var lesson in Model.Lessons.OrderBy(l => l.OrderIndex))
+                            {
+                                <div class="list-group-item d-flex justify-content-between align-items-start border-0 px-0">
+                                    <div class="me-auto">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center"
+                                                 style="width: 40px; height: 40px; flex-shrink: 0;">
+                                                <strong class="text-primary">@lesson.OrderIndex</strong>
+                                            </div>
+                                            <div>
+                                                <h5 class="mb-1">@lesson.Title</h5>
+                                                <p class="mb-1 text-secondary small">@lesson.Description</p>
+                                                <span class="badge bg-light text-dark">
+                                                    <i class="fas fa-clock me-1"></i>@lesson.DurationMinutes min
+                                                </span>
+                                                @if (lesson.Exercises.Any())
+                                                {
+                                                    <span class="badge bg-light text-dark ms-1">
+                                                        <i class="fas fa-dumbbell me-1"></i>@lesson.Exercises.Count exercises
+                                                    </span>
+                                                }
+                                                @if (lesson.IsLocked && !isEnrolled)
+                                                {
+                                                    <span class="badge bg-warning text-dark ms-1">
+                                                        <i class="fas fa-lock me-1"></i>Locked
+                                                    </span>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @if (isEnrolled && !lesson.IsLocked)
+                                    {
+                                        <a asp-controller="Lessons" asp-action="Details" asp-route-id="@lesson.Id"
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-play me-1"></i>Start
+                                        </a>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="course-card sticky-top" style="top: 20px;">
+                <div class="course-card-image">
+                    @switch (Model.Language.ToLower())
+                    {
+                        case "spanish":
+                            <i class="fas fa-language"></i>
+                            break;
+                        case "french":
+                            <i class="fas fa-flag"></i>
+                            break;
+                        case "german":
+                            <i class="fas fa-book"></i>
+                            break;
+                        case "japanese":
+                            <i class="fas fa-yen-sign"></i>
+                            break;
+                        default:
+                            <i class="fas fa-globe"></i>
+                            break;
+                    }
+                </div>
+                <div class="course-card-body">
+                    @if (User.Identity?.IsAuthenticated != true)
+                    {
+                        <h5 class="mb-3">Get Started</h5>
+                        <p class="text-secondary small">Sign in to enroll in this course and start learning!</p>
+                        <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-enroll w-100 mb-2">
+                            <i class="fas fa-sign-in-alt me-2"></i>Sign In to Enroll
+                        </a>
+                        <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-user-plus me-2"></i>Create Account
+                        </a>
+                    }
+                    else if (isEnrolled)
+                    {
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <strong>Enrolled!</strong> Continue learning.
+                        </div>
+                        <a asp-controller="Courses" asp-action="MyCourses" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-bookmark me-2"></i>View My Courses
+                        </a>
+                    }
+                    else
+                    {
+                        <h5 class="mb-3">Ready to Learn?</h5>
+                        <p class="text-secondary small">Enroll now and get instant access to all lessons and exercises!</p>
+                        <form asp-action="Enroll" method="post">
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <button type="submit" class="btn btn-enroll w-100">
+                                <i class="fas fa-plus-circle me-2"></i>Enroll Now
+                            </button>
+                        </form>
+                    }
+
+                    <hr class="my-4" />
+
+                    <h6 class="mb-3">What You'll Learn</h6>
+                    <ul class="list-unstyled small">
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Master @Model.Language fundamentals</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Practice with interactive exercises</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Track your progress</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Earn achievements and badges</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

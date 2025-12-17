@@ -1,0 +1,160 @@
+﻿@model IEnumerable<LanguageLearningPlatform.Data.Models.Course>
+
+@{
+    ViewData["Title"] = "My Courses";
+    var progresses = ViewBag.Progresses as Dictionary<Guid, LanguageLearningPlatform.Data.Models.Progress>;
+}
+
+<div class="container my-5">
+    <div class="mb-5">
+        <h1 class="display-4 fw-bold">
+            <i class="fas fa-bookmark me-3"></i>My Learning Journey
+        </h1>
+        <p class="lead text-secondary">Continue where you left off</p>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="fas fa-book-open" style="font-size: 5rem; color: var(--text-secondary); opacity: 0.3;"></i>
+            </div>
+            <h3>You haven't enrolled in any courses yet</h3>
+            <p class="text-secondary mb-4">Start your learning journey by exploring our course catalog</p>
+            <a asp-action="Index" class="btn btn-enroll btn-lg">
+                <i class="fas fa-compass me-2"></i>Explore Courses
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var course in Model)
+            {
+                var progress = progresses?.ContainsKey(course.Id) == true ? progresses[course.Id] : null;
+                var completionPercentage = progress?.CompletionPercentage ?? 0;
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="course-card">
+                        <div class="course-card-image">
+                            @switch (course.Language.ToLower())
+                            {
+                                case "spanish":
+                                    <i class="fas fa-language"></i>
+                                    break;
+                                case "french":
+                                    <i class="fas fa-flag"></i>
+                                    break;
+                                case "german":
+                                    <i class="fas fa-book"></i>
+                                    break;
+                                case "japanese":
+                                    <i class="fas fa-yen-sign"></i>
+                                    break;
+                                default:
+                                    <i class="fas fa-globe"></i>
+                                    break;
+                            }
+                        </div>
+                        <div class="course-card-body">
+                            <span class="course-level-badge @(course.Level.ToLower() == "beginner" ? "level-beginner" : course.Level.ToLower() == "intermediate" ? "level-intermediate" : "level-advanced")">
+                                @course.Level
+                            </span>
+                            <h3 class="course-title">@course.Title</h3>
+                            <p class="course-language">
+                                <i class="fas fa-globe me-1"></i> @course.Language
+                            </p>
+
+                            @if (progress != null)
+                            {
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="small fw-semibold">Progress</span>
+                                        <span class="small fw-bold text-primary">@completionPercentage.ToString("F0")%</span>
+                                    </div>
+                                    <div class="progress-custom">
+                                        <div class="progress-bar-custom" style="width: @(completionPercentage)%"></div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-2 mb-3 small">
+                                    <div class="col-6">
+                                        <div class="p-2 bg-light rounded text-center">
+                                            <div class="fw-bold text-primary">@progress.CompletedLessons/@course.Lessons.Count</div>
+                                            <div class="text-secondary" style="font-size: 0.75rem;">Lessons</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="p-2 bg-light rounded text-center">
+                                            <div class="fw-bold" style="color: var(--secondary-color);">@progress.PointsEarned</div>
+                                            <div class="text-secondary" style="font-size: 0.75rem;">Points</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @if (progress.LastAccessedAt != null)
+                                {
+                                    <p class="small text-secondary mb-3">
+                                        <i class="fas fa-clock me-1"></i>
+                                        Last accessed @progress.LastAccessedAt.ToString("MMM dd, yyyy")
+                                    </p>
+                                }
+                            }
+
+                            <a asp-action="Details" asp-route-id="@course.Id" class="btn btn-enroll w-100">
+                                <i class="fas fa-play-circle me-2"></i>Continue Learning
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="row g-4 mt-4">
+            <div class="col-12">
+                <h3 class="mb-4">
+                    <i class="fas fa-chart-bar me-2"></i>Your Stats
+                </h3>
+            </div>
+
+            @{
+                var totalPoints = progresses?.Values.Sum(p => p.PointsEarned) ?? 0;
+                var totalLessonsCompleted = progresses?.Values.Sum(p => p.CompletedLessons) ?? 0;
+                var averageProgress = progresses?.Values.Any() == true
+                ? progresses.Values.Average(p => (double)p.CompletionPercentage)
+                : 0;
+            }
+
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-icon success">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="stat-value">@totalPoints</div>
+                    <div class="stat-label">Total Points</div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-icon primary">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-value">@totalLessonsCompleted</div>
+                    <div class="stat-label">Lessons Completed</div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-icon warning">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <div class="stat-value">@averageProgress.ToString("F0")%</div>
+                    <div class="stat-label">Average Progress</div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

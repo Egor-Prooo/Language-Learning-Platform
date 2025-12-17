@@ -1,0 +1,236 @@
+﻿@model LanguageLearningPlatform.Data.Models.Lesson
+
+@{
+    ViewData["Title"] = Model.Title;
+    var courseLessons = ViewBag.CourseLessons as List<LanguageLearningPlatform.Data.Models.Lesson>;
+    var currentIndex = ViewBag.CurrentLessonIndex as int? ?? 0;
+    var hasNext = currentIndex < (courseLessons?.Count - 1 ?? 0);
+    var hasPrevious = currentIndex > 0;
+}
+
+<div class="container my-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Courses" asp-action="MyCourses">My Courses</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Courses" asp-action="Details" asp-route-id="@Model.CourseId">@Model.Course.Title</a></li>
+            <li class="breadcrumb-item active">@Model.Title</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Main Lesson Content -->
+        <div class="col-lg-8">
+            <div class="course-card mb-4">
+                <div class="course-card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <span class="badge" style="background-color: var(--primary-color); color: white; padding: 0.5rem 1rem; font-size: 0.875rem;">
+                                Lesson @Model.OrderIndex
+                            </span>
+                            <h1 class="mt-3 mb-2">@Model.Title</h1>
+                            <p class="text-secondary">@Model.Description</p>
+                            <div class="d-flex gap-3 text-secondary small">
+                                <span><i class="fas fa-clock me-1"></i>@Model.DurationMinutes minutes</span>
+                                @if (Model.Exercises.Any())
+                                {
+                                    <span><i class="fas fa-dumbbell me-1"></i>@Model.Exercises.Count exercises</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <!-- Lesson Content -->
+                    <div class="lesson-content">
+                        @Html.Raw(Model.Content)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exercises Section -->
+            @if (Model.Exercises.Any())
+            {
+                <div class="course-card mb-4">
+                    <div class="course-card-body">
+                        <h3 class="mb-4">
+                            <i class="fas fa-dumbbell me-2"></i>Practice Exercises
+                        </h3>
+
+                        @foreach (var exercise in Model.Exercises.OrderBy(e => e.OrderIndex))
+                        {
+                            <div class="exercise-item p-4 mb-3 border rounded">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <h5 class="mb-0">@exercise.Title</h5>
+                                    <span class="badge bg-light text-dark">
+                                        <i class="fas fa-star me-1" style="color: var(--accent-color);"></i>
+                                        @exercise.Points pts
+                                    </span>
+                                </div>
+
+                                <p class="mb-3">@exercise.Content</p>
+
+                                @if (exercise.Type == "MultipleChoice" && !string.IsNullOrEmpty(exercise.Options))
+                                {
+                                    var options = System.Text.Json.JsonSerializer.Deserialize<string[]>(exercise.Options);
+                                    if (options != null)
+                                    {
+                                        <div class="list-group mb-3">
+                                            @foreach (var option in options)
+                                            {
+                                                <button type="button" class="list-group-item list-group-item-action">
+                                                    @option
+                                                </button>
+                                            }
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="mb-3">
+                                        <input type="text" class="form-control form-select-custom" placeholder="Your answer...">
+                                    </div>
+                                }
+
+                                @if (!string.IsNullOrEmpty(exercise.Hint))
+                                {
+                                    <div class="alert alert-info small">
+                                        <i class="fas fa-lightbulb me-2"></i>
+                                        <strong>Hint:</strong> @exercise.Hint
+                                    </div>
+                                }
+
+                                <button class="btn btn-sm btn-enroll">
+                                    <i class="fas fa-check me-1"></i>Check Answer
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Navigation -->
+            <div class="d-flex justify-content-between">
+                @if (hasPrevious && courseLessons != null)
+                {
+                    var previousLesson = courseLessons[currentIndex - 1];
+                    <a asp-action="Details" asp-route-id="@previousLesson.Id" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-2"></i>Previous Lesson
+                    </a>
+                }
+                else
+                {
+                    <div></div>
+                }
+
+                @if (hasNext && courseLessons != null)
+                {
+                    var nextLesson = courseLessons[currentIndex + 1];
+                    <a asp-action="Details" asp-route-id="@nextLesson.Id" class="btn btn-enroll">
+                        Next Lesson<i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                }
+                else
+                {
+                    <a asp-controller="Courses" asp-action="Details" asp-route-id="@Model.CourseId" class="btn btn-success">
+                        <i class="fas fa-check-circle me-2"></i>Complete Course
+                    </a>
+                }
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Course Navigation -->
+            <div class="course-card sticky-top" style="top: 20px;">
+                <div class="course-card-body">
+                    <h5 class="mb-3">
+                        <i class="fas fa-list me-2"></i>Course Content
+                    </h5>
+
+                    @if (courseLessons != null && courseLessons.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @for (int i = 0; i < courseLessons.Count; i++)
+                            {
+                                var lesson = courseLessons[i];
+                                var isActive = i == currentIndex;
+
+                                <a asp-action="Details" asp-route-id="@lesson.Id"
+                                   class="list-group-item list-group-item-action @(isActive ? "active" : "") border-0 px-0 py-2">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="rounded-circle @(isActive ? "bg-white text-primary" : "bg-light") d-flex align-items-center justify-content-center"
+                                             style="width: 30px; height: 30px; flex-shrink: 0; font-size: 0.75rem;">
+                                            @if (isActive)
+                                            {
+                                                <i class="fas fa-play"></i>
+                                            }
+                                            else
+                                            {
+                                                <strong>@lesson.OrderIndex</strong>
+                                            }
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="small fw-semibold">@lesson.Title</div>
+                                            <div class="text-secondary" style="font-size: 0.75rem;">
+                                                <i class="fas fa-clock me-1"></i>@lesson.DurationMinutes min
+                                            </div>
+                                        </div>
+                                        @if (lesson.IsLocked)
+                                        {
+                                            <i class="fas fa-lock text-secondary"></i>
+                                        }
+                                    </div>
+                                </a>
+                            }
+                        </div>
+                    }
+
+                    <hr />
+
+                    <a asp-controller="Courses" asp-action="Details" asp-route-id="@Model.CourseId"
+                       class="btn btn-outline-primary w-100 btn-sm">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Course
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .lesson-content {
+        font-size: 1.05rem;
+        line-height: 1.8;
+    }
+
+        .lesson-content h2 {
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .lesson-content ul {
+            margin-left: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .lesson-content li {
+            margin-bottom: 0.5rem;
+        }
+
+    .exercise-item {
+        background-color: #F9FAFB;
+        transition: all 0.3s ease;
+    }
+
+        .exercise-item:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+    .list-group-item.active {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+</style>

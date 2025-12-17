@@ -1,8 +1,128 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container hero-content">
+        <div class="row align-items-center">
+            <div class="col-lg-7">
+                <h1 class="hero-title">Learn Languages with Confidence</h1>
+                <p class="hero-subtitle">
+                    Master new languages through interactive lessons, personalized practice, and expert guidance.
+                    Start your journey today!
+                </p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a asp-controller="Courses" asp-action="Index" class="btn btn-custom-primary btn-lg">
+                        <i class="fas fa-rocket me-2"></i>Explore Courses
+                    </a>
+                    @if (User.Identity?.IsAuthenticated != true)
+                    {
+                        <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-custom-secondary btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>Sign Up Free
+                        </a>
+                    }
+                </div>
+            </div>
+            <div class="col-lg-5 text-center mt-4 mt-lg-0">
+                <i class="fas fa-globe" style="font-size: 12rem; opacity: 0.2;"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Section -->
+<div class="container my-5">
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="stat-card fade-in-up">
+                <div class="stat-icon primary">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <div class="stat-value">50+</div>
+                <div class="stat-label">Language Courses</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card fade-in-up" style="animation-delay: 0.1s;">
+                <div class="stat-icon success">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-value">10K+</div>
+                <div class="stat-label">Active Learners</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card fade-in-up" style="animation-delay: 0.2s;">
+                <div class="stat-icon warning">
+                    <i class="fas fa-award"></i>
+                </div>
+                <div class="stat-value">95%</div>
+                <div class="stat-label">Success Rate</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="container my-5">
+    <div class="text-center mb-5">
+        <h2 class="display-5 fw-bold">Why Choose LingoLearn?</h2>
+        <p class="lead text-secondary">The complete language learning platform for everyone</p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6 col-lg-3">
+            <div class="text-center p-4">
+                <div class="mb-3" style="font-size: 3rem; color: var(--primary-color);">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <h4>Expert-Designed Courses</h4>
+                <p class="text-secondary">Learn from courses created by language professionals and native speakers.</p>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="text-center p-4">
+                <div class="mb-3" style="font-size: 3rem; color: var(--secondary-color);">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h4>Track Progress</h4>
+                <p class="text-secondary">Monitor your improvement with detailed analytics and progress tracking.</p>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="text-center p-4">
+                <div class="mb-3" style="font-size: 3rem; color: var(--accent-color);">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <h4>Earn Achievements</h4>
+                <p class="text-secondary">Stay motivated with badges, points, and rewards as you learn.</p>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="text-center p-4">
+                <div class="mb-3" style="font-size: 3rem; color: var(--primary-color);">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h4>Learn Anywhere</h4>
+                <p class="text-secondary">Access your courses on any device, anytime, anywhere.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+<div class="container my-5">
+    <div class="hero-section" style="border-radius: 2rem; padding: 4rem 2rem;">
+        <div class="text-center">
+            <h2 class="display-6 fw-bold mb-3">Ready to Start Your Learning Journey?</h2>
+            <p class="lead mb-4">Join thousands of learners mastering new languages every day</p>
+            <a asp-controller="Courses" asp-action="Index" class="btn btn-custom-primary btn-lg">
+                <i class="fas fa-play-circle me-2"></i>Get Started Now
+            </a>
+        </div>
+    </div>
 </div>

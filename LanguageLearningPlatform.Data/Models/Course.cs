@@ -35,11 +35,18 @@ namespace LanguageLearningPlatform.Data.Models
 
         public DateTime? UpdatedAt { get; set; }
 
+        [ForeignKey(nameof(Creator))]
+        public string? CreatorId { get; set; }
+        public virtual User? Creator { get; set; }
+
+        // Navigation properties
         public virtual ICollection<Lesson> Lessons { get; set; } = new List<Lesson>();
         public virtual ICollection<Progress> Progresses { get; set; } = new List<Progress>();
         public virtual ICollection<Exercise> Exercises { get; set; } = new List<Exercise>();
         public virtual ICollection<CourseEnrollment> Enrollments { get; set; } = new List<CourseEnrollment>();
         public virtual ICollection<CourseSection> Sections { get; set; } = new List<CourseSection>();
+        public virtual ICollection<ForumPost> ForumPosts { get; set; } = new List<ForumPost>();
+        public virtual ICollection<TeacherLesson> TeacherLessons { get; set; } = new List<TeacherLesson>();
 
     }
 }

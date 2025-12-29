@@ -56,19 +56,19 @@ namespace LanguageLearningPlatform.Data
                 .HasForeignKey(cm => cm.TutorId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            //// Course Creator relationship
-            //modelBuilder.Entity<Course>()
-            //    .HasOne(c => c.Creator)
-            //    .WithMany(u => u.CreatedCourses)
-            //    .HasForeignKey(c => c.CreatorId)
-            //    .OnDelete(DeleteBehavior.Restrict);
+            // Course Creator relationship
+            modelBuilder.Entity<Course>()
+                .HasOne(c => c.Creator)
+                .WithMany(u => u.CreatedCourses)
+                .HasForeignKey(c => c.CreatorId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            //// Forum Post relationships
-            //modelBuilder.Entity<ForumPost>()
-            //    .HasOne(fp => fp.Course)
-            //    .WithMany(c => c.ForumPosts)
-            //    .HasForeignKey(fp => fp.CourseId)
-            //    .OnDelete(DeleteBehavior.Cascade);
+            // Forum Post relationships
+            modelBuilder.Entity<ForumPost>()
+                .HasOne(fp => fp.Course)
+                .WithMany(c => c.ForumPosts)
+                .HasForeignKey(fp => fp.CourseId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<ForumPost>()
                 .HasOne(fp => fp.User)
@@ -89,12 +89,12 @@ namespace LanguageLearningPlatform.Data
                 .HasForeignKey(fc => fc.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            //// Teacher Lesson relationships
-            //modelBuilder.Entity<TeacherLesson>()
-            //    .HasOne(tl => tl.Course)
-            //    .WithMany(c => c.TeacherLessons)
-            //    .HasForeignKey(tl => tl.CourseId)
-            //    .OnDelete(DeleteBehavior.Cascade);
+            // Teacher Lesson relationships
+            modelBuilder.Entity<TeacherLesson>()
+                .HasOne(tl => tl.Course)
+                .WithMany(c => c.TeacherLessons)
+                .HasForeignKey(tl => tl.CourseId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<TeacherLesson>()
                 .HasOne(tl => tl.Teacher)

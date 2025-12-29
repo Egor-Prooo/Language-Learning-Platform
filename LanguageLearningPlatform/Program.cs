@@ -19,13 +19,14 @@ namespace LanguageLearningPlatform
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddDefaultIdentity<User>(options => {
-                options.SignIn.RequireConfirmedAccount = false; // Set to false for development
+                options.SignIn.RequireConfirmedAccount = false;
                 options.Password.RequireDigit = true;
                 options.Password.RequiredLength = 6;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
                 options.Password.RequireLowercase = false;
             })
+            .AddRoles<IdentityRole>() // Add role support
             .AddEntityFrameworkStores<ApplicationDbContext>();
 
             // Register services
@@ -41,8 +42,10 @@ namespace LanguageLearningPlatform
             {
                 var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
                 await DatabaseSeeder.SeedAsync(context, userManager);
+                await SeedRolesAndAdminAsync(roleManager, userManager);
             }
 
             // Configure the HTTP request pipeline.
@@ -65,12 +68,58 @@ namespace LanguageLearningPlatform
             app.UseAuthorization();
 
             app.MapControllerRoute(
+                name: "admin",
+                pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
+
+            app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
+
             app.MapRazorPages();
 
             await app.RunAsync();
+        }
 
+        private static async Task SeedRolesAndAdminAsync(RoleManager<IdentityRole> roleManager, UserManager<User> userManager)
+        {
+            // Create roles
+            string[] roleNames = { "Admin", "Teacher", "Student" };
+            foreach (var roleName in roleNames)
+            {
+                if (!await roleManager.RoleExistsAsync(roleName))
+                {
+                    await roleManager.CreateAsync(new IdentityRole(roleName));
+                }
+            }
+
+            // Create admin user
+            var adminEmail = "admin@lingolearn.com";
+            var adminUser = await userManager.FindByEmailAsync(adminEmail);
+
+            if (adminUser == null)
+            {
+                adminUser = new User
+                {
+                    UserName = adminEmail,
+                    Email = adminEmail,
+                    FirstName = "Admin",
+                    LastName = "User",
+                    DateOfBirth = new DateTime(1990, 1, 1),
+                    EmailConfirmed = true,
+                    IsActive = true,
+                    RegistrationDate = DateTime.UtcNow
+                };
+
+                var result = await userManager.CreateAsync(adminUser, "Admin123!");
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(adminUser, "Admin");
+                }
+            }
+            else if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
+            {
+                await userManager.AddToRoleAsync(adminUser, "Admin");
+            }
         }
     }
 }

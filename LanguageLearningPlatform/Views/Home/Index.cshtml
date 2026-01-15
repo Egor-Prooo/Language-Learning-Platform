@@ -33,70 +33,51 @@
     </div>
 </div>
 
-<!-- User Stats Section (if authenticated) -->
-@if (isAuthenticated)
-{
-    <div class="container my-5">
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="stat-card">
-                    <div class="stat-icon success">
-                        <i class="fas fa-trophy"></i>
-                    </div>
-                    <div class="stat-value">@ViewBag.UserTotalPoints</div>
-                    <div class="stat-label">Total Points</div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="stat-card">
-                    <div class="stat-icon primary">
-                        <i class="fas fa-book"></i>
-                    </div>
-                    <div class="stat-value">@ViewBag.UserEnrolledCourses</div>
-                    <div class="stat-label">Enrolled Courses</div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="stat-card">
-                    <div class="stat-icon warning">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="stat-value">@ViewBag.UserCompletedLessons</div>
-                    <div class="stat-label">Completed Lessons</div>
-                </div>
-            </div>
-        </div>
-    </div>
-}
-
-<!-- Platform Stats Section -->
+<!-- Features Section - Why Choose LingoLearn -->
 <div class="container my-5">
+    <div class="text-center mb-5">
+        <h2 class="display-5 fw-bold">Why Choose LingoLearn?</h2>
+        <p class="lead text-secondary">The ultimate blend of academic excellence, game mechanics, and social learning</p>
+    </div>
+
     <div class="row g-4">
-        <div class="col-md-4">
-            <div class="stat-card fade-in-up">
-                <div class="stat-icon primary">
-                    <i class="fas fa-book-open"></i>
-                </div>
-                <div class="stat-value">@(ViewBag.TotalCourses ?? 50)+</div>
-                <div class="stat-label">Language Courses</div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="stat-card fade-in-up" style="animation-delay: 0.1s;">
-                <div class="stat-icon success">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="stat-value">@(ViewBag.TotalUsers ?? 100)+</div>
-                <div class="stat-label">Active Learners</div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="stat-card fade-in-up" style="animation-delay: 0.2s;">
-                <div class="stat-icon warning">
+        <div class="col-md-6 col-lg-3">
+            <div class="text-center p-4">
+                <div class="mb-3" style="font-size: 3rem; color: var(--primary-color);">
                     <i class="fas fa-graduation-cap"></i>
                 </div>
-                <div class="stat-value">@(ViewBag.TotalLessons ?? 500)+</div>
-                <div class="stat-label">Total Lessons</div>
+                <h4>Expert-Designed Courses</h4>
+                <p class="text-secondary">Learn from structured academic lessons created by language professionals and native speakers, combined with engaging interactive exercises.</p>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="text-center p-4">
+                <div class="mb-3" style="font-size: 3rem; color: var(--accent-color);">
+                    <i class="fas fa-gamepad"></i>
+                </div>
+                <h4>Gamified Learning</h4>
+                <p class="text-secondary">Unlike traditional platforms, we combine serious academic content with game mechanics—earn points, unlock achievements, and compete on leaderboards while mastering new languages.</p>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="text-center p-4">
+                <div class="mb-3" style="font-size: 3rem; color: var(--secondary-color);">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h4>Community & Practice</h4>
+                <p class="text-secondary">Connect with fellow learners, participate in discussion forums, and get real practical speaking experience through our interactive community features.</p>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="text-center p-4">
+                <div class="mb-3" style="font-size: 3rem; color: var(--primary-color);">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h4>Track Your Success</h4>
+                <p class="text-secondary">Monitor your improvement with detailed analytics, progress tracking, and personalized insights that help you stay motivated and focused.</p>
             </div>
         </div>
     </div>
@@ -175,51 +156,78 @@
     </div>
 }
 
-<!-- Features Section -->
-<div class="container my-5">
-    <div class="text-center mb-5">
-        <h2 class="display-5 fw-bold">Why Choose LingoLearn?</h2>
-        <p class="lead text-secondary">The complete language learning platform for everyone</p>
+<!-- User Stats Section (if authenticated) -->
+@if (isAuthenticated)
+{
+    <div class="container my-5">
+        <div class="text-center mb-4">
+            <h3 class="fw-bold">Your Learning Journey</h3>
+            <p class="text-secondary">Keep up the great work!</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-icon success">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="stat-value">@ViewBag.UserTotalPoints</div>
+                    <div class="stat-label">Total Points</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-icon primary">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="stat-value">@ViewBag.UserEnrolledCourses</div>
+                    <div class="stat-label">Enrolled Courses</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-icon warning">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-value">@ViewBag.UserCompletedLessons</div>
+                    <div class="stat-label">Completed Lessons</div>
+                </div>
+            </div>
+        </div>
     </div>
+}
 
+<!-- Platform Stats Section -->
+<div class="container my-5">
+    <div class="text-center mb-4">
+        <h3 class="fw-bold">Join Our Growing Community</h3>
+        <p class="text-secondary">Thousands of learners are already improving their language skills</p>
+    </div>
     <div class="row g-4">
-        <div class="col-md-6 col-lg-3">
-            <div class="text-center p-4">
-                <div class="mb-3" style="font-size: 3rem; color: var(--primary-color);">
+        <div class="col-md-4">
+            <div class="stat-card fade-in-up">
+                <div class="stat-icon primary">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <div class="stat-value">@(ViewBag.TotalCourses ?? 50)+</div>
+                <div class="stat-label">Language Courses</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card fade-in-up" style="animation-delay: 0.1s;">
+                <div class="stat-icon success">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-value">@(ViewBag.TotalUsers ?? 100)+</div>
+                <div class="stat-label">Active Learners</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card fade-in-up" style="animation-delay: 0.2s;">
+                <div class="stat-icon warning">
                     <i class="fas fa-graduation-cap"></i>
                 </div>
-                <h4>Expert-Designed Courses</h4>
-                <p class="text-secondary">Learn from courses created by language professionals and native speakers.</p>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-lg-3">
-            <div class="text-center p-4">
-                <div class="mb-3" style="font-size: 3rem; color: var(--secondary-color);">
-                    <i class="fas fa-chart-line"></i>
-                </div>
-                <h4>Track Progress</h4>
-                <p class="text-secondary">Monitor your improvement with detailed analytics and progress tracking.</p>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-lg-3">
-            <div class="text-center p-4">
-                <div class="mb-3" style="font-size: 3rem; color: var(--accent-color);">
-                    <i class="fas fa-trophy"></i>
-                </div>
-                <h4>Earn Achievements</h4>
-                <p class="text-secondary">Stay motivated with badges, points, and rewards as you learn.</p>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-lg-3">
-            <div class="text-center p-4">
-                <div class="mb-3" style="font-size: 3rem; color: var(--primary-color);">
-                    <i class="fas fa-mobile-alt"></i>
-                </div>
-                <h4>Learn Anywhere</h4>
-                <p class="text-secondary">Access your courses on any device, anytime, anywhere.</p>
+                <div class="stat-value">@(ViewBag.TotalLessons ?? 500)+</div>
+                <div class="stat-label">Total Lessons</div>
             </div>
         </div>
     </div>

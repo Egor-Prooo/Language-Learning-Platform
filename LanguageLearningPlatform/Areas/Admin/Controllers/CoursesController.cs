@@ -18,7 +18,7 @@ namespace LanguageLearningPlatform.Web.Areas.Admin.Controllers
             _context = context;
         }
 
-        // GET: Admin/Courses
+        // GET Admin/Courses
         public async Task<IActionResult> Index()
         {
             var courses = await _context.Courses
@@ -31,13 +31,13 @@ namespace LanguageLearningPlatform.Web.Areas.Admin.Controllers
             return View(courses);
         }
 
-        // GET: Admin/Courses/Create
+        // GET Admin/Courses/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Admin/Courses/Create
+        // POST Admin/Courses/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Course course)

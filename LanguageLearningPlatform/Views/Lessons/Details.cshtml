@@ -54,56 +54,84 @@
             {
                 <div class="course-card mb-4">
                     <div class="course-card-body">
+                        <!-- Progress Tracker -->
+                        <div class="lesson-progress mb-4">
+                            <div class="lesson-progress-text">
+                                <span id="completed-count">0</span> / @Model.Exercises.Count exercises completed
+                            </div>
+                            <div class="lesson-progress-bar-container">
+                                <div class="lesson-progress-bar" id="progress-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+
                         <h3 class="mb-4">
                             <i class="fas fa-dumbbell me-2"></i>Practice Exercises
                         </h3>
 
-                        @foreach (var exercise in Model.Exercises.OrderBy(e => e.OrderIndex))
+                        @foreach (var exercise in ViewBag.Exercises as List<LanguageLearningPlatform.Core.Models.ExerciseViewModel>)
                         {
-                            <div class="exercise-item p-4 mb-3 border rounded">
-                                <div class="d-flex justify-content-between align-items-start mb-3">
-                                    <h5 class="mb-0">@exercise.Title</h5>
-                                    <span class="badge bg-light text-dark">
-                                        <i class="fas fa-star me-1" style="color: var(--accent-color);"></i>
-                                        @exercise.Points pts
-                                    </span>
+                            <div class="exercise-item"
+                                 data-exercise-id="@exercise.Id"
+                                 data-correct-answer="@exercise.CorrectAnswer"
+                                 data-explanation="@exercise.Explanation"
+                                 data-type="@exercise.Type">
+
+                                <div class="exercise-header">
+                                    <h5 class="exercise-title">@exercise.Title</h5>
+                                    <div class="exercise-points">
+                                        <i class="fas fa-star"></i>
+                                        <span>@exercise.Points pts</span>
+                                    </div>
                                 </div>
 
-                                <p class="mb-3">@exercise.Content</p>
+                                <div class="exercise-content">
+                                    <p class="exercise-question">@exercise.Content</p>
 
-                                @if (exercise.Type == "MultipleChoice" && !string.IsNullOrEmpty(exercise.Options))
-                                {
-                                    var options = System.Text.Json.JsonSerializer.Deserialize<string[]>(exercise.Options);
-                                    if (options != null)
+                                    @if (exercise.Type == "MultipleChoice" && exercise.Options.Any())
                                     {
-                                        <div class="list-group mb-3">
-                                            @foreach (var option in options)
+                                        <div class="exercise-options">
+                                            @foreach (var option in exercise.Options)
                                             {
-                                                <button type="button" class="list-group-item list-group-item-action">
+                                                <button type="button"
+                                                        class="exercise-option"
+                                                        data-value="@option">
                                                     @option
                                                 </button>
                                             }
                                         </div>
                                     }
-                                }
-                                else
-                                {
-                                    <div class="mb-3">
-                                        <input type="text" class="form-control form-select-custom" placeholder="Your answer...">
-                                    </div>
-                                }
+                                    else if (exercise.Type == "Translation" || exercise.Type == "FillInBlank")
+                                    {
+                                        <input type="text"
+                                               class="exercise-input"
+                                               placeholder="Type your answer here..."
+                                               data-exercise-id="@exercise.Id" />
+                                    }
 
-                                @if (!string.IsNullOrEmpty(exercise.Hint))
-                                {
-                                    <div class="alert alert-info small">
-                                        <i class="fas fa-lightbulb me-2"></i>
-                                        <strong>Hint:</strong> @exercise.Hint
-                                    </div>
-                                }
+                                    @if (!string.IsNullOrEmpty(exercise.Hint))
+                                    {
+                                        <div class="exercise-hint" style="display: none;">
+                                            <i class="fas fa-lightbulb"></i>
+                                            <div>
+                                                <strong>Hint:</strong> @exercise.Hint
+                                            </div>
+                                        </div>
+                                    }
 
-                                <button class="btn btn-sm btn-enroll">
-                                    <i class="fas fa-check me-1"></i>Check Answer
-                                </button>
+                                    <div class="exercise-feedback" style="display: none;"></div>
+                                </div>
+
+                                <div class="exercise-actions">
+                                    @if (!string.IsNullOrEmpty(exercise.Hint))
+                                    {
+                                        <button class="btn-hint" onclick="toggleHint(this)">
+                                            <i class="fas fa-lightbulb me-1"></i>Show Hint
+                                        </button>
+                                    }
+                                    <button class="btn-check-answer" disabled>
+                                        <i class="fas fa-check me-1"></i>Check Answer
+                                    </button>
+                                </div>
                             </div>
                         }
                     </div>
@@ -197,6 +225,11 @@
             </div>
         </div>
     </div>
+
+    @section Scripts {
+        <script src="~/js/exercise.js"></script>
+    }
+
 </div>
 
 <style>

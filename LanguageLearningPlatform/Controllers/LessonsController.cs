@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
+using LanguageLearningPlatform.Core.Models;
 
 namespace LanguageLearningPlatform.Web.Controllers
 {
@@ -45,6 +47,27 @@ namespace LanguageLearningPlatform.Web.Controllers
                 .OrderBy(l => l.OrderIndex)
                 .ToListAsync();
 
+            // Prepare exercises for view
+            var exercises = lesson.Exercises.OrderBy(e => e.OrderIndex).Select(e => new ExerciseViewModel
+            {
+                Id = e.Id,
+                Title = e.Title,
+                Type = e.Type,
+                Content = e.Content,
+                CorrectAnswer = e.CorrectAnswer,
+                Options = string.IsNullOrEmpty(e.Options)
+                    ? new List<string>()
+                    : JsonSerializer.Deserialize<List<string>>(e.Options) ?? new List<string>(),
+                Hint = e.Hint,
+                Explanation = e.Explanation,
+                Points = e.Points,
+                DifficultyLevel = e.DifficultyLevel,
+                AudioUrl = e.AudioUrl,
+                ImageUrl = e.ImageUrl,
+                OrderIndex = e.OrderIndex
+            }).ToList();
+
+            ViewBag.Exercises = exercises;
             ViewBag.CourseLessons = courseLessons;
             ViewBag.CurrentLessonIndex = courseLessons.FindIndex(l => l.Id == id);
 

@@ -38,6 +38,9 @@ namespace LanguageLearningPlatform.Web.Controllers
                 return NotFound(new { error = "Exercise not found" });
             }
 
+            // Validate the answer
+            var isCorrect = ValidateAnswer(exercise.CorrectAnswer, submission.UserAnswer);
+
             // Create the result record
             var result = new UserExerciseResult
             {
@@ -45,18 +48,18 @@ namespace LanguageLearningPlatform.Web.Controllers
                 UserId = userId,
                 ExerciseId = submission.ExerciseId,
                 UserAnswer = submission.UserAnswer,
-                IsCorrect = submission.IsCorrect,
-                PointsEarned = submission.IsCorrect ? exercise.Points : 0,
+                IsCorrect = isCorrect,
+                PointsEarned = isCorrect ? exercise.Points : 0,
                 TimeSpentSeconds = submission.TimeSpentSeconds,
                 AttemptsCount = submission.AttemptsCount,
                 CompletedAt = DateTime.UtcNow,
-                Feedback = submission.IsCorrect ? "Correct!" : "Incorrect"
+                Feedback = isCorrect ? "Excellent! 🎉" : "Not quite right. Try again!"
             };
 
             _context.UserExerciseResults.Add(result);
 
             // Update user's course progress if correct
-            if (submission.IsCorrect)
+            if (isCorrect)
             {
                 var progress = await _context.Progresses
                     .FirstOrDefaultAsync(p => p.UserId == userId && p.CourseId == exercise.CourseId);
@@ -74,12 +77,35 @@ namespace LanguageLearningPlatform.Web.Controllers
             return Ok(new
             {
                 success = true,
+                isCorrect = result.IsCorrect,
                 pointsEarned = result.PointsEarned,
                 totalPoints = await GetUserTotalPoints(userId),
-                isCorrect = result.IsCorrect,
-                message = result.IsCorrect ? "Excellent work! 🎉" : "Keep trying!"
+                feedback = result.Feedback,
+                correctAnswer = !isCorrect ? exercise.CorrectAnswer : null,
+                explanation = isCorrect ? exercise.Explanation : null
             });
         }
+
+        private bool ValidateAnswer(string correctAnswer, string userAnswer)
+        {
+            var normalizedUserAnswer = NormalizeAnswer(userAnswer);
+            var normalizedCorrectAnswer = NormalizeAnswer(correctAnswer);
+            return normalizedUserAnswer == normalizedCorrectAnswer;
+        }
+
+        private string NormalizeAnswer(string answer)
+        {
+            return answer.ToLower()
+                .Trim()
+                .Replace("á", "a")
+                .Replace("é", "e")
+                .Replace("í", "i")
+                .Replace("ó", "o")
+                .Replace("ú", "u")
+                .Replace("ñ", "n")
+                .Replace("ü", "u");
+        }
+
 
         [HttpGet("stats")]
         [Authorize]

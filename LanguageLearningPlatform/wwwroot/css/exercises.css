@@ -1,0 +1,453 @@
+﻿/* Exercise Styles - Duolingo-inspired */
+
+.exercise-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.exercise-item {
+    background: var(--card-background);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 2px solid var(--border-color);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+    .exercise-item:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+.exercise-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.exercise-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.exercise-points {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, var(--accent-color), #FCD34D);
+    border-radius: 20px;
+    color: white;
+    font-weight: 600;
+}
+
+.exercise-content {
+    margin-bottom: 1.5rem;
+}
+
+.exercise-question {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+/* Multiple Choice Options */
+.exercise-options {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.exercise-option {
+    padding: 1rem 1.5rem;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1rem;
+    text-align: left;
+    position: relative;
+}
+
+    .exercise-option:hover {
+        border-color: var(--primary-color);
+        background: rgba(79, 70, 229, 0.05);
+        transform: translateX(4px);
+    }
+
+    .exercise-option.selected {
+        border-color: var(--primary-color);
+        background: rgba(79, 70, 229, 0.1);
+        font-weight: 600;
+    }
+
+        .exercise-option.selected::before {
+            content: '✓';
+            position: absolute;
+            right: 1rem;
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+/* Input Fields */
+.exercise-input {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+    .exercise-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    }
+
+/* Hint Section */
+.exercise-hint {
+    background: rgba(16, 185, 129, 0.1);
+    border-left: 4px solid var(--secondary-color);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: start;
+    gap: 0.75rem;
+}
+
+    .exercise-hint i {
+        color: var(--secondary-color);
+        font-size: 1.2rem;
+        margin-top: 0.1rem;
+    }
+
+/* Feedback Messages */
+.exercise-feedback {
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    margin-top: 1rem;
+    display: none;
+    animation: slideDown 0.3s ease;
+}
+
+    .exercise-feedback.correct {
+        background: rgba(16, 185, 129, 0.1);
+        border: 2px solid var(--secondary-color);
+        color: #065F46;
+    }
+
+    .exercise-feedback.incorrect {
+        background: rgba(239, 68, 68, 0.1);
+        border: 2px solid var(--error-color);
+        color: #991B1B;
+    }
+
+    .exercise-feedback i {
+        font-size: 1.2rem;
+    }
+
+/* Action Buttons */
+.exercise-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.btn-check-answer {
+    flex: 1;
+    padding: 0.875rem 2rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+    .btn-check-answer:hover:not(:disabled) {
+        background: var(--primary-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+
+    .btn-check-answer:disabled {
+        background: var(--border-color);
+        cursor: not-allowed;
+    }
+
+.btn-skip {
+    padding: 0.875rem 1.5rem;
+    background: white;
+    color: var(--text-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+    .btn-skip:hover {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+    }
+
+/* Pronunciation Button */
+.pronunciation-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(79, 70, 229, 0.1);
+    border: 2px solid var(--primary-color);
+    border-radius: 20px;
+    color: var(--primary-color);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+    .pronunciation-btn:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: scale(1.05);
+    }
+
+/* Progress Bar */
+.lesson-progress {
+    position: sticky;
+    top: 0;
+    background: white;
+    padding: 1rem;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+    z-index: 10;
+}
+
+.lesson-progress-text {
+    text-align: center;
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.lesson-progress-bar-container {
+    height: 12px;
+    background: var(--border-color);
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.lesson-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
+    border-radius: 20px;
+    transition: width 0.6s ease;
+}
+
+/* Animations */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-10px);
+    }
+
+    75% {
+        transform: translateX(10px);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.exercise-success {
+    animation: pulse 0.6s ease;
+    border-color: var(--secondary-color) !important;
+}
+
+.exercise-error {
+    animation: shake 0.5s ease;
+}
+
+/* Confetti Animation */
+.confetti {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    top: 0;
+    animation: confetti-fall 1.5s linear forwards;
+}
+
+@keyframes confetti-fall {
+    to {
+        transform: translateY(400px) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Points Earned Animation */
+.points-earned {
+    animation: pointsAnimation 0.6s ease;
+}
+
+@keyframes pointsAnimation {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.3);
+        color: var(--accent-color);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Completion Modal */
+.completion-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+.completion-content {
+    background: white;
+    padding: 3rem;
+    border-radius: 20px;
+    text-align: center;
+    max-width: 500px;
+    animation: slideUp 0.4s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Character Counter for Typing Exercises */
+.character-counter {
+    text-align: right;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+}
+
+/* Difficulty Indicator */
+.difficulty-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.difficulty-easy {
+    background: rgba(16, 185, 129, 0.2);
+    color: var(--secondary-color);
+}
+
+.difficulty-medium {
+    background: rgba(245, 158, 11, 0.2);
+    color: var(--accent-color);
+}
+
+.difficulty-hard {
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--error-color);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .exercise-item {
+        padding: 1.5rem;
+    }
+
+    .exercise-actions {
+        flex-direction: column;
+    }
+
+    .btn-check-answer,
+    .btn-skip {
+        width: 100%;
+    }
+}
+
+/* Streak Display */
+.streak-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+    border-radius: 20px;
+    color: white;
+    font-weight: 600;
+}
+
+    .streak-indicator i {
+        font-size: 1.2rem;
+    }

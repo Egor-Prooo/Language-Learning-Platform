@@ -92,7 +92,7 @@
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Views\\Lessons\\Details.cshtml",
               "ToolTip": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Views\\Lessons\\Details.cshtml",
               "RelativeToolTip": "LanguageLearningPlatform\\Views\\Lessons\\Details.cshtml",
-              "ViewState": "AgIAAEAAAAAAAAAAAAAYwD8AAAAiAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB8AAABMAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2026-02-04T11:39:17.347Z",
               "EditorCaption": ""
@@ -107,8 +107,7 @@
               "RelativeToolTip": "LanguageLearningPlatform.Core\\Models\\ExerciseViewModel.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-04T11:32:25.213Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-04T11:32:25.213Z"
             },
             {
               "$type": "Document",
@@ -120,8 +119,7 @@
               "RelativeToolTip": "LanguageLearningPlatform\\Controllers\\LessonsController.cs",
               "ViewState": "AgIAADMAAAAAAAAAAAAAAEoAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-29T08:30:13.319Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-01-29T08:30:13.319Z"
             },
             {
               "$type": "Document",
@@ -157,8 +155,7 @@
               "RelativeToolTip": "LanguageLearningPlatform\\Controllers\\ExercisesController.cs",
               "ViewState": "AgIAAAwAAAAAAAAAAAAAAAwAAAAfAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-29T08:24:02.791Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-01-29T08:24:02.791Z"
             },
             {
               "$type": "Document",

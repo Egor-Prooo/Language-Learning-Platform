@@ -15,11 +15,10 @@ namespace LanguageLearningPlatform.Data.Seeding
 
             var courses = new List<Course>
             {
-                // Spanish Courses
-                new Course
+               new Course
                 {
                     Id = Guid.NewGuid(),
-                    Title = "Spanish for Beginners",
+                    Title = "Beginner Spanish",
                     Language = Constants.Constants.Spanish,
                     Level = Constants.Constants.Beginner,
                     Description = "Start your Spanish learning journey with essential vocabulary, basic grammar, and everyday conversations. Perfect for absolute beginners!",
@@ -31,7 +30,7 @@ namespace LanguageLearningPlatform.Data.Seeding
                 new Course
                 {
                     Id = Guid.NewGuid(),
-                    Title = "Intermediate Spanish Conversation",
+                    Title = "Intermediate Spanish",
                     Language = Constants.Constants.Spanish,
                     Level = Constants.Constants.Intermediate,
                     Description = "Advance your Spanish skills with complex grammar structures, expanded vocabulary, and real-world conversation practice.",
@@ -43,7 +42,7 @@ namespace LanguageLearningPlatform.Data.Seeding
                 new Course
                 {
                     Id = Guid.NewGuid(),
-                    Title = "Advanced Spanish Mastery",
+                    Title = "Advanced Spanish",
                     Language = Constants.Constants.Spanish,
                     Level = "Advanced",
                     Description = "Master Spanish with advanced literature, professional communication, and native-level fluency exercises.",
@@ -57,7 +56,7 @@ namespace LanguageLearningPlatform.Data.Seeding
                 new Course
                 {
                     Id = Guid.NewGuid(),
-                    Title = "French Fundamentals",
+                    Title = "Beginner French",
                     Language = Constants.Constants.French,
                     Level = Constants.Constants.Beginner,
                     Description = "Learn French from scratch with pronunciation basics, essential phrases, and foundational grammar concepts.",
@@ -69,7 +68,7 @@ namespace LanguageLearningPlatform.Data.Seeding
                 new Course
                 {
                     Id = Guid.NewGuid(),
-                    Title = "Intermediate French Communication",
+                    Title = "Intermediate French",
                     Language = Constants.Constants.French,
                     Level = Constants.Constants.Intermediate,
                     Description = "Develop conversational fluency with intermediate grammar, idiomatic expressions, and practical dialogue scenarios.",
@@ -81,7 +80,7 @@ namespace LanguageLearningPlatform.Data.Seeding
                 new Course
                 {
                     Id = Guid.NewGuid(),
-                    Title = "Advanced French Excellence",
+                    Title = "Advanced French",
                     Language = Constants.Constants.French,
                     Level = "Advanced",
                     Description = "Achieve mastery with sophisticated vocabulary, literary analysis, and professional-level French communication.",
@@ -95,7 +94,7 @@ namespace LanguageLearningPlatform.Data.Seeding
                 new Course
                 {
                     Id = Guid.NewGuid(),
-                    Title = "German for Absolute Beginners",
+                    Title = "Beginner German",
                     Language = Constants.Constants.German,
                     Level = Constants.Constants.Beginner,
                     Description = "Start learning German with basic grammar, essential vocabulary, and fundamental sentence structures.",
@@ -107,7 +106,7 @@ namespace LanguageLearningPlatform.Data.Seeding
                 new Course
                 {
                     Id = Guid.NewGuid(),
-                    Title = "Intermediate German Skills",
+                    Title = "Intermediate German",
                     Language = Constants.Constants.German,
                     Level = Constants.Constants.Intermediate,
                     Description = "Build on your German foundation with complex cases, modal verbs, and practical conversation exercises.",
@@ -119,7 +118,7 @@ namespace LanguageLearningPlatform.Data.Seeding
                 new Course
                 {
                     Id = Guid.NewGuid(),
-                    Title = "Advanced German Proficiency",
+                    Title = "Advanced German",
                     Language = Constants.Constants.German,
                     Level = "Advanced",
                     Description = "Master German with advanced literature, business communication, and near-native proficiency exercises.",
@@ -133,7 +132,7 @@ namespace LanguageLearningPlatform.Data.Seeding
                 new Course
                 {
                     Id = Guid.NewGuid(),
-                    Title = "Japanese Basics - Hiragana & Katakana",
+                    Title = "Beginner Japanese",
                     Language = Constants.Constants.Japanese,
                     Level = Constants.Constants.Beginner,
                     Description = "Master the Japanese writing systems and basic grammar structures. Learn essential phrases for daily communication.",
@@ -145,7 +144,7 @@ namespace LanguageLearningPlatform.Data.Seeding
                 new Course
                 {
                     Id = Guid.NewGuid(),
-                    Title = "Intermediate Japanese & Kanji",
+                    Title = "Intermediate Japanese",
                     Language = Constants.Constants.Japanese,
                     Level = Constants.Constants.Intermediate,
                     Description = "Expand your Japanese skills with kanji learning, intermediate grammar patterns, and cultural contexts.",
@@ -157,7 +156,7 @@ namespace LanguageLearningPlatform.Data.Seeding
                 new Course
                 {
                     Id = Guid.NewGuid(),
-                    Title = "Advanced Japanese Fluency",
+                    Title = "Advanced Japanese",
                     Language = Constants.Constants.Japanese,
                     Level = "Advanced",
                     Description = "Achieve advanced proficiency with complex kanji, business Japanese, and nuanced cultural communication.",
@@ -171,7 +170,7 @@ namespace LanguageLearningPlatform.Data.Seeding
                 new Course
                 {
                     Id = Guid.NewGuid(),
-                    Title = "Italian for Travelers",
+                    Title = "Beginner Italian",
                     Language = "Italian",
                     Level = Constants.Constants.Beginner,
                     Description = "Learn essential Italian for travel, dining, shopping, and basic conversations. Perfect for your next trip to Italy!",
@@ -183,7 +182,7 @@ namespace LanguageLearningPlatform.Data.Seeding
                 new Course
                 {
                     Id = Guid.NewGuid(),
-                    Title = "Intermediate Italian Conversation",
+                    Title = "Intermediate Italian",
                     Language = "Italian",
                     Level = Constants.Constants.Intermediate,
                     Description = "Develop fluency with everyday Italian conversations, intermediate grammar, and cultural insights.",
@@ -195,7 +194,7 @@ namespace LanguageLearningPlatform.Data.Seeding
                 new Course
                 {
                     Id = Guid.NewGuid(),
-                    Title = "Advanced Italian Language & Culture",
+                    Title = "Advanced Italian",
                     Language = "Italian",
                     Level = "Advanced",
                     Description = "Master Italian with advanced literature, regional dialects, and professional communication skills.",
@@ -209,7 +208,7 @@ namespace LanguageLearningPlatform.Data.Seeding
                 new Course
                 {
                     Id = Guid.NewGuid(),
-                    Title = "Mandarin Chinese Essentials",
+                    Title = "Beginner Chinese",
                     Language = "Chinese",
                     Level = Constants.Constants.Beginner,
                     Description = "Start your Mandarin journey with pinyin, basic characters, tones, and fundamental conversational skills.",
@@ -221,7 +220,7 @@ namespace LanguageLearningPlatform.Data.Seeding
                 new Course
                 {
                     Id = Guid.NewGuid(),
-                    Title = "Intermediate Chinese Characters & Grammar",
+                    Title = "Intermediate Chinese",
                     Language = "Chinese",
                     Level = Constants.Constants.Intermediate,
                     Description = "Build your character recognition, master complex grammar structures, and improve conversational fluency.",
@@ -233,7 +232,7 @@ namespace LanguageLearningPlatform.Data.Seeding
                 new Course
                 {
                     Id = Guid.NewGuid(),
-                    Title = "Advanced Mandarin Proficiency",
+                    Title = "Advanced Chinese",
                     Language = "Chinese",
                     Level = "Advanced",
                     Description = "Achieve mastery with advanced characters, business Chinese, and sophisticated reading comprehension.",

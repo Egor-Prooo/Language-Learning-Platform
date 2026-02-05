@@ -32,6 +32,7 @@ namespace LanguageLearningPlatform
             // Register services
             builder.Services.AddScoped<ICourseService, CourseService>();
             builder.Services.AddScoped<IProgressService, ProgressService>();
+            builder.Services.AddScoped<IExerciseService, ExerciseService>();
 
             builder.Services.AddControllersWithViews();
             builder.Services.AddRazorPages();

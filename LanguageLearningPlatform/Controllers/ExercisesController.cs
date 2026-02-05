@@ -1,8 +1,8 @@
-﻿using LanguageLearningPlatform.Data;
+﻿using LanguageLearningPlatform.Core.Models;
+using LanguageLearningPlatform.Data;
 using LanguageLearningPlatform.Data.Models;
 using LanguageLearningPlatform.Services.Contracts;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -14,15 +14,17 @@ namespace LanguageLearningPlatform.Web.Controllers
     public class ExercisesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly IExerciseService _exerciseService;
 
-        public ExercisesController(ApplicationDbContext context)
+        public ExercisesController(ApplicationDbContext context, IExerciseService exerciseService)
         {
             _context = context;
+            _exerciseService = exerciseService;
         }
 
         [HttpPost("submit")]
         [Authorize]
-        public async Task<IActionResult> SubmitExercise([FromBody] ExerciseSubmissionDto submission)
+        public async Task<IActionResult> SubmitExercise([FromBody] ExerciseSubmissionRequest submission)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -39,7 +41,7 @@ namespace LanguageLearningPlatform.Web.Controllers
             }
 
             // Validate the answer
-            var isCorrect = ValidateAnswer(exercise.CorrectAnswer, submission.UserAnswer);
+            var validationResult = await _exerciseService.ValidateAnswerAsync(submission.ExerciseId, submission.UserAnswer);
 
             // Create the result record
             var result = new UserExerciseResult
@@ -48,18 +50,18 @@ namespace LanguageLearningPlatform.Web.Controllers
                 UserId = userId,
                 ExerciseId = submission.ExerciseId,
                 UserAnswer = submission.UserAnswer,
-                IsCorrect = isCorrect,
-                PointsEarned = isCorrect ? exercise.Points : 0,
+                IsCorrect = validationResult.IsCorrect,
+                PointsEarned = validationResult.PointsEarned,
                 TimeSpentSeconds = submission.TimeSpentSeconds,
                 AttemptsCount = submission.AttemptsCount,
                 CompletedAt = DateTime.UtcNow,
-                Feedback = isCorrect ? "Excellent! 🎉" : "Not quite right. Try again!"
+                Feedback = validationResult.Feedback
             };
 
             _context.UserExerciseResults.Add(result);
 
             // Update user's course progress if correct
-            if (isCorrect)
+            if (validationResult.IsCorrect)
             {
                 var progress = await _context.Progresses
                     .FirstOrDefaultAsync(p => p.UserId == userId && p.CourseId == exercise.CourseId);
@@ -74,38 +76,31 @@ namespace LanguageLearningPlatform.Web.Controllers
 
             await _context.SaveChangesAsync();
 
-            return Ok(new
+            // Get updated stats
+            var stats = await _exerciseService.GetUserExerciseStatsAsync(userId);
+            var totalPoints = await GetUserTotalPoints(userId);
+
+            return Ok(new ExerciseSubmissionResponse
             {
-                success = true,
-                isCorrect = result.IsCorrect,
-                pointsEarned = result.PointsEarned,
-                totalPoints = await GetUserTotalPoints(userId),
-                feedback = result.Feedback,
-                correctAnswer = !isCorrect ? exercise.CorrectAnswer : null,
-                explanation = isCorrect ? exercise.Explanation : null
+                Success = true,
+                IsCorrect = validationResult.IsCorrect,
+                PointsEarned = validationResult.PointsEarned,
+                TotalPoints = totalPoints,
+                Feedback = validationResult.Feedback,
+                CorrectAnswer = validationResult.CorrectAnswer,
+                Explanation = validationResult.Explanation,
+                Streak = stats.CurrentStreak,
+                LevelUp = false // You can implement level-up logic here
             });
         }
 
-        private bool ValidateAnswer(string correctAnswer, string userAnswer)
+        [HttpGet("lesson/{lessonId}")]
+        [Authorize]
+        public async Task<IActionResult> GetLessonExercises(Guid lessonId)
         {
-            var normalizedUserAnswer = NormalizeAnswer(userAnswer);
-            var normalizedCorrectAnswer = NormalizeAnswer(correctAnswer);
-            return normalizedUserAnswer == normalizedCorrectAnswer;
+            var exercises = await _exerciseService.GetLessonExercisesAsync(lessonId);
+            return Ok(exercises);
         }
-
-        private string NormalizeAnswer(string answer)
-        {
-            return answer.ToLower()
-                .Trim()
-                .Replace("á", "a")
-                .Replace("é", "e")
-                .Replace("í", "i")
-                .Replace("ó", "o")
-                .Replace("ú", "u")
-                .Replace("ñ", "n")
-                .Replace("ü", "u");
-        }
-
 
         [HttpGet("stats")]
         [Authorize]
@@ -118,27 +113,37 @@ namespace LanguageLearningPlatform.Web.Controllers
                 return Unauthorized();
             }
 
-            var totalExercises = await _context.UserExerciseResults
-                .Where(r => r.UserId == userId)
-                .CountAsync();
+            var stats = await _exerciseService.GetUserExerciseStatsAsync(userId);
+            return Ok(stats);
+        }
 
-            var correctExercises = await _context.UserExerciseResults
-                .Where(r => r.UserId == userId && r.IsCorrect)
-                .CountAsync();
+        [HttpGet("history")]
+        [Authorize]
+        public async Task<IActionResult> GetExerciseHistory([FromQuery] Guid? courseId = null)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var totalPoints = await GetUserTotalPoints(userId);
-
-            var accuracy = totalExercises > 0
-                ? (double)correctExercises / totalExercises * 100
-                : 0;
-
-            return Ok(new
+            if (string.IsNullOrEmpty(userId))
             {
-                totalExercises,
-                correctExercises,
-                totalPoints,
-                accuracy = Math.Round(accuracy, 2)
-            });
+                return Unauthorized();
+            }
+
+            var history = await _exerciseService.GetUserExerciseHistoryAsync(userId, courseId);
+            return Ok(history);
+        }
+
+        [HttpPost("hint/{exerciseId}")]
+        [Authorize]
+        public async Task<IActionResult> GetHint(Guid exerciseId)
+        {
+            var exercise = await _exerciseService.GetExerciseByIdAsync(exerciseId);
+
+            if (exercise == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(new { hint = exercise.Hint });
         }
 
         private async Task<int> GetUserTotalPoints(string userId)
@@ -147,14 +152,5 @@ namespace LanguageLearningPlatform.Web.Controllers
                 .Where(p => p.UserId == userId)
                 .SumAsync(p => p.PointsEarned);
         }
-    }
-
-    public class ExerciseSubmissionDto
-    {
-        public Guid ExerciseId { get; set; }
-        public string UserAnswer { get; set; } = string.Empty;
-        public bool IsCorrect { get; set; }
-        public int AttemptsCount { get; set; }
-        public int TimeSpentSeconds { get; set; } = 0;
     }
 }

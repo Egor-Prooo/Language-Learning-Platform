@@ -1,0 +1,362 @@
+﻿@model IEnumerable<LanguageLearningPlatform.Core.Models.InteractiveExerciseViewModel>
+
+@{
+    ViewData["Title"] = "Practice Exercises";
+    var lessonTitle = ViewBag.LessonTitle ?? "Lesson Exercises";
+    var lessonId = ViewBag.LessonId;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/exercises.css" />
+}
+
+<div class="exercise-container">
+    <!-- Progress Header -->
+    <div class="lesson-progress">
+        <div class="lesson-progress-text">
+            <strong id="completed-count">0</strong> / <span id="total-count">@Model.Count()</span> Exercises Completed
+        </div>
+        <div class="lesson-progress-bar-container">
+            <div id="progress-bar" class="lesson-progress-bar" style="width: 0%"></div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <div class="d-flex gap-3">
+                <div class="stat-badge">
+                    <i class="fas fa-star text-warning"></i>
+                    <span id="user-total-points">0</span> Points
+                </div>
+                <div class="stat-badge">
+                    <i class="fas fa-fire text-danger"></i>
+                    <span id="user-streak">0</span> Day Streak
+                </div>
+            </div>
+            <div id="hearts-container"></div>
+        </div>
+    </div>
+
+    <!-- Back to Lesson Button -->
+    <div class="mb-4">
+        <a href="@Url.Action("Details", "Lessons", new { id = lessonId })" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Lesson
+        </a>
+    </div>
+
+    <h1 class="mb-4">
+        <i class="fas fa-dumbbell me-2"></i>@lessonTitle - Practice
+    </h1>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            No exercises available for this lesson yet. Check back soon!
+        </div>
+    }
+    else
+    {
+        @foreach (var exercise in Model)
+        {
+            <div class="exercise-item"
+                 data-exercise-id="@exercise.Id"
+                 data-type="@exercise.ExerciseType"
+                 data-points="@exercise.Points"
+                 data-attempts="1"
+                 data-start-time="@DateTime.Now.Ticks">
+
+                <!-- Exercise Header -->
+                <div class="exercise-header">
+                    <h3 class="exercise-title">
+                        @switch (exercise.ExerciseType)
+                        {
+                            case "MultipleChoice":
+                                <i class="fas fa-list-ul me-2"></i>
+                                break;
+                            case "FillInTheBlank":
+                                <i class="fas fa-keyboard me-2"></i>
+                                break;
+                            case "Translation":
+                                <i class="fas fa-language me-2"></i>
+                                break;
+                            case "Listening":
+                                <i class="fas fa-headphones me-2"></i>
+                                break;
+                            case "Speaking":
+                                <i class="fas fa-microphone me-2"></i>
+                                break;
+                            case "Matching":
+                                <i class="fas fa-link me-2"></i>
+                                break;
+                            default:
+                                <i class="fas fa-question me-2"></i>
+                                break;
+                        }
+                        @exercise.ExerciseType
+                    </h3>
+                    <div class="exercise-points">
+                        <i class="fas fa-star"></i>
+                        <span>@exercise.Points XP</span>
+                    </div>
+                </div>
+
+                <div class="exercise-content">
+                    <!-- Question -->
+                    <div class="exercise-question">
+                        @Html.Raw(exercise.Question)
+                    </div>
+
+                    <!-- Audio for Listening Exercises -->
+                    @if (exercise.ExerciseType == "Listening" && !string.IsNullOrEmpty(exercise.AudioUrl))
+                    {
+                        <div class="mb-4 text-center">
+                            <audio controls class="w-100" style="max-width: 500px;">
+                                <source src="@exercise.AudioUrl" type="audio/mpeg">
+                                Your browser does not support the audio element.
+                            </audio>
+                        </div>
+                    }
+
+                    <!-- Image if available -->
+                    @if (!string.IsNullOrEmpty(exercise.ImageUrl))
+                    {
+                        <div class="mb-4 text-center">
+                            <img src="@exercise.ImageUrl"
+                                 alt="Exercise image"
+                                 class="img-fluid rounded-3 shadow-sm"
+                                 style="max-height: 300px; object-fit: cover;">
+                        </div>
+                    }
+
+                    <!-- Multiple Choice Options -->
+                    @if (exercise.ExerciseType == "MultipleChoice" && exercise.Options != null)
+                    {
+                        <div class="exercise-options">
+                            @foreach (var option in exercise.Options)
+                            {
+                                <div class="exercise-option" data-value="@option">
+                                    @option
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    <!-- Fill in the Blank / Translation Input -->
+                    @if (exercise.ExerciseType == "FillInTheBlank" || exercise.ExerciseType == "Translation")
+                    {
+                        <div class="mb-3">
+                            <input type="text"
+                                   class="form-control exercise-input"
+                                   placeholder="Type your answer here..."
+                                   autocomplete="off">
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(exercise.TargetLanguage))
+                        {
+                            <div class="text-center mb-3">
+                                <button type="button"
+                                        class="btn-pronunciation"
+                                        data-text="@exercise.CorrectAnswer"
+                                        data-lang="@exercise.TargetLanguage">
+                                    <i class="fas fa-volume-up"></i>
+                                    Hear Pronunciation
+                                </button>
+                            </div>
+                        }
+                    }
+
+                    <!-- Word Bank for Fill in the Blank -->
+                    @if (exercise.ExerciseType == "FillInTheBlank" && exercise.WordBank != null && exercise.WordBank.Any())
+                    {
+                        <div class="word-bank mb-4">
+                            <div class="word-bank-label">
+                                <i class="fas fa-lightbulb me-2"></i>Word Bank:
+                            </div>
+                            <div class="word-bank-items">
+                                @foreach (var word in exercise.WordBank)
+                                {
+                                    <span class="word-bank-item">@word.Word</span>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Matching Exercise -->
+                    @if (exercise.ExerciseType == "Matching" && exercise.MatchingPairs != null)
+                    {
+                        <div class="matching-exercise">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5 class="mb-3">Left Column</h5>
+                                    <div class="matching-column" id="left-column-@exercise.Id">
+                                        @foreach (var pair in exercise.MatchingPairs)
+                                        {
+                                            <div class="matching-item" data-pair-id="@pair.PairId">
+                                                @pair.LeftItem
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5 class="mb-3">Right Column</h5>
+                                    <div class="matching-column" id="right-column-@exercise.Id">
+                                        @foreach (var pair in exercise.MatchingPairs.OrderBy(x => Guid.NewGuid()))
+                                        {
+                                            <div class="matching-item" data-pair-id="@pair.PairId">
+                                                @pair.RightItem
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" class="exercise-input" id="matching-answer-@exercise.Id">
+                        </div>
+                    }
+
+                    <!-- Speaking Exercise -->
+                    @if (exercise.ExerciseType == "Speaking" && exercise.SpeakingData != null)
+                    {
+                        <div class="speaking-exercise">
+                            <div class="target-phrase mb-4 p-4 bg-light rounded-3 text-center">
+                                <h4>Say this phrase:</h4>
+                                <p class="display-6 fw-bold text-primary">@exercise.SpeakingData.TargetPhrase</p>
+                                <button type="button"
+                                        class="btn-pronunciation mt-3"
+                                        data-text="@exercise.SpeakingData.TargetPhrase"
+                                        data-lang="@exercise.SpeakingData.Language">
+                                    <i class="fas fa-volume-up"></i>
+                                    Listen
+                                </button>
+                            </div>
+
+                            <div class="text-center">
+                                <button type="button" class="btn btn-enroll btn-lg" id="btn-record-@exercise.Id">
+                                    <i class="fas fa-microphone me-2"></i>
+                                    Start Recording
+                                </button>
+                                <div class="mt-3 text-muted">
+                                    <small>
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Minimum accuracy: @(exercise.SpeakingData.MinimumAccuracy * 100)%
+                                    </small>
+                                </div>
+                            </div>
+                            <input type="hidden" class="exercise-input" id="speaking-answer-@exercise.Id">
+                        </div>
+                    }
+
+                    <!-- Hint Section -->
+                    @if (!string.IsNullOrEmpty(exercise.Hint))
+                    {
+                        <div class="exercise-hint">
+                            <i class="fas fa-lightbulb"></i>
+                            <div>
+                                <strong>Hint:</strong><br>
+                                @exercise.Hint
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Explanation (shown after correct answer) -->
+                    @if (!string.IsNullOrEmpty(exercise.Explanation))
+                    {
+                        <input type="hidden" class="exercise-explanation" value="@exercise.Explanation">
+                    }
+                </div>
+
+                <!-- Exercise Actions -->
+                <div class="exercise-actions">
+                    <button type="button" class="btn-check-answer" disabled>
+                        <i class="fas fa-check me-1"></i>Check Answer
+                    </button>
+
+                    @if (!string.IsNullOrEmpty(exercise.Hint))
+                    {
+                        <button type="button" class="btn-hint" onclick="toggleHint(this)">
+                            <i class="fas fa-lightbulb me-1"></i>Show Hint
+                        </button>
+                    }
+
+                    <button type="button" class="btn-skip">
+                        <i class="fas fa-forward me-1"></i>Skip
+                    </button>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+<!-- Summary Card -->
+<div class="card shadow-sm">
+    <div class="card-body text-center">
+        <h4 class="mb-3">
+            <i class="fas fa-chart-line me-2 text-primary"></i>Your Progress
+        </h4>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="progress-stat">
+                    <div class="stat-icon bg-primary-soft">
+                        <i class="fas fa-check-circle text-primary"></i>
+                    </div>
+                    <div class="stat-value" id="final-completed">0</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="progress-stat">
+                    <div class="stat-icon bg-success-soft">
+                        <i class="fas fa-star text-warning"></i>
+                    </div>
+                    <div class="stat-value" id="final-points">0</div>
+                    <div class="stat-label">Points Earned</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="progress-stat">
+                    <div class="stat-icon bg-danger-soft">
+                        <i class="fas fa-fire text-danger"></i>
+                    </div>
+                    <div class="stat-value" id="final-streak">0</div>
+                    <div class="stat-label">Day Streak</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/interactive-exercises.js"></script>
+    <script>
+        // Initialize progress tracking
+        document.addEventListener('DOMContentLoaded', function() {
+            const totalExercises = @Model.Count();
+            document.getElementById('total-count').textContent = totalExercises;
+
+            // Load user stats
+            loadUserStats();
+        });
+
+        async function loadUserStats() {
+            try {
+                const response = await fetch('/api/exercises/stats');
+                if (response.ok) {
+                    const stats = await response.json();
+                    document.getElementById('user-total-points').textContent = stats.totalPoints || 0;
+                    document.getElementById('user-streak').textContent = stats.currentStreak || 0;
+
+                    // Update final stats
+                    document.getElementById('final-points').textContent = stats.totalPoints || 0;
+                    document.getElementById('final-streak').textContent = stats.currentStreak || 0;
+                }
+            } catch (error) {
+                console.error('Error loading user stats:', error);
+            }
+        }
+
+        // Update final stats when exercises are completed
+        setInterval(function() {
+            const completed = document.querySelectorAll('.exercise-item.exercise-completed').length;
+            document.getElementById('final-completed').textContent = completed;
+        }, 1000);
+    </script>
+}

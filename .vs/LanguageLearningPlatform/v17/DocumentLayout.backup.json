@@ -3,8 +3,8 @@
   "WorkspaceRootPath": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Migrations\\20260205095658_UpdatedCourseNames.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:LanguageLearningPlatform.Data\\Migrations\\20260205095658_UpdatedCourseNames.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{45F58F51-2E6B-426E-9CAA-DB9EC2EEE17C}|LanguageLearningPlatform.Data\\LanguageLearningPlatform.Data.csproj|c:\\users\\epros\\source\\repos\\languagelearningplatform\\languagelearningplatform.data\\migrations\\20260205095658_updatedcoursenames.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{45F58F51-2E6B-426E-9CAA-DB9EC2EEE17C}|LanguageLearningPlatform.Data\\LanguageLearningPlatform.Data.csproj|solutionrelative:languagelearningplatform.data\\migrations\\20260205095658_updatedcoursenames.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|c:\\users\\epros\\source\\repos\\languagelearningplatform\\languagelearningplatform\\wwwroot\\js\\interactive-exercises.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
@@ -128,7 +128,7 @@
               "RelativeDocumentMoniker": "LanguageLearningPlatform.Data\\Migrations\\20260205095658_UpdatedCourseNames.cs",
               "ToolTip": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Migrations\\20260205095658_UpdatedCourseNames.cs",
               "RelativeToolTip": "LanguageLearningPlatform.Data\\Migrations\\20260205095658_UpdatedCourseNames.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-05T09:56:59.109Z",
               "EditorCaption": ""
@@ -143,8 +143,7 @@
               "RelativeToolTip": "LanguageLearningPlatform\\wwwroot\\js\\interactive-exercises.js",
               "ViewState": "AgIAAOQBAAAAAAAAAAAowPABAAAsAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-02-05T09:42:45.966Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-05T09:42:45.966Z"
             },
             {
               "$type": "Document",
@@ -156,8 +155,7 @@
               "RelativeToolTip": "LanguageLearningPlatform.Core\\Models\\InteractiveExerciseViewModel.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAEYAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-05T09:40:09.564Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-05T09:40:09.564Z"
             },
             {
               "$type": "Document",
@@ -169,8 +167,7 @@
               "RelativeToolTip": "LanguageLearningPlatform.Services\\ExerciseService.cs",
               "ViewState": "AgIAACQAAAAAAAAAAAAAAPMAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-05T09:35:18.029Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-05T09:35:18.029Z"
             },
             {
               "$type": "Document",
@@ -182,8 +179,7 @@
               "RelativeToolTip": "LanguageLearningPlatform.Services\\Contracts\\IExerciseService.cs",
               "ViewState": "AgIAAAYAAAAAAAAAAAAAABUAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-05T09:33:37.978Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-05T09:33:37.978Z"
             },
             {
               "$type": "Document",
@@ -195,8 +191,7 @@
               "RelativeToolTip": "LanguageLearningPlatform.Services\\Contracts\\IProgressService.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-05T09:33:22.965Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-05T09:33:22.965Z"
             },
             {
               "$type": "Document",
@@ -208,8 +203,7 @@
               "RelativeToolTip": "LanguageLearningPlatform\\wwwroot\\css\\site.css",
               "ViewState": "AgIAAF4BAAAAAAAAAAAAAMEBAAAkAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
-              "WhenOpened": "2026-02-05T09:20:08.187Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-05T09:20:08.187Z"
             },
             {
               "$type": "Document",
@@ -221,8 +215,7 @@
               "RelativeToolTip": "LanguageLearningPlatform.Data\\Seeding\\CourseSeeder.cs",
               "ViewState": "AgIAAMwAAAAAAAAAAAAAAPIAAAARAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-05T09:17:27.019Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-05T09:17:27.019Z"
             },
             {
               "$type": "Document",
@@ -234,8 +227,7 @@
               "RelativeToolTip": "LanguageLearningPlatform\\Controllers\\ExercisesController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-29T08:24:02.791Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-01-29T08:24:02.791Z"
             },
             {
               "$type": "Document",
@@ -247,8 +239,7 @@
               "RelativeToolTip": "LanguageLearningPlatform\\wwwroot\\js\\exercise.js",
               "ViewState": "AgIAAIIAAAAAAAAAAAAAADABAAADAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-01-29T08:01:13.749Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-01-29T08:01:13.749Z"
             },
             {
               "$type": "Document",
@@ -260,8 +251,7 @@
               "RelativeToolTip": "LanguageLearningPlatform.Services\\CourseService.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-05T09:17:18.625Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-05T09:17:18.625Z"
             },
             {
               "$type": "Document",
@@ -273,8 +263,7 @@
               "RelativeToolTip": "LanguageLearningPlatform\\Views\\Lessons\\Details.cshtml",
               "ViewState": "AgIAAAwAAAAAAAAAAAAAAB0AAAAjAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-02-04T11:39:17.347Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-04T11:39:17.347Z"
             },
             {
               "$type": "Document",
@@ -286,8 +275,7 @@
               "RelativeToolTip": "LanguageLearningPlatform\\Program.cs",
               "ViewState": "AgIAAA8AAAAAAAAAAAAAACIAAABMAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-29T07:31:18.608Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-01-29T07:31:18.608Z"
             },
             {
               "$type": "Document",

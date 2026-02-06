@@ -73,6 +73,5 @@ namespace LanguageLearningPlatform.Web.Controllers
 
             return View(lesson);
         }
-
     }
 }

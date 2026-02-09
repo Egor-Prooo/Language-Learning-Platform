@@ -80,17 +80,18 @@ namespace LanguageLearningPlatform.Web.Controllers
             var stats = await _exerciseService.GetUserExerciseStatsAsync(userId);
             var totalPoints = await GetUserTotalPoints(userId);
 
+            // Make sure your response matches what JavaScript expects
             return Ok(new ExerciseSubmissionResponse
             {
                 Success = true,
                 IsCorrect = validationResult.IsCorrect,
                 PointsEarned = validationResult.PointsEarned,
                 TotalPoints = totalPoints,
-                Feedback = validationResult.Feedback,
-                CorrectAnswer = validationResult.CorrectAnswer,
-                Explanation = validationResult.Explanation,
+                Feedback = validationResult.IsCorrect ? "Correct! Well done! 🎉" : "Not quite right. Try again!",
+                CorrectAnswer = validationResult.IsCorrect ? null : validationResult.CorrectAnswer,
+                Explanation = validationResult.IsCorrect ? validationResult.Explanation : null,
                 Streak = stats.CurrentStreak,
-                LevelUp = false // You can implement level-up logic here
+                LevelUp = false // Implement your level-up logic
             });
         }
 
@@ -152,5 +153,7 @@ namespace LanguageLearningPlatform.Web.Controllers
                 .Where(p => p.UserId == userId)
                 .SumAsync(p => p.PointsEarned);
         }
+
+
     }
 }

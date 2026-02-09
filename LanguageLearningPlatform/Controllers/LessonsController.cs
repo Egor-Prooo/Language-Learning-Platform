@@ -1,9 +1,10 @@
-﻿using LanguageLearningPlatform.Data;
+﻿using LanguageLearningPlatform.Core.Models;
+using LanguageLearningPlatform.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using System.Text.Json;
-using LanguageLearningPlatform.Core.Models;
 
 namespace LanguageLearningPlatform.Web.Controllers
 {

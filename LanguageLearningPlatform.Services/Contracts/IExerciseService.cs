@@ -18,6 +18,15 @@ namespace LanguageLearningPlatform.Services.Contracts
         Task<ExerciseStatsDto> GetUserExerciseStatsAsync(string userId);
     }
 
+    public class ExerciseValidationResult
+    {
+        public bool IsCorrect { get; set; }
+        public int PointsEarned { get; set; }
+        public string Feedback { get; set; } = string.Empty;
+        public string? CorrectAnswer { get; set; }
+        public string? Explanation { get; set; }
+    }
+
     public class ExerciseResultDto
     {
         public bool IsCorrect { get; set; }

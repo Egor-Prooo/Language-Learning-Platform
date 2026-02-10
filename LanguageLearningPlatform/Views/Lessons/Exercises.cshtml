@@ -60,7 +60,7 @@
         {
             <div class="exercise-item"
                  data-exercise-id="@exercise.Id"
-                 data-type="@exercise.ExerciseType"
+                 data-type="@exercise.Type"
                  data-points="@exercise.Points"
                  data-attempts="1"
                  data-start-time="@DateTime.Now.Ticks">
@@ -68,11 +68,12 @@
                 <!-- Exercise Header -->
                 <div class="exercise-header">
                     <h3 class="exercise-title">
-                        @switch (exercise.ExerciseType)
+                        @switch (exercise.Type)
                         {
                             case "MultipleChoice":
                                 <i class="fas fa-list-ul me-2"></i>
                                 break;
+                            case "FillInBlank":
                             case "FillInTheBlank":
                                 <i class="fas fa-keyboard me-2"></i>
                                 break;
@@ -92,7 +93,7 @@
                                 <i class="fas fa-question me-2"></i>
                                 break;
                         }
-                        @exercise.ExerciseType
+                        @exercise.Type
                     </h3>
                     <div class="exercise-points">
                         <i class="fas fa-star"></i>
@@ -103,11 +104,11 @@
                 <div class="exercise-content">
                     <!-- Question -->
                     <div class="exercise-question">
-                        @Html.Raw(exercise.Question)
+                        @Html.Raw(exercise.Content)
                     </div>
 
                     <!-- Audio for Listening Exercises -->
-                    @if (exercise.ExerciseType == "Listening" && !string.IsNullOrEmpty(exercise.AudioUrl))
+                    @if (exercise.Type == "Listening" && !string.IsNullOrEmpty(exercise.AudioUrl))
                     {
                         <div class="mb-4 text-center">
                             <audio controls class="w-100" style="max-width: 500px;">
@@ -129,7 +130,7 @@
                     }
 
                     <!-- Multiple Choice Options -->
-                    @if (exercise.ExerciseType == "MultipleChoice" && exercise.Options != null)
+                    @if (exercise.Type == "MultipleChoice" && exercise.Options != null && exercise.Options.Any())
                     {
                         <div class="exercise-options">
                             @foreach (var option in exercise.Options)
@@ -142,7 +143,7 @@
                     }
 
                     <!-- Fill in the Blank / Translation Input -->
-                    @if (exercise.ExerciseType == "FillInTheBlank" || exercise.ExerciseType == "Translation")
+                    @if (exercise.Type == "FillInBlank" || exercise.Type == "FillInTheBlank" || exercise.Type == "Translation")
                     {
                         <div class="mb-3">
                             <input type="text"
@@ -150,23 +151,10 @@
                                    placeholder="Type your answer here..."
                                    autocomplete="off">
                         </div>
-
-                        @if (!string.IsNullOrEmpty(exercise.TargetLanguage))
-                        {
-                            <div class="text-center mb-3">
-                                <button type="button"
-                                        class="btn-pronunciation"
-                                        data-text="@exercise.CorrectAnswer"
-                                        data-lang="@exercise.TargetLanguage">
-                                    <i class="fas fa-volume-up"></i>
-                                    Hear Pronunciation
-                                </button>
-                            </div>
-                        }
                     }
 
                     <!-- Word Bank for Fill in the Blank -->
-                    @if (exercise.ExerciseType == "FillInTheBlank" && exercise.WordBank != null && exercise.WordBank.Any())
+                    @if ((exercise.Type == "FillInBlank" || exercise.Type == "FillInTheBlank") && exercise.WordBank != null && exercise.WordBank.Any())
                     {
                         <div class="word-bank mb-4">
                             <div class="word-bank-label">
@@ -182,7 +170,7 @@
                     }
 
                     <!-- Matching Exercise -->
-                    @if (exercise.ExerciseType == "Matching" && exercise.MatchingPairs != null)
+                    @if (exercise.Type == "Matching" && exercise.MatchingPairs != null && exercise.MatchingPairs.Any())
                     {
                         <div class="matching-exercise">
                             <div class="row">
@@ -192,7 +180,7 @@
                                         @foreach (var pair in exercise.MatchingPairs)
                                         {
                                             <div class="matching-item" data-pair-id="@pair.PairId">
-                                                @pair.LeftItem
+                                                @pair.Left
                                             </div>
                                         }
                                     </div>
@@ -203,7 +191,7 @@
                                         @foreach (var pair in exercise.MatchingPairs.OrderBy(x => Guid.NewGuid()))
                                         {
                                             <div class="matching-item" data-pair-id="@pair.PairId">
-                                                @pair.RightItem
+                                                @pair.Right
                                             </div>
                                         }
                                     </div>
@@ -214,7 +202,7 @@
                     }
 
                     <!-- Speaking Exercise -->
-                    @if (exercise.ExerciseType == "Speaking" && exercise.SpeakingData != null)
+                    @if (exercise.Type == "Speaking" && exercise.SpeakingData != null)
                     {
                         <div class="speaking-exercise">
                             <div class="target-phrase mb-4 p-4 bg-light rounded-3 text-center">
@@ -256,12 +244,6 @@
                             </div>
                         </div>
                     }
-
-                    <!-- Explanation (shown after correct answer) -->
-                    @if (!string.IsNullOrEmpty(exercise.Explanation))
-                    {
-                        <input type="hidden" class="exercise-explanation" value="@exercise.Explanation">
-                    }
                 </div>
 
                 <!-- Exercise Actions -->
@@ -287,7 +269,7 @@
 </div>
 
 <!-- Summary Card -->
-<div class="card shadow-sm">
+<div class="card shadow-sm mt-4">
     <div class="card-body text-center">
         <h4 class="mb-3">
             <i class="fas fa-chart-line me-2 text-primary"></i>Your Progress
@@ -359,8 +341,4 @@
             document.getElementById('final-completed').textContent = completed;
         }, 1000);
     </script>
-}
-
-@section Styles {
-    <link rel="stylesheet" href="~/css/exercises.css" asp-append-version="true" />
 }

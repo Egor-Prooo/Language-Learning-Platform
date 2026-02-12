@@ -50,93 +50,100 @@
             </div>
 
             <!-- Exercises Section -->
+            <!-- Replace the inline exercises section with: -->
             @if (Model.Exercises.Any())
             {
                 <div class="course-card mb-4">
                     <div class="course-card-body">
-                        <!-- Progress Tracker -->
-                        <div class="lesson-progress mb-4">
-                            <div class="lesson-progress-text">
-                                <span id="completed-count">0</span> / @Model.Exercises.Count exercises completed
-                            </div>
-                            <div class="lesson-progress-bar-container">
-                                <div class="lesson-progress-bar" id="progress-bar" style="width: 0%"></div>
-                            </div>
-                        </div>
-
                         <h3 class="mb-4">
                             <i class="fas fa-dumbbell me-2"></i>Practice Exercises
                         </h3>
 
-                        @foreach (var exercise in ViewBag.Exercises as List<LanguageLearningPlatform.Core.Models.ExerciseViewModel>)
-                        {
-                            <div class="exercise-item"
-                                 data-exercise-id="@exercise.Id"
-                                 data-correct-answer="@exercise.CorrectAnswer"
-                                 data-explanation="@exercise.Explanation"
-                                 data-type="@exercise.Type">
+                        <div class="alert alert-info mb-4">
+                            <i class="fas fa-info-circle me-2"></i>
+                            This lesson has <strong>@Model.Exercises.Count exercises</strong> to help you practice what you've learned.
+                        </div>
 
-                                <div class="exercise-header">
-                                    <h5 class="exercise-title">@exercise.Title</h5>
-                                    <div class="exercise-points">
-                                        <i class="fas fa-star"></i>
-                                        <span>@exercise.Points pts</span>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="stat-card">
+                                    <div class="stat-icon primary">
+                                        <i class="fas fa-dumbbell"></i>
                                     </div>
-                                </div>
-
-                                <div class="exercise-content">
-                                    <p class="exercise-question">@exercise.Content</p>
-
-                                    @if (exercise.Type == "MultipleChoice" && exercise.Options.Any())
-                                    {
-                                        <div class="exercise-options">
-                                            @foreach (var option in exercise.Options)
-                                            {
-                                                <button type="button"
-                                                        class="exercise-option"
-                                                        data-value="@option">
-                                                    @option
-                                                </button>
-                                            }
-                                        </div>
-                                    }
-                                    else if (exercise.Type == "Translation" || exercise.Type == "FillInBlank")
-                                    {
-                                        <input type="text"
-                                               class="exercise-input"
-                                               placeholder="Type your answer here..."
-                                               data-exercise-id="@exercise.Id" />
-                                    }
-
-                                    @if (!string.IsNullOrEmpty(exercise.Hint))
-                                    {
-                                        <div class="exercise-hint" style="display: none;">
-                                            <i class="fas fa-lightbulb"></i>
-                                            <div>
-                                                <strong>Hint:</strong> @exercise.Hint
-                                            </div>
-                                        </div>
-                                    }
-
-                                    <div class="exercise-feedback" style="display: none;"></div>
-                                </div>
-
-                                <div class="exercise-actions">
-                                    @if (!string.IsNullOrEmpty(exercise.Hint))
-                                    {
-                                        <button class="btn-hint" onclick="toggleHint(this)">
-                                            <i class="fas fa-lightbulb me-1"></i>Show Hint
-                                        </button>
-                                    }
-                                    <button class="btn-check-answer" disabled>
-                                        <i class="fas fa-check me-1"></i>Check Answer
-                                    </button>
+                                    <div class="stat-value">@Model.Exercises.Count</div>
+                                    <div class="stat-label">Total Exercises</div>
                                 </div>
                             </div>
-                        }
+                            <div class="col-md-6">
+                                <div class="stat-card">
+                                    <div class="stat-icon warning">
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                    <div class="stat-value">@Model.Exercises.Sum(e => e.Points)</div>
+                                    <div class="stat-label">Total Points Available</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 text-center">
+                            <a asp-action="Exercises" asp-route-id="@Model.Id"
+                               class="btn btn-enroll btn-lg">
+                                <i class="fas fa-play-circle me-2"></i>Start Exercises
+                            </a>
+                        </div>
+
+                        <!-- Optional: Show exercise types preview -->
+                        <div class="mt-4">
+                            <h5 class="mb-3">Exercise Types in This Lesson:</h5>
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (var type in Model.Exercises.Select(e => e.Type).Distinct())
+                                {
+                                    <span class="badge" style="background-color: var(--primary-color); padding: 0.5rem 1rem;">
+                                        @switch (type)
+                                        {
+                                            case "MultipleChoice":
+                                                <i class="fas fa-list-ul me-1"></i>
+                                                <text>Multiple Choice</text>
+                                                break;
+                                            case "Translation":
+                                                <i class="fas fa-language me-1"></i>
+                                                <text>Translation</text>
+                                                break;
+                                            case "FillInBlank":
+                                                <i class="fas fa-keyboard me-1"></i>
+                                                <text>Fill in the Blank</text>
+                                                break;
+                                            default:
+                                                <text>@type</text>
+                                                break;
+                                        }
+                                    </span>
+                                }
+                            </div>
+                        </div>
                     </div>
                 </div>
             }
+            else
+            {
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No exercises available for this lesson yet.
+                </div>
+            }
+            ```
+
+            ### 3. Navigation Flow
+
+            Here's the complete user flow:
+            ```
+            Course Details (Courses/Details)
+            ↓ (User clicks "View Lesson")
+            Lesson Content Page (Lessons/Details)
+            ↓ (User clicks "Start Exercises")
+            Interactive Exercises Page (Lessons/Exercises)
+            ↓ (After completion)
+            Back to Lesson or Next Lesson
 
             <!-- Navigation -->
             <div class="d-flex justify-content-between">

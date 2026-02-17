@@ -151,8 +151,11 @@ class InteractiveExerciseHandler {
 
         const response = await fetch('/api/exercises/submit', {
             method: 'POST',
+            credentials: 'include',        
             headers: {
                 'Content-Type': 'application/json',
+                'RequestVerificationToken': document.querySelector(
+                    'input[name="__RequestVerificationToken"]')?.value ?? ''
             },
             body: JSON.stringify({
                 exerciseId: exerciseId,
@@ -163,11 +166,10 @@ class InteractiveExerciseHandler {
         });
 
         if (!response.ok) {
-            throw new Error('Failed to submit answer');
+            const errorText = await response.text();
+            console.error('Server error:', response.status, errorText);
+            throw new Error(`Server returned ${response.status}`);
         }
-
-        const result = await response.json();
-        this.handleAnswerResult(result, exerciseItem);
     }
 
     handleAnswerResult(result, exerciseItem) {

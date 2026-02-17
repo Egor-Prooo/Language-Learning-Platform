@@ -11,6 +11,7 @@ namespace LanguageLearningPlatform.Web.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [IgnoreAntiforgeryToken]
     public class ExercisesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;

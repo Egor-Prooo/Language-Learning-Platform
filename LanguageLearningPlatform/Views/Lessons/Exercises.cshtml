@@ -70,12 +70,14 @@
     {
         @foreach (var exercise in Model)
         {
+            var startTimeMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
             <div class="exercise-item"
                  data-exercise-id="@exercise.Id"
                  data-type="@exercise.Type"
                  data-points="@exercise.Points"
                  data-attempts="1"
-                 data-start-time="@DateTime.Now.Ticks">
+                 data-start-time="@startTimeMs">
 
                 <!-- Exercise Header -->
                 <div class="exercise-header">

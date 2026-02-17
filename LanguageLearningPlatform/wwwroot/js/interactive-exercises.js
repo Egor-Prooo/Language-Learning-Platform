@@ -146,30 +146,37 @@ class InteractiveExerciseHandler {
     }
 
     async submitAnswer(exerciseId, userAnswer, exerciseItem) {
-        const startTime = exerciseItem.dataset.startTime || Date.now();
-        const timeSpent = Math.floor((Date.now() - startTime) / 1000);
+        const startTime = exerciseItem.dataset.startTime
+            ? parseInt(exerciseItem.dataset.startTime)
+            : Date.now();
+        const timeSpent = Math.max(0, Math.floor((Date.now() - startTime) / 1000));
+
+        const payload = {
+            exerciseId: exerciseId,
+            userAnswer: userAnswer,
+            timeSpentSeconds: timeSpent,
+            attemptsCount: parseInt(exerciseItem.dataset.attempts || '1')
+        };
+
+        console.log('Submitting payload:', JSON.stringify(payload)); // debug
 
         const response = await fetch('/api/exercises/submit', {
             method: 'POST',
-            credentials: 'include',        
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
-                'RequestVerificationToken': document.querySelector(
-                    'input[name="__RequestVerificationToken"]')?.value ?? ''
             },
-            body: JSON.stringify({
-                exerciseId: exerciseId,
-                userAnswer: userAnswer,
-                timeSpentSeconds: timeSpent,
-                attemptsCount: parseInt(exerciseItem.dataset.attempts || '1')
-            })
+            body: JSON.stringify(payload)
         });
 
         if (!response.ok) {
             const errorText = await response.text();
             console.error('Server error:', response.status, errorText);
-            throw new Error(`Server returned ${response.status}`);
+            throw new Error(`Server returned ${response.status}: ${errorText}`);
         }
+
+        const result = await response.json();
+        this.handleAnswerResult(result, exerciseItem);
     }
 
     handleAnswerResult(result, exerciseItem) {

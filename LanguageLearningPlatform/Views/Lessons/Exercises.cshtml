@@ -10,6 +10,18 @@
     <link rel="stylesheet" href="~/css/exercises.css" />
 }
 
+<!-- Back to Lesson Button -->
+<div class="mb-4">
+    <a href="@Url.Action("Details", "Lessons", new { id = ViewBag.LessonId })"
+       class="btn btn-outline-secondary me-2">
+        <i class="fas fa-arrow-left me-2"></i>Back to Lesson
+    </a>
+    <a href="@Url.Action("Details", "Courses", new { id = ViewBag.CourseId })"
+       class="btn btn-outline-primary">
+        <i class="fas fa-book me-2"></i>Back to Course
+    </a>
+</div>
+
 <div class="exercise-container">
     <!-- Progress Header -->
     <div class="lesson-progress">

@@ -58,33 +58,31 @@
     </div>
 
     <!-- Results Count -->
-    <div class="my-4">
-        <h5 class="text-secondary">
-            <i class="fas fa-list me-2"></i>
-            Showing @Model.Count() course@(Model.Count() != 1 ? "s" : "")
-            @if (!string.IsNullOrEmpty(ViewBag.SelectedLanguage) || !string.IsNullOrEmpty(ViewBag.SelectedLevel))
-            {
-                <span> - </span>
-                @if (!string.IsNullOrEmpty(ViewBag.SelectedLanguage))
-                {
-                    <span class="badge bg-primary">@ViewBag.SelectedLanguage</span>
-                }
-                @if (!string.IsNullOrEmpty(ViewBag.SelectedLevel))
-                {
-                    <span class="badge bg-secondary">@ViewBag.SelectedLevel</span>
-                }
-                <a asp-action="Index" class="btn btn-sm btn-outline-secondary ms-2">
-                    <i class="fas fa-times me-1"></i>Clear Filters
-                </a>
-            }
-        </h5>
+    <div class="my-4 d-flex align-items-center gap-2">
+        <span class="text-secondary fw-semibold">
+            @Model.Count() course@(Model.Count() != 1 ? "s" : "") found
+        </span>
+        @if (!string.IsNullOrEmpty(ViewBag.SelectedLanguage as string))
+        {
+            <span class="badge bg-primary">@ViewBag.SelectedLanguage</span>
+        }
+        @if (!string.IsNullOrEmpty(ViewBag.SelectedLevel as string))
+        {
+            <span class="badge bg-secondary">@ViewBag.SelectedLevel</span>
+        }
+        @if (!string.IsNullOrEmpty(ViewBag.SelectedLanguage as string) || !string.IsNullOrEmpty(ViewBag.SelectedLevel as string))
+        {
+            <a asp-action="Index" class="btn btn-sm btn-outline-secondary ms-1">
+                <i class="fas fa-times me-1"></i>Clear
+            </a>
+        }
     </div>
 
     <!-- Courses Grid -->
     @if (!Model.Any())
     {
         <div class="text-center py-5">
-            <i class="fas fa-search" style="font-size: 4rem; color: var(--text-secondary); opacity: 0.5;"></i>
+            <i class="fas fa-search" style="font-size: 4rem; color: var(--text-secondary); opacity: 0.4;"></i>
             <h3 class="mt-3">No courses found</h3>
             <p class="text-secondary">Try adjusting your filters</p>
             <a asp-action="Index" class="btn btn-primary">
@@ -94,11 +92,11 @@
     }
     else
     {
-        <div class="row g-4 mt-2">
+        <div class="row g-4 mt-1">
             @foreach (var course in Model)
             {
                 <div class="col-md-6 col-lg-4">
-                    <div class="course-card">
+                    <div class="course-card course-card-full">
                         <div class="course-card-image">
                             @switch (course.Language.ToLower())
                             {
@@ -106,40 +104,36 @@
                                     <i class="fas fa-language"></i>
                                     break;
                                 case "french":
+
                                     <i class="fas fa-flag"></i>
                                     break;
                                 case "german":
+
                                     <i class="fas fa-book"></i>
                                     break;
                                 case "japanese":
+
                                     <i class="fas fa-yen-sign"></i>
                                     break;
                                 default:
+
                                     <i class="fas fa-globe"></i>
                                     break;
                             }
                         </div>
-                        <div class="course-card-body">
+                        <div class="course-card-body d-flex flex-column">
                             <span class="course-level-badge @(course.Level.ToLower() == "beginner" ? "level-beginner" : course.Level.ToLower() == "intermediate" ? "level-intermediate" : "level-advanced")">
                                 @course.Level
                             </span>
                             <h3 class="course-title">@course.Title</h3>
                             <p class="course-language">
-                                <i class="fas fa-globe me-1"></i> @course.Language
-                                <span class="ms-2">
-                                    <i class="fas fa-clock me-1"></i> @course.EstimatedHours hours
-                                </span>
+                                <i class="fas fa-globe me-1"></i>@course.Language
+                                <span class="ms-2"><i class="fas fa-clock me-1"></i>@course.EstimatedHours hrs</span>
                             </p>
-                            <p class="course-description">@course.Description</p>
+                            <p class="course-description flex-grow-1">@course.Description</p>
                             <div class="course-meta">
-                                <span>
-                                    <i class="fas fa-book-open me-1"></i>
-                                    @course.Lessons.Count Lessons
-                                </span>
-                                <span>
-                                    <i class="fas fa-users me-1"></i>
-                                    @course.Enrollments.Count Students
-                                </span>
+                                <span><i class="fas fa-book-open me-1"></i>@course.Lessons.Count Lessons</span>
+                                <span><i class="fas fa-users me-1"></i>@course.Enrollments.Count Students</span>
                             </div>
                             <div class="mt-3">
                                 <a asp-action="Details" asp-route-id="@course.Id" class="btn btn-enroll w-100">

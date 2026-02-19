@@ -49,7 +49,9 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: 1rem;
 }
 
-/* Navbar Styles */
+/* ===========================
+   Navbar Styles
+   =========================== */
 .navbar-custom {
     background-color: var(--card-background);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -93,7 +95,9 @@ h1, h2, h3, h4, h5, h6 {
         color: var(--primary-color) !important;
     }
 
-/* Hero Section */
+/* ===========================
+   Hero Section
+   =========================== */
 .hero-section {
     background: linear-gradient(135deg, var(--primary-color) 0%, #7C3AED 100%);
     color: white;
@@ -133,7 +137,9 @@ h1, h2, h3, h4, h5, h6 {
     opacity: 0.95;
 }
 
-/* Button Styles */
+/* ===========================
+   Button Styles
+   =========================== */
 .btn-custom-primary {
     background-color: white;
     color: var(--primary-color);
@@ -178,42 +184,62 @@ h1, h2, h3, h4, h5, h6 {
 
     .btn-enroll:hover {
         background-color: var(--primary-hover);
+        color: white;
         transform: translateY(-2px);
         box-shadow: 0 6px 12px rgba(79, 70, 229, 0.3);
     }
 
-/* Card Styles */
+/* ===========================
+   Course Card Styles
+   KEY FIX: removed height: 100% — it caused cards to stretch 
+   on detail pages with little content. Use .course-card-full 
+   on grid/listing pages where you DO want equal heights.
+   =========================== */
 .course-card {
     background: var(--card-background);
     border-radius: 16px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease;
     overflow: hidden;
-    height: 100%;
     border: 1px solid var(--border-color);
     position: relative;
     z-index: 1;
 }
 
     .course-card:hover {
-        transform: translateY(-4px);
         box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
         z-index: 2;
     }
 
+/* Use this on listing/grid pages where equal-height cards look good */
+.course-card-full {
+    height: 100%;
+}
+
+    .course-card-full:hover {
+        transform: translateY(-4px);
+    }
+
 .course-card-image {
     width: 100%;
-    height: 180px;
+    height: 160px;
     background: linear-gradient(135deg, var(--primary-color) 0%, #7C3AED 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 3rem;
     color: white;
+    flex-shrink: 0;
 }
 
 .course-card-body {
     padding: 1.5rem;
+}
+
+/* Compact card variant for detail/sidebar pages */
+.course-card-compact .course-card-image {
+    height: 100px;
+    font-size: 2rem;
 }
 
 .course-level-badge {
@@ -273,7 +299,9 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--text-secondary);
 }
 
-/* Progress Bar */
+/* ===========================
+   Progress Bar
+   =========================== */
 .progress-custom {
     height: 8px;
     border-radius: 10px;
@@ -288,7 +316,9 @@ h1, h2, h3, h4, h5, h6 {
     transition: width 0.6s ease;
 }
 
-/* Stats Cards */
+/* ===========================
+   Stats Cards
+   =========================== */
 .stat-card {
     background: var(--card-background);
     border-radius: 16px;
@@ -321,6 +351,10 @@ h1, h2, h3, h4, h5, h6 {
         color: var(--accent-color);
     }
 
+    .stat-icon.danger {
+        color: var(--error-color);
+    }
+
 .stat-value {
     font-size: 2rem;
     font-weight: 700;
@@ -332,7 +366,9 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 0.95rem;
 }
 
-/* Filter Section */
+/* ===========================
+   Filter Section
+   =========================== */
 .filter-section {
     background: var(--card-background);
     border-radius: 16px;
@@ -361,7 +397,169 @@ h1, h2, h3, h4, h5, h6 {
         outline: none;
     }
 
-/* Footer */
+/* ===========================
+   Page Header Utility
+   Used on detail pages for a clean titled section
+   =========================== */
+.page-header {
+    background: var(--card-background);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--border-color);
+    border-left: 5px solid var(--primary-color);
+}
+
+.page-header-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin-top: 0.75rem;
+}
+
+/* ===========================
+   Content Sections (detail pages)
+   =========================== */
+.content-section {
+    background: var(--card-background);
+    border-radius: 16px;
+    padding: 1.75rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--border-color);
+}
+
+.content-section-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* ===========================
+   Sidebar Panel (sticky on detail pages)
+   =========================== */
+.sidebar-panel {
+    background: var(--card-background);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--border-color);
+    position: sticky;
+    top: 80px; /* clears navbar */
+}
+
+/* ===========================
+   Lesson Content Styles
+   =========================== */
+.lesson-content {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: var(--text-primary);
+}
+
+    .lesson-content h2 {
+        margin-top: 1.75rem;
+        margin-bottom: 0.75rem;
+        color: var(--primary-color);
+        font-size: 1.4rem;
+    }
+
+    .lesson-content h3 {
+        margin-top: 1.25rem;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+        font-size: 1.15rem;
+    }
+
+    .lesson-content ul {
+        margin-left: 1.5rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .lesson-content li {
+        margin-bottom: 0.4rem;
+    }
+
+    .lesson-content strong {
+        color: var(--primary-color);
+    }
+
+/* ===========================
+   Lesson List Item (course nav sidebar)
+   =========================== */
+.lesson-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 0;
+    border-bottom: 1px solid var(--border-color);
+    text-decoration: none;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+    .lesson-nav-item:last-child {
+        border-bottom: none;
+    }
+
+    .lesson-nav-item:hover {
+        color: var(--primary-color);
+    }
+
+    .lesson-nav-item.active {
+        color: var(--primary-color);
+        font-weight: 700;
+    }
+
+.lesson-nav-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--background-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    border: 2px solid var(--border-color);
+}
+
+.lesson-nav-item.active .lesson-nav-num {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* ===========================
+   Exercise Type Badges
+   =========================== */
+.exercise-type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: rgba(79, 70, 229, 0.1);
+    color: var(--primary-color);
+}
+
+/* ===========================
+   Footer
+   =========================== */
 .footer-custom {
     background-color: var(--text-primary);
     color: white;
@@ -420,6 +618,7 @@ h1, h2, h3, h4, h5, h6 {
     .social-icon:hover {
         background-color: var(--primary-color);
         transform: translateY(-3px);
+        color: white;
     }
 
 .footer-copyright {
@@ -427,7 +626,9 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 0.875rem;
 }
 
-/* Responsive Design */
+/* ===========================
+   Responsive Design
+   =========================== */
 @media (max-width: 768px) {
     .hero-title {
         font-size: 2rem;
@@ -438,12 +639,19 @@ h1, h2, h3, h4, h5, h6 {
     }
 
     .course-card-image {
-        height: 150px;
+        height: 130px;
         font-size: 2rem;
+    }
+
+    .sidebar-panel {
+        position: static;
+        margin-top: 1.5rem;
     }
 }
 
-/* Animations */
+/* ===========================
+   Animations
+   =========================== */
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -460,7 +668,12 @@ h1, h2, h3, h4, h5, h6 {
     animation: fadeInUp 0.6s ease-out;
 }
 
-/* Loading States */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 .loading-spinner {
     display: inline-block;
     width: 20px;
@@ -469,10 +682,4 @@ h1, h2, h3, h4, h5, h6 {
     border-radius: 50%;
     border-top-color: white;
     animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
 }

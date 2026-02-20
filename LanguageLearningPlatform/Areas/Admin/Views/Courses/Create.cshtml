@@ -1,0 +1,217 @@
+﻿@model LanguageLearningPlatform.Data.Models.Course
+
+@{
+    ViewData["Title"] = "Create Course";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0"><i class="fas fa-plus-circle me-2"></i>New Course</h1>
+        <p class="text-muted small mb-0">Fill in the details to create a new course</p>
+    </div>
+    <a asp-area="Admin" asp-controller="Courses" asp-action="Index" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Courses
+    </a>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h6 class="admin-card-title"><i class="fas fa-info-circle me-2 text-primary"></i>Course Details</h6>
+            </div>
+            <div class="admin-card-body">
+                <form asp-area="Admin" asp-controller="Courses" asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4" role="alert"></div>
+
+                    <div class="row g-3">
+
+                        <div class="col-12">
+                            <label asp-for="Title" class="form-label fw-semibold">
+                                Course Title <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Title" class="form-control" placeholder="e.g. Beginner Spanish" />
+                            <span asp-validation-for="Title" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Language" class="form-label fw-semibold">
+                                Language <span class="text-danger">*</span>
+                            </label>
+                            <select asp-for="Language" class="form-select">
+                                <option value="">Select a language</option>
+                                <option value="Spanish">Spanish</option>
+                                <option value="French">French</option>
+                                <option value="German">German</option>
+                                <option value="Japanese">Japanese</option>
+                                <option value="Italian">Italian</option>
+                                <option value="Chinese">Chinese</option>
+                                <option value="Portuguese">Portuguese</option>
+                                <option value="Korean">Korean</option>
+                                <option value="Arabic">Arabic</option>
+                                <option value="Russian">Russian</option>
+                            </select>
+                            <span asp-validation-for="Language" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Level" class="form-label fw-semibold">
+                                Level <span class="text-danger">*</span>
+                            </label>
+                            <select asp-for="Level" class="form-select">
+                                <option value="">Select a level</option>
+                                <option value="Beginner">Beginner</option>
+                                <option value="Intermediate">Intermediate</option>
+                                <option value="Advanced">Advanced</option>
+                            </select>
+                            <span asp-validation-for="Level" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="LanguageCode" class="form-label fw-semibold">Language Code</label>
+                            <input asp-for="LanguageCode" class="form-control" placeholder="e.g. ES, FR, DE" maxlength="10" />
+                            <div class="form-text">ISO code used for TTS and flags.</div>
+                            <span asp-validation-for="LanguageCode" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="EstimatedHours" class="form-label fw-semibold">Estimated Hours</label>
+                            <input asp-for="EstimatedHours" type="number" min="1" max="500" class="form-control" placeholder="e.g. 20" />
+                            <span asp-validation-for="EstimatedHours" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Publish Status</label>
+                            <div class="form-check form-switch mt-2">
+                                <input asp-for="IsPublished" class="form-check-input" type="checkbox" role="switch" id="isPublishedSwitch" />
+                                <label class="form-check-label" for="isPublishedSwitch">Publish immediately</label>
+                            </div>
+                            <div class="form-text">Unpublished courses are hidden from students.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="Description" class="form-label fw-semibold">Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="4"
+                                      placeholder="Describe what students will learn in this course..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="ImageUrl" class="form-label fw-semibold">Image URL</label>
+                            <input asp-for="ImageUrl" class="form-control" placeholder="https://example.com/image.png" />
+                            <div class="form-text">Optional cover image URL for the course card.</div>
+                            <span asp-validation-for="ImageUrl" class="text-danger small"></span>
+                        </div>
+
+                    </div>
+
+                    <hr class="my-4" />
+
+                    <div class="d-flex gap-3">
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="fas fa-save me-2"></i>Create Course
+                        </button>
+                        <a asp-area="Admin" asp-controller="Courses" asp-action="Index" class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tips Sidebar -->
+    <div class="col-lg-4">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h6 class="admin-card-title"><i class="fas fa-lightbulb me-2 text-warning"></i>Tips</h6>
+            </div>
+            <div class="admin-card-body">
+                <ul class="list-unstyled mb-0" style="font-size: 0.875rem; line-height: 1.8;">
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        Use a clear title like <strong>Beginner Spanish</strong>.
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        Set the correct language code (ES, FR, DE, JA...) for speech features.
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        Keep unpublished until lessons and exercises are added.
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        Estimated hours help students plan their schedule.
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        A good description increases enrollment rates.
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="admin-card mt-4">
+            <div class="admin-card-header">
+                <h6 class="admin-card-title"><i class="fas fa-globe me-2 text-primary"></i>Language Codes</h6>
+            </div>
+            <div class="admin-card-body p-0">
+                <table class="table table-sm mb-0" style="font-size: 0.82rem;">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Language</th>
+                            <th>Code</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="ps-3">Spanish</td><td>ES</td></tr>
+                        <tr><td class="ps-3">French</td><td>FR</td></tr>
+                        <tr><td class="ps-3">German</td><td>DE</td></tr>
+                        <tr><td class="ps-3">Japanese</td><td>JA</td></tr>
+                        <tr><td class="ps-3">Italian</td><td>IT</td></tr>
+                        <tr><td class="ps-3">Chinese</td><td>ZH</td></tr>
+                        <tr><td class="ps-3">Portuguese</td><td>PT</td></tr>
+                        <tr><td class="ps-3">Korean</td><td>KO</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .admin-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        overflow: hidden;
+    }
+
+    .admin-card-header {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #F3F4F6;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .admin-card-title {
+        margin: 0;
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: #1F2937;
+    }
+
+    .admin-card-body {
+        padding: 1.5rem;
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

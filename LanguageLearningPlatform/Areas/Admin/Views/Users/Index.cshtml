@@ -1,0 +1,405 @@
+﻿@model IEnumerable<LanguageLearningPlatform.Data.Models.User>
+
+@{
+    ViewData["Title"] = "Manage Users";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var usersWithRoles = ViewBag.UsersWithRoles as List<(LanguageLearningPlatform.Data.Models.User User, IList<string> Roles)>;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0"><i class="fas fa-users me-2"></i>User Management</h1>
+        <p class="text-muted small mb-0">@Model.Count() total users registered</p>
+    </div>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTeacherModal">
+        <i class="fas fa-chalkboard-teacher me-2"></i>Add Teacher
+    </button>
+</div>
+
+<!-- Search + Filter Bar -->
+<div class="admin-card mb-4">
+    <div class="admin-card-body">
+        <div class="row g-3">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0">
+                        <i class="fas fa-search text-muted"></i>
+                    </span>
+                    <input type="text" id="userSearch" class="form-control border-start-0"
+                           placeholder="Search by name or email">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select id="roleFilter" class="form-select">
+                    <option value="">All Roles</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Teacher">Teacher</option>
+                    <option value="Student">Student</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select id="statusFilter" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-outline-secondary w-100" id="clearFilters">
+                    <i class="fas fa-times me-1"></i>Clear
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Users Table -->
+<div class="admin-card">
+    <div class="admin-card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="usersTable">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">User</th>
+                        <th>Role</th>
+                        <th>Language</th>
+                        <th>Progress</th>
+                        <th>Joined</th>
+                        <th>Status</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (usersWithRoles != null)
+                    {
+                        @foreach (var item in usersWithRoles)
+                        {
+                            var user = item.User;
+                            var roles = item.Roles;
+                            var roleLabel = roles.Contains("Admin") ? "Admin" :
+                            roles.Contains("Teacher") ? "Teacher" : "Student";
+                            var totalPoints = user.Progresses.Sum(p => p.PointsEarned);
+                            var enrolledCount = user.Progresses.Count;
+                            var initials = (user.FirstName?.Substring(0, 1) ?? "") + (user.LastName?.Substring(0, 1) ?? "");
+                            var statusText = user.IsActive ? "active" : "inactive";
+
+                            <tr class="user-row"
+                                data-name="@((user.FirstName + " " + user.LastName).ToLower())"
+                                data-email="@(user.Email ?? "")"
+                                data-role="@roleLabel"
+                                data-status="@statusText">
+
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="user-avatar">
+                                            @initials
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold" style="font-size:0.9rem;">
+                                                @user.FirstName @user.LastName
+                                            </div>
+                                            <div class="text-muted" style="font-size:0.78rem;">
+                                                @user.Email
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    @if (roleLabel == "Admin")
+                                    {
+                                        <span class="badge rounded-pill bg-danger-subtle text-danger">
+                                            <i class="fas fa-shield-alt me-1"></i>Admin
+                                        </span>
+                                    }
+                                    else if (roleLabel == "Teacher")
+                                    {
+                                        <span class="badge rounded-pill bg-primary-subtle text-primary">
+                                            <i class="fas fa-chalkboard-teacher me-1"></i>Teacher
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge rounded-pill bg-secondary-subtle text-secondary">
+                                            <i class="fas fa-graduation-cap me-1"></i>Student
+                                        </span>
+                                    }
+                                </td>
+
+                                <td>
+                                    @if (!string.IsNullOrEmpty(user.PreferredLanguage))
+                                    {
+                                        <span class="badge bg-light text-dark">@user.PreferredLanguage</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">-</span>
+                                    }
+                                </td>
+
+                                <td>
+                                    <div class="text-muted small">
+                                        <i class="fas fa-book me-1"></i>@enrolledCount courses
+                                        @if (totalPoints > 0)
+                                        {
+                                            <span class="ms-2 text-warning fw-semibold">
+                                                <i class="fas fa-star me-1"></i>@totalPoints pts
+                                            </span>
+                                        }
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span class="text-muted small">
+                                        @user.RegistrationDate.ToString("MMM dd, yyyy")
+                                    </span>
+                                </td>
+
+                                <td>
+                                    @if (user.IsActive)
+                                    {
+                                        <span class="badge rounded-pill bg-success-subtle text-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge rounded-pill bg-secondary-subtle text-secondary">Inactive</span>
+                                    }
+                                </td>
+
+                                <td class="text-end pe-4">
+                                    <div class="d-flex gap-1 justify-content-end">
+
+                                        <a asp-action="Details" asp-route-id="@user.Id"
+                                           class="btn btn-sm btn-outline-secondary" title="View">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+
+                                        @if (roleLabel != "Admin")
+                                        {
+                                            if (roleLabel == "Teacher")
+                                            {
+                                                <form asp-action="RemoveRole" method="post" class="d-inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="userId" value="@user.Id" />
+                                                    <input type="hidden" name="role" value="Teacher" />
+                                                    <button type="submit"
+                                                            class="btn btn-sm btn-outline-warning"
+                                                            title="Remove Teacher Role"
+                                                            onclick="return confirm('Remove Teacher role?')">
+                                                        <i class="fas fa-user-minus"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <form asp-action="AssignRole" method="post" class="d-inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="userId" value="@user.Id" />
+                                                    <input type="hidden" name="role" value="Teacher" />
+                                                    <button type="submit"
+                                                            class="btn btn-sm btn-outline-primary"
+                                                            title="Make Teacher">
+                                                        <i class="fas fa-chalkboard-teacher"></i>
+                                                    </button>
+                                                </form>
+                                            }
+
+                                            <form asp-action="ToggleActive" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@user.Id" />
+                                                @if (user.IsActive)
+                                                {
+                                                    <button type="submit"
+                                                            class="btn btn-sm btn-outline-danger"
+                                                            title="Deactivate"
+                                                            onclick="return confirm('Deactivate this user?')">
+                                                        <i class="fas fa-ban"></i>
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <button type="submit"
+                                                            class="btn btn-sm btn-outline-success"
+                                                            title="Activate"
+                                                            onclick="return confirm('Activate this user?')">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                }
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div id="emptyState" class="text-center py-5 d-none">
+            <i class="fas fa-user-slash text-muted" style="font-size:3rem;opacity:0.4;"></i>
+            <p class="mt-3 text-muted">No users match your search.</p>
+        </div>
+    </div>
+</div>
+
+<!-- ADD TEACHER MODAL -->
+<div class="modal fade" id="addTeacherModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title">
+                    <i class="fas fa-chalkboard-teacher me-2 text-primary"></i>Add New Teacher
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="CreateTeacher" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="alert alert-info small">
+                        <i class="fas fa-info-circle me-2"></i>
+                        The teacher will be created with a temporary password and assigned the Teacher role automatically.
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small">First Name</label>
+                            <input type="text" name="FirstName" class="form-control" required placeholder="Jane" />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold small">Last Name</label>
+                            <input type="text" name="LastName" class="form-control" required placeholder="Smith" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">Email</label>
+                            <input type="email" name="Email" class="form-control" required
+                                   placeholder="teacher@example.com" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">Specialization</label>
+                            <select name="Specialization" class="form-select">
+                                <option value="">Select language</option>
+                                <option>Spanish</option>
+                                <option>French</option>
+                                <option>German</option>
+                                <option>Japanese</option>
+                                <option>Italian</option>
+                                <option>Chinese</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">Teacher Bio</label>
+                            <textarea name="TeacherBio" class="form-control" rows="3"
+                                      placeholder="Brief bio about the teacher"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">Temporary Password</label>
+                            <div class="input-group">
+                                <input type="text" name="TempPassword" id="tempPassword"
+                                       class="form-control" required value="Teacher123!" />
+                                <button type="button" class="btn btn-outline-secondary" id="generatePwd">
+                                    <i class="fas fa-dice"></i>
+                                </button>
+                            </div>
+                            <div class="form-text">The teacher should change this on first login.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Create Teacher Account
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .admin-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        overflow: hidden;
+    }
+
+    .admin-card-body {
+        padding: 1.25rem;
+    }
+
+    .table > :not(caption) > * > * {
+        padding: 0.85rem 0.75rem;
+    }
+
+    .user-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4F46E5, #7C3AED);
+        color: white;
+        font-size: 0.85rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            var searchInput  = document.getElementById('userSearch');
+            var roleFilter   = document.getElementById('roleFilter');
+            var statusFilter = document.getElementById('statusFilter');
+            var rows         = document.querySelectorAll('.user-row');
+            var emptyState   = document.getElementById('emptyState');
+
+            function applyFilters() {
+                var search = searchInput.value.toLowerCase();
+                var role   = roleFilter.value;
+                var status = statusFilter.value;
+                var visible = 0;
+
+                rows.forEach(function(row) {
+                    var nameMatch   = row.dataset.name.includes(search) || row.dataset.email.includes(search);
+                    var roleMatch   = !role   || row.dataset.role   === role;
+                    var statusMatch = !status || row.dataset.status === status;
+                    var show = nameMatch && roleMatch && statusMatch;
+                    row.style.display = show ? '' : 'none';
+                    if (show) visible++;
+                });
+
+                if (visible > 0) {
+                    emptyState.classList.add('d-none');
+                } else {
+                    emptyState.classList.remove('d-none');
+                }
+            }
+
+            searchInput.addEventListener('input', applyFilters);
+            roleFilter.addEventListener('change', applyFilters);
+            statusFilter.addEventListener('change', applyFilters);
+
+            document.getElementById('clearFilters').addEventListener('click', function () {
+                searchInput.value  = '';
+                roleFilter.value   = '';
+                statusFilter.value = '';
+                applyFilters();
+            });
+
+            var generateBtn = document.getElementById('generatePwd');
+            if (generateBtn) {
+                generateBtn.addEventListener('click', function () {
+                    var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+                    var pwd = '';
+                    for (var i = 0; i < 12; i++) {
+                        pwd += chars[Math.floor(Math.random() * chars.length)];
+                    }
+                    document.getElementById('tempPassword').value = pwd;
+                });
+            }
+        });
+    </script>
+}

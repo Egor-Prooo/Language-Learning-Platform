@@ -3,168 +3,294 @@
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="container-fluid">
-    <h1 class="h3 mb-4 text-gray-800">
-        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
-    </h1>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Dashboard</h1>
+        <p class="text-muted small mb-0">Welcome back! Here's what's happening on LingoLearn.</p>
+    </div>
+    <div class="text-muted small">
+        <i class="fas fa-calendar me-1"></i>@DateTime.Now.ToString("dddd, MMMM d, yyyy")
+    </div>
+</div>
 
-    <!-- Stats Cards -->
-    <div class="row g-4 mb-4">
-        <div class="col-xl-3 col-md-6">
-            <div class="card border-left-primary shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Total Users
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.TotalUsers</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-users fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
+<!-- STAT CARDS -->
+<div class="row g-3 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="admin-stat-card" style="border-left-color: #4F46E5;">
+            <div class="admin-stat-icon" style="background: rgba(79,70,229,0.1); color: #4F46E5;">
+                <i class="fas fa-users"></i>
             </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-            <div class="card border-left-success shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Total Courses
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.TotalCourses</div>
-                            <small class="text-muted">@ViewBag.PublishedCourses published</small>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-book fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-            <div class="card border-left-info shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                Total Enrollments
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.TotalEnrollments</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-            <div class="card border-left-warning shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                Total Lessons
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.TotalLessons</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-book-open fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
+            <div class="admin-stat-body">
+                <div class="admin-stat-value">@ViewBag.TotalUsers</div>
+                <div class="admin-stat-label">Total Users</div>
+                <div class="admin-stat-sub text-success">
+                    <i class="fas fa-circle me-1" style="font-size:0.5rem;vertical-align:middle;"></i>Active platform
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row g-4">
-        <!-- Recent Users -->
-        <div class="col-lg-6">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-user-plus me-2"></i>Recent Users
-                    </h6>
-                    <a asp-area="Admin" asp-controller="Users" asp-action="Index" class="btn btn-sm btn-primary">
-                        View All
-                    </a>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Registered</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var user in (List<LanguageLearningPlatform.Data.Models.User>)ViewBag.RecentUsers)
-                                {
-                                    <tr>
-                                        <td>@user.FirstName @user.LastName</td>
-                                        <td>@user.Email</td>
-                                        <td>@user.RegistrationDate.ToString("MMM dd, yyyy")</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="admin-stat-card" style="border-left-color: #10B981;">
+            <div class="admin-stat-icon" style="background: rgba(16,185,129,0.1); color: #10B981;">
+                <i class="fas fa-book"></i>
+            </div>
+            <div class="admin-stat-body">
+                <div class="admin-stat-value">@ViewBag.TotalCourses</div>
+                <div class="admin-stat-label">Total Courses</div>
+                <div class="admin-stat-sub text-muted">
+                    <i class="fas fa-eye me-1"></i>@ViewBag.PublishedCourses published
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Popular Courses -->
-        <div class="col-lg-6">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-star me-2"></i>Popular Courses
-                    </h6>
-                    <a asp-area="Admin" asp-controller="Courses" asp-action="Index" class="btn btn-sm btn-primary">
-                        View All
-                    </a>
+    <div class="col-xl-3 col-md-6">
+        <div class="admin-stat-card" style="border-left-color: #F59E0B;">
+            <div class="admin-stat-icon" style="background: rgba(245,158,11,0.1); color: #F59E0B;">
+                <i class="fas fa-clipboard-list"></i>
+            </div>
+            <div class="admin-stat-body">
+                <div class="admin-stat-value">@ViewBag.TotalEnrollments</div>
+                <div class="admin-stat-label">Total Enrollments</div>
+                <div class="admin-stat-sub text-muted">
+                    <i class="fas fa-graduation-cap me-1"></i>Across all courses
                 </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="admin-stat-card" style="border-left-color: #8B5CF6;">
+            <div class="admin-stat-icon" style="background: rgba(139,92,246,0.1); color: #8B5CF6;">
+                <i class="fas fa-dumbbell"></i>
+            </div>
+            <div class="admin-stat-body">
+                <div class="admin-stat-value">@ViewBag.TotalExercises</div>
+                <div class="admin-stat-label">Total Exercises</div>
+                <div class="admin-stat-sub text-muted">
+                    <i class="fas fa-book-open me-1"></i>@ViewBag.TotalLessons lessons
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CHARTS ROW -->
+<div class="row g-3 mb-4">
+
+    <!-- Enrollments by Language -->
+    <div class="col-xl-8">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h6 class="admin-card-title">
+                    <i class="fas fa-chart-bar me-2 text-primary"></i>Enrollments by Language
+                </h6>
+                <span class="badge bg-light text-dark">All time</span>
+            </div>
+            <div class="admin-card-body">
+                <canvas id="enrollmentsByLanguageChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Courses by Level -->
+    <div class="col-xl-4">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h6 class="admin-card-title">
+                    <i class="fas fa-chart-pie me-2 text-success"></i>Courses by Level
+                </h6>
+            </div>
+            <div class="admin-card-body d-flex align-items-center justify-content-center">
+                <canvas id="coursesByLevelChart" height="180"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TABLES ROW -->
+<div class="row g-3">
+
+    <!-- Recent Users -->
+    <div class="col-lg-6">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h6 class="admin-card-title">
+                    <i class="fas fa-user-plus me-2 text-primary"></i>Recent Registrations
+                </h6>
+                <a asp-area="Admin" asp-controller="Users" asp-action="Index"
+                   class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="admin-card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">User</th>
+                                <th>Language</th>
+                                <th>Joined</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in (List<LanguageLearningPlatform.Data.Models.User>)ViewBag.RecentUsers)
+                            {
                                 <tr>
-                                    <th>Course</th>
-                                    <th>Enrollments</th>
-                                    <th>Status</th>
+                                    <td class="ps-3">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0"
+                                                 style="width:34px;height:34px;font-size:0.8rem;background:linear-gradient(135deg,#4F46E5,#7C3AED);">
+                                                @(user.FirstName?.Substring(0, 1))@(user.LastName?.Substring(0, 1))
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold" style="font-size:0.9rem;">
+                                                    @user.FirstName @user.LastName
+                                                </div>
+                                                <div class="text-muted" style="font-size:0.78rem;">@user.Email</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(user.PreferredLanguage))
+                                        {
+                                            <span class="badge bg-light text-dark">@user.PreferredLanguage</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">—</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="text-muted small">
+                                            @user.RegistrationDate.ToString("MMM dd, yyyy")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if (user.IsActive)
+                                        {
+                                            <span class="badge rounded-pill bg-success-subtle text-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge rounded-pill bg-secondary-subtle text-secondary">Inactive</span>
+                                        }
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var course in (List<LanguageLearningPlatform.Data.Models.Course>)ViewBag.PopularCourses)
-                                {
-                                    <tr>
-                                        <td>@course.Title</td>
-                                        <td>
-                                            <span class="badge bg-primary">@course.Enrollments.Count</span>
-                                        </td>
-                                        <td>
-                                            @if (course.IsPublished)
-                                            {
-                                                <span class="badge bg-success">Published</span>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popular Courses -->
+    <div class="col-lg-6">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h6 class="admin-card-title">
+                    <i class="fas fa-star me-2 text-warning"></i>Most Popular Courses
+                </h6>
+                <a asp-area="Admin" asp-controller="Courses" asp-action="Index"
+                   class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="admin-card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Course</th>
+                                <th>Level</th>
+                                <th>Enrolled</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var course in (List<LanguageLearningPlatform.Data.Models.Course>)ViewBag.PopularCourses)
+                            {
+                                <tr>
+                                    <td class="ps-3">
+                                        <div class="fw-semibold" style="font-size:0.9rem;">@course.Title</div>
+                                        <div class="text-muted" style="font-size:0.78rem;">@course.Language</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge rounded-pill
+                                                @(course.Level == "Beginner" ? "bg-success-subtle text-success" :
+                                                                                            course.Level == "Intermediate" ? "bg-warning-subtle text-warning" :
+                                                                                            "bg-danger-subtle text-danger")">
+                                        @course.Level
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        @{
+                                                var maxEnroll = ((List<LanguageLearningPlatform.Data.Models.Course>)ViewBag.PopularCourses)
+                                                .Max(c => c.Enrollments.Count);
+                                                var pct = maxEnroll > 0 ? (course.Enrollments.Count * 100 / maxEnroll) : 0;
                                             }
-                                            else
-                                            {
-                                                <span class="badge bg-secondary">Draft</span>
-                                            }
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
+                                            <div class="progress flex-grow-1" style="height:6px;min-width:60px;">
+                                                <div class="progress-bar bg-primary" style="width:@pct%"></div>
+                                            </div>
+                                            <span class="fw-bold text-primary small">@course.Enrollments.Count</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (course.IsPublished)
+                                        {
+                                            <span class="badge rounded-pill bg-success-subtle text-success">Published</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge rounded-pill bg-secondary-subtle text-secondary">Draft</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="col-12">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h6 class="admin-card-title">
+                    <i class="fas fa-bolt me-2 text-warning"></i>Quick Actions
+                </h6>
+            </div>
+            <div class="admin-card-body">
+                <div class="row g-3">
+                    <div class="col-md-3 col-6">
+                        <a asp-area="Admin" asp-controller="Courses" asp-action="Create"
+                           class="quick-action-btn text-primary">
+                            <i class="fas fa-plus-circle fa-2x mb-2"></i>
+                            <div class="fw-semibold small">New Course</div>
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <a asp-area="Admin" asp-controller="Users" asp-action="Index"
+                           class="quick-action-btn text-success">
+                            <i class="fas fa-user-cog fa-2x mb-2"></i>
+                            <div class="fw-semibold small">Manage Users</div>
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <a asp-area="Admin" asp-controller="Courses" asp-action="Index"
+                           class="quick-action-btn text-warning">
+                            <i class="fas fa-book-open fa-2x mb-2"></i>
+                            <div class="fw-semibold small">All Courses</div>
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <a asp-area="" asp-controller="Home" asp-action="Index"
+                           class="quick-action-btn text-secondary">
+                            <i class="fas fa-eye fa-2x mb-2"></i>
+                            <div class="fw-semibold small">View Site</div>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -173,23 +299,178 @@
 </div>
 
 <style>
-    .border-left-primary {
-        border-left: .25rem solid #4e73df !important;
+    .admin-stat-card {
+        background: white;
+        border-radius: 12px;
+        border-left: 4px solid transparent;
+        padding: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        transition: box-shadow 0.2s ease;
+    }
+    .admin-stat-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+
+    .admin-stat-icon {
+        width: 52px; height: 52px;
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.4rem;
+        flex-shrink: 0;
     }
 
-    .border-left-success {
-        border-left: .25rem solid #1cc88a !important;
+    .admin-stat-value {
+        font-size: 1.75rem;
+        font-weight: 800;
+        line-height: 1;
+        color: #1F2937;
     }
 
-    .border-left-info {
-        border-left: .25rem solid #36b9cc !important;
+    .admin-stat-label {
+        font-size: 0.82rem;
+        color: #6B7280;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: 0.2rem;
     }
 
-    .border-left-warning {
-        border-left: .25rem solid #f6c23e !important;
+    .admin-stat-sub {
+        font-size: 0.78rem;
+        margin-top: 0.35rem;
     }
 
-    .text-xs {
-        font-size: .7rem;
+    .admin-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        overflow: hidden;
+    }
+
+    .admin-card-header {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #F3F4F6;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .admin-card-title {
+        margin: 0;
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: #1F2937;
+    }
+
+    .admin-card-body { padding: 1.25rem; }
+
+    .quick-action-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1.25rem;
+        border-radius: 12px;
+        background: #F9FAFB;
+        border: 2px solid #E5E7EB;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        height: 100%;
+    }
+    .quick-action-btn:hover {
+        background: white;
+        border-color: currentColor;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 </style>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const popularCourses = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                            ((List<LanguageLearningPlatform.Data.Models.Course>)ViewBag.PopularCourses)
+                                    .GroupBy(c => c.Language)
+                                    .Select(g => new { language = g.Key, count = g.Sum(c => c.Enrollments.Count) })
+                                    .OrderByDescending(x => x.count)
+                    ));
+
+        // Bar Chart - Enrollments by Language
+        const barCtx = document.getElementById('enrollmentsByLanguageChart');
+        if (barCtx) {
+            new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: popularCourses.map(c => c.language),
+                    datasets: [{
+                        label: 'Enrollments',
+                        data: popularCourses.map(c => c.count),
+                        backgroundColor: [
+                            'rgba(79,70,229,0.8)',
+                            'rgba(16,185,129,0.8)',
+                            'rgba(245,158,11,0.8)',
+                            'rgba(239,68,68,0.8)',
+                            'rgba(139,92,246,0.8)',
+                            'rgba(59,130,246,0.8)',
+                        ],
+                        borderRadius: 6,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1, precision: 0 },
+                            grid: { color: 'rgba(0,0,0,0.04)' }
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+            // Donut Chart - Courses by Level
+            const levelData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                        ((List<LanguageLearningPlatform.Data.Models.Course>)ViewBag.PopularCourses)
+                                .GroupBy(c => c.Level)
+                                .Select(g => new { level = g.Key, count = g.Count() })
+                ));
+
+        const levelCounts = { Beginner: 0, Intermediate: 0, Advanced: 0 };
+        levelData.forEach(l => { if (levelCounts[l.level] !== undefined) levelCounts[l.level] = l.count; });
+
+            const pieCtx = document.getElementById('coursesByLevelChart');
+            if (pieCtx) {
+                new Chart(pieCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Beginner', 'Intermediate', 'Advanced'],
+                        datasets: [{
+                            data: [levelCounts.Beginner || 1, levelCounts.Intermediate || 1, levelCounts.Advanced || 1],
+                            backgroundColor: ['#10B981', '#F59E0B', '#EF4444'],
+                            borderWidth: 2,
+                            borderColor: '#fff',
+                            hoverOffset: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        cutout: '65%',
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { padding: 16, font: { size: 12 } }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+}

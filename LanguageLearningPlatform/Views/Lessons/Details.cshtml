@@ -1,4 +1,5 @@
 ﻿@model LanguageLearningPlatform.Data.Models.Lesson
+@using LanguageLearningPlatform.Core.Models
 
 @{
     ViewData["Title"] = Model.Title;
@@ -6,6 +7,7 @@
     var currentIndex = ViewBag.CurrentLessonIndex as int? ?? 0;
     var hasNext = currentIndex < (courseLessons?.Count - 1 ?? 0);
     var hasPrevious = currentIndex > 0;
+    var videos = ViewBag.Videos as IEnumerable<VideoLessonViewModel> ?? Enumerable.Empty<VideoLessonViewModel>();
 }
 
 <div class="container my-4">
@@ -39,22 +41,143 @@
                             <i class="fas fa-dumbbell me-1"></i>@Model.Exercises.Count exercises
                         </span>
                     }
+                    @if (videos.Any())
+                    {
+                        <span class="badge bg-light text-dark">
+                            <i class="fas fa-play-circle me-1"></i>@videos.Count() videos
+                        </span>
+                    }
                 </div>
 
                 <h1 class="mb-1" style="font-size: 1.75rem;">@Model.Title</h1>
                 <p class="text-secondary mb-0">@Model.Description</p>
             </div>
 
-            <!-- Lesson Content -->
+            <!-- Lesson Content (Notes) -->
             <div class="content-section">
                 <div class="content-section-title">
-                    <i class="fas fa-book-open text-primary"></i> Lesson Material
+                    <i class="fas fa-book-open text-primary"></i> Lesson Notes
                 </div>
                 <div class="lesson-content">
                     @Html.Raw(Model.Content)
                 </div>
             </div>
 
+            <!-- ───────────────── VIDEO LESSONS ───────────────── -->
+            @if (videos.Any())
+            {
+                <div class="content-section" id="video-lessons-section">
+                    <div class="content-section-title">
+                        <i class="fas fa-video text-primary"></i> Video Lessons
+                        <span class="ms-auto badge bg-light text-dark fw-normal" style="font-size:0.8rem;">
+                            @videos.Count() video@(videos.Count() != 1 ? "s" : "")
+                        </span>
+                    </div>
+
+                    <!-- Active Video Player -->
+                    <div id="video-player-wrapper" class="mb-4" style="display:none;">
+                        <div class="video-player-card">
+                            <div class="video-responsive-wrapper">
+                                <iframe id="active-video-iframe"
+                                        src=""
+                                        title=""
+                                        frameborder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowfullscreen
+                                        class="video-iframe">
+                                </iframe>
+                                <!-- Shown for Direct video provider -->
+                                <video id="active-video-direct"
+                                       controls
+                                       class="video-direct d-none"
+                                       style="width:100%;border-radius:12px;">
+                                    <source id="active-video-direct-src" src="" type="video/mp4">
+                                    Your browser does not support the video element.
+                                </video>
+                            </div>
+                            <div class="video-player-info p-3">
+                                <h5 id="active-video-title" class="mb-1 fw-bold"></h5>
+                                <p id="active-video-description" class="text-secondary small mb-0"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Video List -->
+                    <div class="video-list d-flex flex-column gap-3">
+                        @foreach (var video in videos)
+                        {
+                            <div class="video-list-item @(video.IsCompleted ? "video-completed" : "")"
+                                 data-video-id="@video.Id"
+                                 data-embed-url="@video.EmbedUrl"
+                                 data-video-url="@video.VideoUrl"
+                                 data-provider="@video.VideoProvider"
+                                 data-title="@video.Title"
+                                 data-description="@video.Description"
+                                 data-duration="@video.DurationSeconds">
+
+                                <div class="video-list-thumb">
+                                    @if (video.IsCompleted)
+                                    {
+                                        <div class="video-thumb-icon completed">
+                                            <i class="fas fa-check"></i>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="video-thumb-icon">
+                                            <i class="fas fa-play"></i>
+                                        </div>
+                                    }
+                                </div>
+
+                                <div class="video-list-info flex-grow-1 min-w-0">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <span class="fw-semibold text-truncate">@video.Title</span>
+                                        @if (video.IsRequired)
+                                        {
+                                            <span class="badge bg-danger-subtle text-danger flex-shrink-0" style="font-size:0.7rem;">Required</span>
+                                        }
+                                        @if (video.IsCompleted)
+                                        {
+                                            <span class="badge bg-success-subtle text-success flex-shrink-0" style="font-size:0.7rem;">
+                                                <i class="fas fa-check me-1"></i>Done
+                                            </span>
+                                        }
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(video.Description))
+                                    {
+                                        <p class="text-secondary small mb-1 text-truncate">@video.Description</p>
+                                    }
+                                    <div class="d-flex align-items-center gap-3">
+                                        @if (video.DurationSeconds > 0)
+                                        {
+                                            <span class="text-secondary" style="font-size:0.78rem;">
+                                                <i class="fas fa-clock me-1"></i>@video.DurationFormatted
+                                            </span>
+                                        }
+                                        <span class="text-secondary" style="font-size:0.78rem;">
+                                            <i class="fab fa-@(video.VideoProvider.ToLower() == "youtube" ? "youtube text-danger" : video.VideoProvider.ToLower() == "vimeo" ? "vimeo text-info" : "film text-secondary") me-1"></i>
+                                            @video.VideoProvider
+                                        </span>
+                                        @if (video.WatchProgress > 0 && !video.IsCompleted)
+                                        {
+                                            <span class="text-primary" style="font-size:0.78rem;">
+                                                <i class="fas fa-history me-1"></i>@video.WatchProgress.ToString("F0")% watched
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+
+                                <button class="btn-play-video flex-shrink-0" onclick="playVideo(this)">
+                                    <i class="fas fa-play me-1"></i>
+                                    @(video.WatchProgress > 0 && !video.IsCompleted ? "Resume" : video.IsCompleted ? "Rewatch" : "Watch")
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            <!-- ─────────────────────────────────────────────────── -->
             <!-- Exercises CTA -->
             @if (Model.Exercises.Any())
             {
@@ -89,15 +212,15 @@
                                     case "MultipleChoice":
                                         <i class="fas fa-list-ul"></i>
                                         <text>Multiple Choice</text>
-                 break;
+                                        break;
                                     case "Translation":
                                         <i class="fas fa-language"></i>
                                         <text>Translation</text>
-                    break;
+                                        break;
                                     case "FillInBlank":
                                         <i class="fas fa-keyboard"></i>
                                         <text>Fill in Blank</text>
-                  break;
+                                        break;
                                     default:
                                         <text>@type</text>
                                         break;
@@ -143,8 +266,7 @@
                 }
                 else
                 {
-                    <a asp-controller="Courses" asp-action="Details" asp-route-id="@Model.CourseId"
-                       class="btn btn-success">
+                    <a asp-controller="Courses" asp-action="Details" asp-route-id="@Model.CourseId" class="btn btn-success">
                         <i class="fas fa-check-circle me-2"></i>Back to Course
                     </a>
                 }
@@ -165,7 +287,6 @@
                         {
                             var lesson = courseLessons[i];
                             var isActive = i == currentIndex;
-
                             <a asp-action="Details" asp-route-id="@lesson.Id"
                                class="lesson-nav-item @(isActive ? "active" : "")">
                                 <div class="lesson-nav-num">
@@ -191,11 +312,9 @@
                             </a>
                         }
                     </div>
-
                     <hr class="my-3" />
                 }
 
-                <!-- Progress summary -->
                 <div class="d-flex justify-content-between small text-secondary">
                     <span>Lesson @(currentIndex + 1) of @courseLessons?.Count</span>
                     <span>@(Math.Round((currentIndex + 1.0) / (courseLessons?.Count ?? 1) * 100))% through</span>
@@ -208,6 +327,24 @@
 
                 <hr class="my-3" />
 
+                @if (videos.Any())
+                {
+                    <div class="mb-3">
+                        <div class="fw-semibold small text-secondary mb-2">
+                            <i class="fas fa-video me-1"></i>Videos in this lesson
+                        </div>
+                        @foreach (var video in videos)
+                        {
+                            <div class="d-flex align-items-center gap-2 py-1">
+                                <i class="fas fa-@(video.IsCompleted ? "check-circle text-success" : "circle text-muted")"
+                                   style="font-size:0.75rem;"></i>
+                                <span class="small text-truncate">@video.Title</span>
+                            </div>
+                        }
+                    </div>
+                    <hr class="my-3" />
+                }
+
                 <a asp-controller="Courses" asp-action="Details" asp-route-id="@Model.CourseId"
                    class="btn btn-outline-secondary w-100 btn-sm">
                     <i class="fas fa-arrow-left me-2"></i>Back to Course
@@ -216,3 +353,229 @@
         </div>
     </div>
 </div>
+
+@section Styles {
+    <style>
+        /* ── Video Player ── */
+        .video-player-card {
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+        }
+
+        .video-responsive-wrapper {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 */
+            height: 0;
+            overflow: hidden;
+        }
+
+        .video-iframe,
+        .video-direct {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        .video-player-info {
+            background: #1a1a2e;
+            color: white;
+        }
+
+            .video-player-info h5 {
+                color: #fff;
+            }
+
+            .video-player-info p {
+                color: #9ca3af;
+            }
+
+        /* ── Video List ── */
+        .video-list-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            background: white;
+            border: 2px solid #E5E7EB;
+            border-radius: 14px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+            .video-list-item:hover {
+                border-color: var(--primary-color);
+                box-shadow: 0 4px 14px rgba(79,70,229,0.12);
+                transform: translateY(-2px);
+            }
+
+            .video-list-item.video-completed {
+                border-color: #10B981;
+                background: linear-gradient(135deg, #F0FFF4, #fff);
+            }
+
+        .video-thumb-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary-color), #7C3AED);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+            .video-thumb-icon.completed {
+                background: linear-gradient(135deg, #10B981, #059669);
+            }
+
+        /* ── Play Button ── */
+        .btn-play-video {
+            padding: 0.55rem 1.1rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+            .btn-play-video:hover {
+                background: #4338CA;
+                transform: scale(1.05);
+            }
+
+        /* ── Smooth player reveal ── */
+        #video-player-wrapper {
+            animation: fadeSlideDown 0.4s ease;
+        }
+
+        @@keyframes fadeSlideDown {
+            from
+
+        {
+            opacity: 0;
+            transform: translateY(-12px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        let currentVideoId = null;
+        let progressInterval = null;
+
+        function playVideo(btn) {
+            const item = btn.closest('.video-list-item');
+            const videoId   = item.dataset.videoId;
+            const embedUrl  = item.dataset.embedUrl;
+            const videoUrl  = item.dataset.videoUrl;
+            const provider  = item.dataset.provider;
+            const title     = item.dataset.title;
+            const desc      = item.dataset.description;
+
+            // Highlight active item
+            document.querySelectorAll('.video-list-item').forEach(el => el.classList.remove('active-video'));
+            item.classList.add('active-video');
+
+            const wrapper   = document.getElementById('video-player-wrapper');
+            const iframe    = document.getElementById('active-video-iframe');
+            const direct    = document.getElementById('active-video-direct');
+            const directSrc = document.getElementById('active-video-direct-src');
+            const titleEl   = document.getElementById('active-video-title');
+            const descEl    = document.getElementById('active-video-description');
+
+            // Reset
+            iframe.src = '';
+            direct.classList.add('d-none');
+            iframe.classList.remove('d-none');
+
+            if (provider === 'Direct') {
+                iframe.classList.add('d-none');
+                direct.classList.remove('d-none');
+                directSrc.src = videoUrl;
+                direct.load();
+            } else {
+                iframe.src = embedUrl;
+            }
+
+            titleEl.textContent = title;
+            descEl.textContent  = desc;
+            wrapper.style.display = 'block';
+
+            // Scroll to player
+            wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            currentVideoId = videoId;
+
+            // Start progress tracking (every 15s)
+            clearInterval(progressInterval);
+            progressInterval = setInterval(() => trackProgress(false), 15000);
+        }
+
+        async function trackProgress(isCompleted) {
+            if (!currentVideoId) return;
+
+            try {
+                await fetch('/api/videolessons/progress', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        videoId: currentVideoId,
+                        watchedSeconds: 0,   // extend if you wire up the player API
+                        isCompleted: isCompleted
+                    })
+                });
+            } catch(e) {
+                console.warn('Progress update failed', e);
+            }
+        }
+
+        // Mark video as complete when user explicitly clicks "Done"
+        function markComplete() {
+            trackProgress(true).then(() => {
+                const item = document.querySelector(`.video-list-item[data-video-id="${currentVideoId}"]`);
+                if (item) {
+                    item.classList.add('video-completed');
+                    const thumb = item.querySelector('.video-thumb-icon');
+                    if (thumb) {
+                        thumb.classList.add('completed');
+                        thumb.innerHTML = '<i class="fas fa-check"></i>';
+                    }
+                }
+            });
+        }
+
+        // Add a "Mark as complete" button to the player info bar once a video is playing
+        document.getElementById('video-player-wrapper').addEventListener('transitionend', () => {});
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inject "Mark complete" button dynamically into player info once it exists
+            const info = document.querySelector('.video-player-info');
+            if (info) {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-sm btn-success mt-2';
+                btn.innerHTML = '<i class="fas fa-check me-1"></i>Mark as Complete';
+                btn.onclick = markComplete;
+                info.appendChild(btn);
+            }
+        });
+    </script>
+}

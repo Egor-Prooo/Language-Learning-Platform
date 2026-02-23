@@ -1,6 +1,7 @@
 ﻿using LanguageLearningPlatform.Core.Models;
 using LanguageLearningPlatform.Data;
 using LanguageLearningPlatform.Data.Models;
+using LanguageLearningPlatform.Services.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,28 +13,26 @@ namespace LanguageLearningPlatform.Web.Controllers
     public class LessonsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IVideoLessonService _videoLessonService;
 
-        public LessonsController(ApplicationDbContext context)
+        public LessonsController(ApplicationDbContext context, IVideoLessonService videoLessonService)
         {
             _context = context;
+            _videoLessonService = videoLessonService;
         }
 
         // GET: Lessons/Details/5
         public async Task<IActionResult> Details(Guid id)
         {
             var lesson = await _context.Lessons
-                .Include(l => l.Course)
-                .Include(l => l.Exercises.OrderBy(e => e.OrderIndex))
-                .FirstOrDefaultAsync(l => l.Id == id);
+        .Include(l => l.Course)
+        .Include(l => l.Exercises.OrderBy(e => e.OrderIndex))
+        .FirstOrDefaultAsync(l => l.Id == id);
 
-            if (lesson == null)
-            {
-                return NotFound();
-            }
+            if (lesson == null) return NotFound();
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            // Check if user is enrolled
             var isEnrolled = await _context.CourseEnrollments
                 .AnyAsync(e => e.UserId == userId && e.CourseId == lesson.CourseId && e.IsActive);
 
@@ -43,14 +42,16 @@ namespace LanguageLearningPlatform.Web.Controllers
                 return RedirectToAction("Details", "Courses", new { id = lesson.CourseId });
             }
 
-            // Get other lessons in the course for navigation
             var courseLessons = await _context.Lessons
                 .Where(l => l.CourseId == lesson.CourseId)
                 .OrderBy(l => l.OrderIndex)
                 .ToListAsync();
 
+            var videos = await _videoLessonService.GetLessonVideosAsync(id, userId);
+
             ViewBag.CourseLessons = courseLessons;
             ViewBag.CurrentLessonIndex = courseLessons.FindIndex(l => l.Id == id);
+            ViewBag.Videos = videos;
 
             return View(lesson);
         }

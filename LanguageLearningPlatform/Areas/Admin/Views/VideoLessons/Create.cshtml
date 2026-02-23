@@ -1,0 +1,185 @@
+﻿@model LanguageLearningPlatform.Data.Models.VideoLesson
+
+@{
+    ViewData["Title"] = "Add Video Lesson";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var lesson = ViewBag.Lesson as LanguageLearningPlatform.Data.Models.Lesson;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0"><i class="fas fa-plus-circle me-2"></i>Add Video</h1>
+        <p class="text-muted small mb-0">Adding to: <strong>@lesson?.Title</strong></p>
+    </div>
+    <a asp-action="ForLesson" asp-route-lessonId="@lesson?.Id" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back
+    </a>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h6 class="admin-card-title"><i class="fas fa-video me-2 text-primary"></i>Video Details</h6>
+            </div>
+            <div class="admin-card-body">
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="LessonId" value="@lesson?.Id" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3"></div>
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label asp-for="Title" class="form-label fw-semibold">Title <span class="text-danger">*</span></label>
+                            <input asp-for="Title" class="form-control" placeholder="e.g. Introduction to Spanish Greetings" />
+                            <span asp-validation-for="Title" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="Description" class="form-label fw-semibold">Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="3"
+                                      placeholder="Brief description of what this video covers..."></textarea>
+                        </div>
+
+                        <div class="col-md-8">
+                            <label asp-for="VideoUrl" class="form-label fw-semibold">Video URL <span class="text-danger">*</span></label>
+                            <input asp-for="VideoUrl" class="form-control" id="videoUrlInput"
+                                   placeholder="https://www.youtube.com/watch?v=..." />
+                            <div class="form-text">Paste a YouTube, Vimeo, or direct MP4 URL.</div>
+                            <span asp-validation-for="VideoUrl" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="VideoProvider" class="form-label fw-semibold">Provider</label>
+                            <select asp-for="VideoProvider" class="form-select" id="providerSelect">
+                                <option value="YouTube">YouTube</option>
+                                <option value="Vimeo">Vimeo</option>
+                                <option value="Direct">Direct (MP4)</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="DurationSeconds" class="form-label fw-semibold">Duration (seconds)</label>
+                            <input asp-for="DurationSeconds" type="number" min="0" class="form-control" placeholder="e.g. 360" />
+                            <div class="form-text">Optional. 360 = 6:00</div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="OrderIndex" class="form-label fw-semibold">Order</label>
+                            <input asp-for="OrderIndex" type="number" min="0" class="form-control" value="0" />
+                        </div>
+
+                        <div class="col-md-4 d-flex align-items-end">
+                            <div class="form-check form-switch mb-2">
+                                <input asp-for="IsRequired" class="form-check-input" type="checkbox" role="switch" id="isRequiredSwitch" />
+                                <label class="form-check-label fw-semibold" for="isRequiredSwitch">Required to complete</label>
+                            </div>
+                        </div>
+
+                        <!-- Live Preview -->
+                        <div class="col-12" id="preview-container" style="display:none;">
+                            <label class="form-label fw-semibold">Preview</label>
+                            <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;background:#000;">
+                                <iframe id="preview-iframe" src="" frameborder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowfullscreen
+                                        style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4" />
+                    <div class="d-flex gap-3">
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="fas fa-save me-2"></i>Add Video
+                        </button>
+                        <a asp-action="ForLesson" asp-route-lessonId="@lesson?.Id" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tips -->
+    <div class="col-lg-4">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h6 class="admin-card-title"><i class="fas fa-lightbulb me-2 text-warning"></i>Tips</h6>
+            </div>
+            <div class="admin-card-body" style="font-size:0.875rem;line-height:1.8;">
+                <p><i class="fas fa-check-circle text-success me-2"></i>Paste any <strong>YouTube</strong> or <strong>Vimeo</strong> URL — it's converted automatically.</p>
+                <p><i class="fas fa-check-circle text-success me-2"></i>For hosted MP4s, choose <strong>Direct</strong> and paste the file URL.</p>
+                <p><i class="fas fa-check-circle text-success me-2"></i>Mark as <strong>Required</strong> if students must watch it before moving on.</p>
+                <p class="mb-0"><i class="fas fa-check-circle text-success me-2"></i>Use <strong>Order</strong> to control which video appears first.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .admin-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        overflow: hidden;
+    }
+
+    .admin-card-header {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #F3F4F6;
+        display: flex;
+        align-items: center;
+    }
+
+    .admin-card-title {
+        margin: 0;
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: #1F2937;
+    }
+
+    .admin-card-body {
+        padding: 1.5rem;
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Auto-detect provider from URL
+        document.getElementById('videoUrlInput').addEventListener('input', function () {
+            const url = this.value.trim();
+            const select = document.getElementById('providerSelect');
+
+            if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                select.value = 'YouTube';
+                showPreview(url, 'YouTube');
+            } else if (url.includes('vimeo.com')) {
+                select.value = 'Vimeo';
+                showPreview(url, 'Vimeo');
+            } else if (url.endsWith('.mp4') || url.endsWith('.webm')) {
+                select.value = 'Direct';
+                document.getElementById('preview-container').style.display = 'none';
+            }
+        });
+
+        function showPreview(url, provider) {
+            let embedUrl = '';
+
+            if (provider === 'YouTube') {
+                let videoId = null;
+                if (url.includes('youtu.be/'))         videoId = url.split('youtu.be/')[1].split('?')[0];
+                else if (url.includes('watch?v='))      videoId = new URL(url).searchParams.get('v');
+                if (videoId) embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
+            } else if (provider === 'Vimeo') {
+                const parts = url.replace(/\/$/, '').split('/');
+                embedUrl = `https://player.vimeo.com/video/${parts[parts.length - 1]}`;
+            }
+
+            if (embedUrl) {
+                document.getElementById('preview-iframe').src = embedUrl;
+                document.getElementById('preview-container').style.display = 'block';
+            }
+        }
+    </script>
+}

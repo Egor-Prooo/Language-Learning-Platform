@@ -1,0 +1,117 @@
+﻿@model LanguageLearningPlatform.Data.Models.Lesson
+
+@{
+    ViewData["Title"] = "Videos for: " + Model.Title;
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0"><i class="fas fa-video me-2"></i>Video Lessons</h1>
+        <p class="text-muted small mb-0">
+            <strong>@Model.Course.Title</strong> › @Model.Title
+        </p>
+    </div>
+    <a asp-action="Create" asp-route-lessonId="@Model.Id" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i>Add Video
+    </a>
+</div>
+
+@if (!Model.VideoLessons.Any())
+{
+    <div class="admin-card">
+        <div class="admin-card-body text-center py-5">
+            <i class="fas fa-video text-muted" style="font-size:3rem;opacity:0.3;"></i>
+            <p class="mt-3 text-muted">No videos added to this lesson yet.</p>
+            <a asp-action="Create" asp-route-lessonId="@Model.Id" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Add First Video
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="admin-card">
+        <div class="admin-card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">#</th>
+                        <th>Title</th>
+                        <th>Provider</th>
+                        <th>Duration</th>
+                        <th>Required</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var video in Model.VideoLessons)
+                    {
+                        <tr>
+                            <td class="ps-4 text-muted">@video.OrderIndex</td>
+                            <td>
+                                <div class="fw-semibold">@video.Title</div>
+                                <div class="text-muted small text-truncate" style="max-width:300px;">
+                                    @video.Description
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark">
+                                    <i class="fab fa-@(video.VideoProvider.ToLower() == "youtube" ? "youtube text-danger" : "vimeo text-info") me-1"></i>
+                                    @video.VideoProvider
+                                </span>
+                            </td>
+                            <td>
+                                @if (video.DurationSeconds > 0)
+                                {
+                                    <span class="text-muted small">
+                                        @($"{video.DurationSeconds / 60}:{video.DurationSeconds % 60:D2}")
+                                    </span>
+                                }
+                                else
+                                {
+
+                                    <span class="text-muted small">—</span>
+                                }
+                            </td>
+                            <td>
+                                @if (video.IsRequired)
+                                {
+                                    <span class="badge bg-danger-subtle text-danger">Required</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary-subtle text-secondary">Optional</span>
+                                }
+                            </td>
+                            <td class="text-end pe-4">
+                                <form asp-action="Delete" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@video.Id" />
+                                    <input type="hidden" name="lessonId" value="@Model.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                                            onclick="return confirm('Delete this video?')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+<style>
+    .admin-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        overflow: hidden;
+    }
+
+    .admin-card-body {
+        padding: 1.25rem;
+    }
+</style>

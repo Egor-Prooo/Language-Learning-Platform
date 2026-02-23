@@ -26,6 +26,8 @@ namespace LanguageLearningPlatform.Data
         public DbSet<ForumComment> ForumComments { get; set; }
         public DbSet<TeacherLesson> TeacherLessons { get; set; }
         public DbSet<CourseSection> CourseSections { get; set; }
+        public DbSet<VideoLesson> VideoLessons { get; set; }
+        public DbSet<UserVideoProgress> UserVideoProgresses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -212,8 +212,8 @@
                                             </button>
                                         }
                                     </form>
-                                    <form asp-area="Admin" asp-controller="Courses" asp-action="Delete"
-                                          method="post" class="d-inline">
+                                    cshtml<form asp-area="Admin" asp-controller="Courses" asp-action="DeleteConfirmed"
+                                                method="post" class="d-inline">
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="id" value="@course.Id" />
                                         <button type="submit" class="btn btn-sm btn-outline-danger"

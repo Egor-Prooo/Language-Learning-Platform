@@ -34,5 +34,7 @@ namespace LanguageLearningPlatform.Data.Models
         public virtual Course Course { get; set; } = null!;
 
         public virtual ICollection<Exercise> Exercises { get; set; } = new List<Exercise>();
+
+        public virtual ICollection<VideoLesson> VideoLessons { get; set; } = new List<VideoLesson>();
     }
 }

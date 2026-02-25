@@ -193,6 +193,11 @@
                                        class="btn btn-sm btn-outline-primary" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
+                                    <a asp-area="Admin" asp-controller="Lessons" asp-action="ForCourse"
+                                       asp-route-courseId="@course.Id"
+                                       class="btn btn-sm btn-outline-info" title="Lessons">
+                                        <i class="fas fa-list"></i>
+                                    </a>
                                     <form asp-area="Admin" asp-controller="Courses" asp-action="TogglePublish"
                                           method="post" class="d-inline">
                                         @Html.AntiForgeryToken()
@@ -212,7 +217,7 @@
                                             </button>
                                         }
                                     </form>
-                                    cshtml<form asp-area="Admin" asp-controller="Courses" asp-action="DeleteConfirmed"
+                                    <form asp-area="Admin" asp-controller="Courses" asp-action="DeleteConfirmed"
                                                 method="post" class="d-inline">
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="id" value="@course.Id" />

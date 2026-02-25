@@ -1,0 +1,245 @@
+﻿@model LanguageLearningPlatform.Data.Models.Achievement
+
+@{
+    var isEdit = Model.Id != Guid.Empty;
+    ViewData["Title"] = isEdit ? "Edit Achievement" : "Create Achievement";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">
+            <i class="fas fa-@(isEdit ? "edit" : "plus-circle") me-2"></i>
+            @(isEdit ? "Edit Achievement" : "New Achievement")
+        </h1>
+        <p class="text-muted small mb-0">@(isEdit ? "Update achievement details" : "Create a new achievement for your platform")</p>
+    </div>
+    <a asp-area="Admin" asp-controller="Achievements" asp-action="Index" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back
+    </a>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h6 class="admin-card-title"><i class="fas fa-info-circle me-2 text-primary"></i>Achievement Details</h6>
+            </div>
+            <div class="admin-card-body">
+                <form asp-area="Admin" asp-controller="Achievements" asp-action="Save" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="CreatedAt" />
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4"></div>
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label asp-for="Title" class="form-label fw-semibold">
+                                Title <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Title" class="form-control" placeholder="e.g. First Steps" />
+                            <span asp-validation-for="Title" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="Description" class="form-label fw-semibold">Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="3"
+                                      placeholder="e.g. Complete your first lesson"></textarea>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Category" class="form-label fw-semibold">
+                                Category <span class="text-danger">*</span>
+                            </label>
+                            <select asp-for="Category" class="form-select">
+                                <option value="">Select a category</option>
+                                <option value="Completion">Completion</option>
+                                <option value="Streak">Streak</option>
+                                <option value="Points">Points</option>
+                                <option value="Accuracy">Accuracy</option>
+                            </select>
+                            <span asp-validation-for="Category" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="IconUrl" class="form-label fw-semibold">Icon URL</label>
+                            <input asp-for="IconUrl" class="form-control" placeholder="https://example.com/icon.png" />
+                            <div class="form-text">Optional image URL for the achievement badge.</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="PointsRequired" class="form-label fw-semibold">Points Required</label>
+                            <input asp-for="PointsRequired" type="number" min="0" class="form-control"
+                                   placeholder="e.g. 100" />
+                            <div class="form-text">How many points the user needs to unlock this.</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="PointsReward" class="form-label fw-semibold">Points Reward</label>
+                            <input asp-for="PointsReward" type="number" min="0" class="form-control"
+                                   placeholder="e.g. 50" />
+                            <div class="form-text">Points awarded when this achievement is unlocked.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-check form-switch mt-1">
+                                <input asp-for="IsRare" class="form-check-input" type="checkbox" role="switch" id="isRareSwitch" />
+                                <label class="form-check-label fw-semibold" for="isRareSwitch">
+                                    <i class="fas fa-gem text-warning me-1"></i>Rare Achievement
+                                </label>
+                            </div>
+                            <div class="form-text ms-4">Rare achievements are highlighted with a gold icon and special badge.</div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4" />
+
+                    <div class="d-flex gap-3">
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="fas fa-save me-2"></i>@(isEdit ? "Save Changes" : "Create Achievement")
+                        </button>
+                        <a asp-area="Admin" asp-controller="Achievements" asp-action="Index" class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview + Tips Sidebar -->
+    <div class="col-lg-4">
+        <!-- Live Preview -->
+        <div class="admin-card mb-4">
+            <div class="admin-card-header">
+                <h6 class="admin-card-title"><i class="fas fa-eye me-2 text-primary"></i>Live Preview</h6>
+            </div>
+            <div class="admin-card-body text-center">
+                <div id="preview-icon" class="achievement-icon-preview mx-auto mb-3">
+                    <i class="fas fa-award"></i>
+                </div>
+                <div id="preview-title" class="fw-bold mb-1" style="font-size:1rem;">Achievement Title</div>
+                <div id="preview-desc" class="text-muted small mb-2">Description goes here</div>
+                <div id="preview-badge" class="d-none">
+                    <span class="badge bg-warning text-dark">RARE</span>
+                </div>
+                <hr class="my-2" />
+                <div class="d-flex justify-content-around small">
+                    <div>
+                        <div class="fw-bold text-primary" id="preview-required">0</div>
+                        <div class="text-muted">pts required</div>
+                    </div>
+                    <div>
+                        <div class="fw-bold text-warning" id="preview-reward">+0</div>
+                        <div class="text-muted">pts reward</div>
+                    </div>
+                    <div>
+                        <div class="fw-bold" id="preview-cat" style="color:#6B7280;">—</div>
+                        <div class="text-muted">category</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tips -->
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h6 class="admin-card-title"><i class="fas fa-lightbulb me-2 text-warning"></i>Tips</h6>
+            </div>
+            <div class="admin-card-body" style="font-size:0.875rem;line-height:1.8;">
+                <p><i class="fas fa-check-circle text-success me-2"></i>Use <strong>Completion</strong> for lesson/course milestones.</p>
+                <p><i class="fas fa-check-circle text-success me-2"></i>Use <strong>Streak</strong> for consecutive day goals.</p>
+                <p><i class="fas fa-check-circle text-success me-2"></i>Use <strong>Points</strong> for total score thresholds.</p>
+                <p><i class="fas fa-check-circle text-success me-2"></i>Use <strong>Accuracy</strong> for exercise correctness goals.</p>
+                <p class="mb-0"><i class="fas fa-gem text-warning me-2"></i>Mark as <strong>Rare</strong> for hard-to-get achievements to increase motivation.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .admin-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        overflow: hidden;
+    }
+
+    .admin-card-header {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #F3F4F6;
+        display: flex;
+        align-items: center;
+    }
+
+    .admin-card-title {
+        margin: 0;
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: #1F2937;
+    }
+
+    .admin-card-body {
+        padding: 1.5rem;
+    }
+
+    .achievement-icon-preview {
+        width: 72px;
+        height: 72px;
+        border-radius: 16px;
+        background: linear-gradient(135deg,#6B7280,#9CA3AF);
+        color: white;
+        font-size: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+        .achievement-icon-preview.rare {
+            background: linear-gradient(135deg,#F59E0B,#D97706);
+        }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const categoryColors = {
+            'Completion': '#10B981', 'Streak': '#F59E0B',
+            'Points': '#4F46E5', 'Accuracy': '#EF4444', '': '#6B7280'
+        };
+
+        function updatePreview() {
+            document.getElementById('preview-title').textContent =
+                document.getElementById('Title').value || 'Achievement Title';
+            document.getElementById('preview-desc').textContent =
+                document.getElementById('Description').value || 'Description goes here';
+            document.getElementById('preview-required').textContent =
+                document.getElementById('PointsRequired').value || '0';
+            document.getElementById('preview-reward').textContent =
+                '+' + (document.getElementById('PointsReward').value || '0');
+
+            const cat = document.getElementById('Category').value;
+            document.getElementById('preview-cat').textContent = cat || '—';
+            document.getElementById('preview-cat').style.color = categoryColors[cat] || '#6B7280';
+
+            const isRare = document.getElementById('isRareSwitch').checked;
+            const icon   = document.getElementById('preview-icon');
+            const badge  = document.getElementById('preview-badge');
+            icon.classList.toggle('rare', isRare);
+            icon.innerHTML = `<i class="fas fa-${isRare ? 'medal' : 'award'}"></i>`;
+            badge.classList.toggle('d-none', !isRare);
+        }
+
+        ['Title','Description','PointsRequired','PointsReward','Category'].forEach(id => {
+            document.getElementById(id)?.addEventListener('input', updatePreview);
+            document.getElementById(id)?.addEventListener('change', updatePreview);
+        });
+        document.getElementById('isRareSwitch')?.addEventListener('change', updatePreview);
+
+        // Run once on load for edit mode
+        updatePreview();
+    </script>
+}

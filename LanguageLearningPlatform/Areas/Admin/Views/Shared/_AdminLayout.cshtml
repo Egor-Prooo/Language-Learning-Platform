@@ -202,6 +202,13 @@
                     <span class="sidebar-icon"><i class="fas fa-external-link-alt"></i></span>
                     View Site
                 </a>
+
+                <div class="sidebar-section-label">Content</div>
+                <a asp-area="Admin" asp-controller="Lessons" asp-action="Index"
+                   class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Lessons" ? "active" : "")">
+                    <span class="sidebar-icon"><i class="fas fa-video"></i></span>
+                    Lessons &amp; Videos
+                </a>
             </div>
         </nav>
 

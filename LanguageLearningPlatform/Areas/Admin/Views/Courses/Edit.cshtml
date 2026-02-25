@@ -1,0 +1,193 @@
+﻿@model LanguageLearningPlatform.Data.Models.Course
+
+@{
+    ViewData["Title"] = "Edit Course";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0"><i class="fas fa-edit me-2"></i>Edit Course</h1>
+        <p class="text-muted small mb-0">@Model.Title</p>
+    </div>
+    <a asp-area="Admin" asp-controller="Courses" asp-action="Index" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Courses
+    </a>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h6 class="admin-card-title"><i class="fas fa-info-circle me-2 text-primary"></i>Course Details</h6>
+            </div>
+            <div class="admin-card-body">
+                <form asp-area="Admin" asp-controller="Courses" asp-action="Edit"
+                      asp-route-id="@Model.Id" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="CreatedAt" />
+                    <input type="hidden" asp-for="CreatorId" />
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4"></div>
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label asp-for="Title" class="form-label fw-semibold">
+                                Course Title <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Title" class="form-control" />
+                            <span asp-validation-for="Title" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Language" class="form-label fw-semibold">
+                                Language <span class="text-danger">*</span>
+                            </label>
+                            <select asp-for="Language" class="form-select">
+                                <option value="">Select a language</option>
+                                <option value="Spanish">Spanish</option>
+                                <option value="French">French</option>
+                                <option value="German">German</option>
+                                <option value="Japanese">Japanese</option>
+                                <option value="Italian">Italian</option>
+                                <option value="Chinese">Chinese</option>
+                                <option value="Portuguese">Portuguese</option>
+                                <option value="Korean">Korean</option>
+                                <option value="Arabic">Arabic</option>
+                                <option value="Russian">Russian</option>
+                            </select>
+                            <span asp-validation-for="Language" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Level" class="form-label fw-semibold">
+                                Level <span class="text-danger">*</span>
+                            </label>
+                            <select asp-for="Level" class="form-select">
+                                <option value="">Select a level</option>
+                                <option value="Beginner">Beginner</option>
+                                <option value="Intermediate">Intermediate</option>
+                                <option value="Advanced">Advanced</option>
+                            </select>
+                            <span asp-validation-for="Level" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="LanguageCode" class="form-label fw-semibold">Language Code</label>
+                            <input asp-for="LanguageCode" class="form-control" maxlength="10" />
+                            <div class="form-text">ISO code e.g. ES, FR, DE</div>
+                            <span asp-validation-for="LanguageCode" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="EstimatedHours" class="form-label fw-semibold">Estimated Hours</label>
+                            <input asp-for="EstimatedHours" type="number" min="1" max="500" class="form-control" />
+                            <span asp-validation-for="EstimatedHours" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Publish Status</label>
+                            <div class="form-check form-switch mt-2">
+                                <input asp-for="IsPublished" class="form-check-input" type="checkbox"
+                                       role="switch" id="isPublishedSwitch" />
+                                <label class="form-check-label" for="isPublishedSwitch">Published</label>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="Description" class="form-label fw-semibold">Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="ImageUrl" class="form-label fw-semibold">Image URL</label>
+                            <input asp-for="ImageUrl" class="form-control" placeholder="https://example.com/image.png" />
+                            <span asp-validation-for="ImageUrl" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <hr class="my-4" />
+
+                    <div class="d-flex gap-3">
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
+                        <a asp-area="Admin" asp-controller="Courses" asp-action="Index"
+                           class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Sidebar -->
+    <div class="col-lg-4">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h6 class="admin-card-title"><i class="fas fa-chart-bar me-2 text-primary"></i>Course Stats</h6>
+            </div>
+            <div class="admin-card-body">
+                <div class="d-flex justify-content-between py-2 border-bottom">
+                    <span class="text-muted small">Created</span>
+                    <span class="small fw-semibold">@Model.CreatedAt.ToString("MMM dd, yyyy")</span>
+                </div>
+                @if (Model.UpdatedAt.HasValue)
+                {
+                    <div class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="text-muted small">Last Updated</span>
+                        <span class="small fw-semibold">@Model.UpdatedAt.Value.ToString("MMM dd, yyyy")</span>
+                    </div>
+                }
+                <div class="d-flex justify-content-between py-2 border-bottom">
+                    <span class="text-muted small">Status</span>
+                    @if (Model.IsPublished)
+                    {
+                        <span class="badge rounded-pill bg-success-subtle text-success">Published</span>
+                    }
+                    else
+                    {
+                        <span class="badge rounded-pill bg-secondary-subtle text-secondary">Draft</span>
+                    }
+                </div>
+                <div class="d-flex justify-content-between py-2">
+                    <span class="text-muted small">Course ID</span>
+                    <span class="small text-muted" style="font-size:0.7rem;">@Model.Id</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .admin-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        overflow: hidden;
+    }
+
+    .admin-card-header {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #F3F4F6;
+        display: flex;
+        align-items: center;
+    }
+
+    .admin-card-title {
+        margin: 0;
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: #1F2937;
+    }
+
+    .admin-card-body {
+        padding: 1.5rem;
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

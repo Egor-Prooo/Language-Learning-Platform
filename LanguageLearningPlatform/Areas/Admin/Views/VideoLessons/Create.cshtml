@@ -25,33 +25,41 @@
             <div class="admin-card-body">
                 <form asp-action="Create" method="post">
                     @Html.AntiForgeryToken()
-                    <input type="hidden" asp-for="LessonId" value="@lesson?.Id" />
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3"></div>
+                    <input type="hidden" name="lessonId" value="@lesson?.Id" />
+
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger mb-3">
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <div>@error.ErrorMessage</div>
+                            }
+                        </div>
+                    }
 
                     <div class="row g-3">
                         <div class="col-12">
-                            <label asp-for="Title" class="form-label fw-semibold">Title <span class="text-danger">*</span></label>
-                            <input asp-for="Title" class="form-control" placeholder="e.g. Introduction to Spanish Greetings" />
-                            <span asp-validation-for="Title" class="text-danger small"></span>
+                            <label class="form-label fw-semibold">Title <span class="text-danger">*</span></label>
+                            <input type="text" name="title" class="form-control"
+                                   placeholder="e.g. Introduction to Spanish Greetings" />
                         </div>
 
                         <div class="col-12">
-                            <label asp-for="Description" class="form-label fw-semibold">Description</label>
-                            <textarea asp-for="Description" class="form-control" rows="3"
+                            <label class="form-label fw-semibold">Description</label>
+                            <textarea name="description" class="form-control" rows="3"
                                       placeholder="Brief description of what this video covers..."></textarea>
                         </div>
 
                         <div class="col-md-8">
-                            <label asp-for="VideoUrl" class="form-label fw-semibold">Video URL <span class="text-danger">*</span></label>
-                            <input asp-for="VideoUrl" class="form-control" id="videoUrlInput"
+                            <label class="form-label fw-semibold">Video URL <span class="text-danger">*</span></label>
+                            <input type="text" name="videoUrl" id="videoUrlInput" class="form-control"
                                    placeholder="https://www.youtube.com/watch?v=..." />
                             <div class="form-text">Paste a YouTube, Vimeo, or direct MP4 URL.</div>
-                            <span asp-validation-for="VideoUrl" class="text-danger small"></span>
                         </div>
 
                         <div class="col-md-4">
-                            <label asp-for="VideoProvider" class="form-label fw-semibold">Provider</label>
-                            <select asp-for="VideoProvider" class="form-select" id="providerSelect">
+                            <label class="form-label fw-semibold">Provider</label>
+                            <select name="videoProvider" id="providerSelect" class="form-select">
                                 <option value="YouTube">YouTube</option>
                                 <option value="Vimeo">Vimeo</option>
                                 <option value="Direct">Direct (MP4)</option>
@@ -59,20 +67,24 @@
                         </div>
 
                         <div class="col-md-4">
-                            <label asp-for="DurationSeconds" class="form-label fw-semibold">Duration (seconds)</label>
-                            <input asp-for="DurationSeconds" type="number" min="0" class="form-control" placeholder="e.g. 360" />
+                            <label class="form-label fw-semibold">Duration (seconds)</label>
+                            <input type="number" name="durationSeconds" class="form-control"
+                                   value="0" min="0" placeholder="e.g. 360" />
                             <div class="form-text">Optional. 360 = 6:00</div>
                         </div>
 
                         <div class="col-md-4">
-                            <label asp-for="OrderIndex" class="form-label fw-semibold">Order</label>
-                            <input asp-for="OrderIndex" type="number" min="0" class="form-control" value="0" />
+                            <label class="form-label fw-semibold">Order</label>
+                            <input type="number" name="orderIndex" class="form-control" value="0" min="0" />
                         </div>
 
                         <div class="col-md-4 d-flex align-items-end">
                             <div class="form-check form-switch mb-2">
-                                <input asp-for="IsRequired" class="form-check-input" type="checkbox" role="switch" id="isRequiredSwitch" />
-                                <label class="form-check-label fw-semibold" for="isRequiredSwitch">Required to complete</label>
+                                <input type="checkbox" name="isRequired" id="isRequiredSwitch"
+                                       class="form-check-input" role="switch" value="true" />
+                                <label class="form-check-label fw-semibold" for="isRequiredSwitch">
+                                    Required to complete
+                                </label>
                             </div>
                         </div>
 
@@ -93,7 +105,9 @@
                         <button type="submit" class="btn btn-primary px-4">
                             <i class="fas fa-save me-2"></i>Add Video
                         </button>
-                        <a asp-action="ForLesson" asp-route-lessonId="@lesson?.Id" class="btn btn-outline-secondary">Cancel</a>
+                        <a asp-action="ForLesson" asp-route-lessonId="@lesson?.Id" class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
                     </div>
                 </form>
             </div>

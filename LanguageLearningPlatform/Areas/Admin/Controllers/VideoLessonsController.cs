@@ -49,21 +49,42 @@ namespace LanguageLearningPlatform.Web.Areas.Admin.Controllers
         // POST: Admin/VideoLessons/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(VideoLesson video)
+        public async Task<IActionResult> Create(
+            Guid lessonId,
+            string title,
+            string description,
+            string videoUrl,
+            string videoProvider,
+            int durationSeconds,
+            int orderIndex,
+            bool isRequired)
         {
-            if (ModelState.IsValid)
+            if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(videoUrl))
             {
-                await _videoService.CreateVideoAsync(video);
-                TempData["SuccessMessage"] = "Video added successfully!";
-                return RedirectToAction(nameof(ForLesson), new { lessonId = video.LessonId });
+                var lesson = await _context.Lessons
+                    .Include(l => l.Course)
+                    .FirstOrDefaultAsync(l => l.Id == lessonId);
+
+                ViewBag.Lesson = lesson;
+                ModelState.AddModelError(string.Empty, "Title and Video URL are required.");
+                return View(new VideoLesson { LessonId = lessonId });
             }
 
-            var lesson = await _context.Lessons
-                .Include(l => l.Course)
-                .FirstOrDefaultAsync(l => l.Id == video.LessonId);
+            var video = new VideoLesson
+            {
+                LessonId = lessonId,
+                Title = title,
+                Description = description ?? string.Empty,
+                VideoUrl = videoUrl,
+                VideoProvider = videoProvider ?? "YouTube",
+                DurationSeconds = durationSeconds,
+                OrderIndex = orderIndex,
+                IsRequired = isRequired
+            };
 
-            ViewBag.Lesson = lesson;
-            return View(video);
+            await _videoService.CreateVideoAsync(video);
+            TempData["SuccessMessage"] = "Video added successfully!";
+            return RedirectToAction(nameof(ForLesson), new { lessonId });
         }
 
         // POST: Admin/VideoLessons/Delete

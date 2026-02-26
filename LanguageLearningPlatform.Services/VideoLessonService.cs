@@ -107,6 +107,9 @@ namespace LanguageLearningPlatform.Services
 
         public async Task<VideoLesson> CreateVideoAsync(VideoLesson video)
         {
+            if (video.LessonId == Guid.Empty)
+                throw new ArgumentException("LessonId must not be empty.");
+
             video.Id = Guid.NewGuid();
             video.CreatedAt = DateTime.UtcNow;
             _context.VideoLessons.Add(video);

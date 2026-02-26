@@ -314,12 +314,11 @@
               "Title": "VideoLessonsController.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Areas\\Admin\\Controllers\\VideoLessonsController.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Areas\\Admin\\Controllers\\VideoLessonsController.cs",
-              "ToolTip": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Areas\\Admin\\Controllers\\VideoLessonsController.cs*",
-              "RelativeToolTip": "LanguageLearningPlatform\\Areas\\Admin\\Controllers\\VideoLessonsController.cs*",
+              "ToolTip": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Areas\\Admin\\Controllers\\VideoLessonsController.cs",
+              "RelativeToolTip": "LanguageLearningPlatform\\Areas\\Admin\\Controllers\\VideoLessonsController.cs",
               "ViewState": "AgIAADsAAAAAAAAAAAAuwDcAAAAcAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-23T14:04:35.081Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-23T14:04:35.081Z"
             },
             {
               "$type": "Document",
@@ -339,9 +338,9 @@
               "Title": "Create.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Areas\\Admin\\Views\\VideoLessons\\Create.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Areas\\Admin\\Views\\VideoLessons\\Create.cshtml",
-              "ToolTip": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Areas\\Admin\\Views\\VideoLessons\\Create.cshtml*",
-              "RelativeToolTip": "LanguageLearningPlatform\\Areas\\Admin\\Views\\VideoLessons\\Create.cshtml*",
-              "ViewState": "AgIAAEcAAAAAAAAAAAAuwGAAAAA3AAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Areas\\Admin\\Views\\VideoLessons\\Create.cshtml",
+              "RelativeToolTip": "LanguageLearningPlatform\\Areas\\Admin\\Views\\VideoLessons\\Create.cshtml",
+              "ViewState": "AgIAAHcAAAAAAAAAAAAewFkAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2026-02-23T14:15:08.938Z",
               "EditorCaption": ""
@@ -356,8 +355,7 @@
               "RelativeToolTip": "LanguageLearningPlatform.Services\\VideoLessonService.cs",
               "ViewState": "AgIAAGEAAAAAAAAAAAAuwH8AAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-23T14:02:05.931Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-23T14:02:05.931Z"
             },
             {
               "$type": "Document",

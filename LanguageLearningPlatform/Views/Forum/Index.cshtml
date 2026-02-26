@@ -1,0 +1,473 @@
+﻿@model IEnumerable<LanguageLearningPlatform.Services.Contracts.ForumPostViewModel>
+
+@{
+    ViewData["Title"] = "Community Forum";
+    var categories = ViewBag.Categories as IEnumerable<string> ?? Enumerable.Empty<string>();
+    var selectedCategory = ViewBag.SelectedCategory as string;
+    var search = ViewBag.Search as string;
+    var isAuth = User.Identity?.IsAuthenticated == true;
+}
+
+<div class="container my-5">
+
+    <!-- Header -->
+    <div class="forum-hero mb-5">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="forum-hero-title">
+                    <i class="fas fa-comments me-3"></i>Community Forum
+                </h1>
+                <p class="forum-hero-subtitle">
+                    Connect with fellow learners, ask questions, share tips, and practice your language skills in real conversations.
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                @if (isAuth)
+                {
+                    <a asp-action="Create" class="btn btn-forum-primary btn-lg">
+                        <i class="fas fa-pen me-2"></i>New Post
+                    </a>
+                }
+                else
+                {
+                    <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-forum-primary btn-lg">
+                        <i class="fas fa-sign-in-alt me-2"></i>Sign in to Post
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            <div class="forum-sidebar">
+                <div class="forum-sidebar-title">
+                    <i class="fas fa-filter me-2"></i>Filter
+                </div>
+
+                <!-- Search -->
+                <form method="get" asp-action="Index" class="mb-3">
+                    <input type="hidden" name="category" value="@selectedCategory" />
+                    <div class="input-group">
+                        <input type="text" name="search" value="@search"
+                               class="form-control forum-search-input"
+                               placeholder="Search posts..." />
+                        <button type="submit" class="btn btn-forum-outline">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Categories -->
+                <div class="forum-sidebar-section">
+                    <div class="forum-sidebar-label">Categories</div>
+                    <a asp-action="Index" class="forum-category-link @(selectedCategory == null ? "active" : "")">
+                        <i class="fas fa-globe me-2"></i>All Topics
+                    </a>
+                    @foreach (var cat in categories)
+                    {
+                        <a asp-action="Index" asp-route-category="@cat" asp-route-search="@search"
+                           class="forum-category-link @(selectedCategory == cat ? "active" : "")">
+                            @GetCategoryIcon(cat) @cat
+                        </a>
+                    }
+                </div>
+
+                @if (!string.IsNullOrEmpty(selectedCategory) || !string.IsNullOrEmpty(search))
+                {
+                    <a asp-action="Index" class="btn btn-sm btn-outline-secondary w-100 mt-2">
+                        <i class="fas fa-times me-1"></i>Clear Filters
+                    </a>
+                }
+            </div>
+        </div>
+
+        <!-- Posts -->
+        <div class="col-lg-9">
+
+            <!-- Stats bar -->
+            <div class="forum-stats-bar mb-3">
+                <span class="forum-stats-count">
+                    <strong>@Model.Count()</strong> @(Model.Count() == 1 ? "post" : "posts")
+                    @if (!string.IsNullOrEmpty(selectedCategory))
+                    {
+                        <span class="badge forum-badge-category ms-2">@selectedCategory</span>
+                    }
+                    @if (!string.IsNullOrEmpty(search))
+                    {
+                        <span class="badge forum-badge-search ms-2">
+                            <i class="fas fa-search me-1"></i>@search
+                        </span>
+                    }
+                </span>
+            </div>
+
+            @if (!Model.Any())
+            {
+                <div class="forum-empty">
+                    <i class="fas fa-comments"></i>
+                    <h4>No posts yet</h4>
+                    <p>Be the first to start a conversation!</p>
+                    @if (isAuth)
+                    {
+                        <a asp-action="Create" class="btn btn-forum-primary">
+                            <i class="fas fa-pen me-2"></i>Create First Post
+                        </a>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="forum-post-list">
+                    @foreach (var post in Model)
+                    {
+                        <div class="forum-post-card @(post.IsPinned ? "pinned" : "")">
+                            @if (post.IsPinned)
+                            {
+                                <div class="forum-pin-banner">
+                                    <i class="fas fa-thumbtack me-1"></i>Pinned
+                                </div>
+                            }
+                            <div class="forum-post-card-body">
+                                <!-- Avatar -->
+                                <div class="forum-avatar">
+                                    @post.AuthorInitials
+                                </div>
+
+                                <!-- Main info -->
+                                <div class="forum-post-info flex-grow-1 min-w-0">
+                                    <div class="d-flex align-items-start gap-2 flex-wrap mb-1">
+                                        <a asp-action="Post" asp-route-id="@post.Id"
+                                           class="forum-post-title-link">
+                                            @post.Title
+                                        </a>
+                                        @if (post.IsClosed)
+                                        {
+                                            <span class="badge forum-badge-closed">
+                                                <i class="fas fa-lock me-1"></i>Closed
+                                            </span>
+                                        }
+                                    </div>
+                                    <div class="forum-post-meta">
+                                        <span class="forum-badge-category-sm">@post.Category</span>
+                                        <span><i class="fas fa-user me-1"></i>@post.AuthorName</span>
+                                        <span><i class="fas fa-clock me-1"></i>@TimeAgo(post.CreatedAt)</span>
+                                    </div>
+                                </div>
+
+                                <!-- Stats -->
+                                <div class="forum-post-stats">
+                                    <div class="forum-stat">
+                                        <i class="fas fa-eye"></i>
+                                        <span>@post.Views</span>
+                                    </div>
+                                    <div class="forum-stat">
+                                        <i class="fas fa-comment"></i>
+                                        <span>@post.CommentCount</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@functions {
+    string TimeAgo(DateTime dt)
+    {
+        var diff = DateTime.UtcNow - dt;
+        if (diff.TotalMinutes < 1) return "just now";
+        if (diff.TotalMinutes < 60) return $"{(int)diff.TotalMinutes}m ago";
+        if (diff.TotalHours < 24) return $"{(int)diff.TotalHours}h ago";
+        if (diff.TotalDays < 7) return $"{(int)diff.TotalDays}d ago";
+        return dt.ToString("MMM dd, yyyy");
+    }
+
+    Microsoft.AspNetCore.Html.IHtmlContent GetCategoryIcon(string cat) => new Microsoft.AspNetCore.Html.HtmlString(cat switch
+    {
+        "General Discussion" => "<i class=\"fas fa-comments me-2\"></i>",
+        "Grammar Help" => "<i class=\"fas fa-spell-check me-2\"></i>",
+        "Vocabulary" => "<i class=\"fas fa-book me-2\"></i>",
+        "Pronunciation" => "<i class=\"fas fa-microphone me-2\"></i>",
+        "Study Tips" => "<i class=\"fas fa-lightbulb me-2\"></i>",
+        "Language Exchange" => "<i class=\"fas fa-exchange-alt me-2\"></i>",
+        "Culture & Travel" => "<i class=\"fas fa-globe me-2\"></i>",
+        "Resources & Tools" => "<i class=\"fas fa-tools me-2\"></i>",
+        _ => "<i class=\"fas fa-tag me-2\"></i>"
+    });
+}
+
+<style>
+    /* ── Forum Hero ── */
+    .forum-hero {
+        background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        border-radius: 20px;
+        padding: 2.5rem;
+        color: white;
+    }
+
+    .forum-hero-title {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+
+    .forum-hero-subtitle {
+        opacity: 0.85;
+        font-size: 1rem;
+        margin: 0;
+    }
+
+    /* ── Buttons ── */
+    .btn-forum-primary {
+        background: white;
+        color: #4F46E5;
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        padding: 0.75rem 1.5rem;
+        transition: all 0.2s;
+    }
+
+        .btn-forum-primary:hover {
+            background: #F3F4F6;
+            color: #4F46E5;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+
+    .btn-forum-outline {
+        background: transparent;
+        border: 2px solid #E5E7EB;
+        border-radius: 0 10px 10px 0;
+        color: #6B7280;
+    }
+
+    /* ── Sidebar ── */
+    .forum-sidebar {
+        background: white;
+        border-radius: 16px;
+        padding: 1.25rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        position: sticky;
+        top: 1rem;
+    }
+
+    .forum-sidebar-title {
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: #1F2937;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #F3F4F6;
+    }
+
+    .forum-sidebar-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #9CA3AF;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .forum-category-link {
+        display: flex;
+        align-items: center;
+        padding: 0.55rem 0.75rem;
+        border-radius: 10px;
+        color: #4B5563;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.15s;
+        margin-bottom: 2px;
+    }
+
+        .forum-category-link:hover {
+            background: #F3F4F6;
+            color: #4F46E5;
+        }
+
+        .forum-category-link.active {
+            background: #EEF2FF;
+            color: #4F46E5;
+            font-weight: 700;
+        }
+
+    .forum-search-input {
+        border-radius: 10px 0 0 10px;
+        border: 2px solid #E5E7EB;
+    }
+
+        .forum-search-input:focus {
+            border-color: #4F46E5;
+            box-shadow: none;
+        }
+
+    /* ── Stats bar ── */
+    .forum-stats-bar {
+        display: flex;
+        align-items: center;
+        color: #6B7280;
+        font-size: 0.9rem;
+    }
+
+    .forum-badge-category {
+        background: #EEF2FF;
+        color: #4F46E5;
+        font-weight: 600;
+    }
+
+    .forum-badge-search {
+        background: #FEF3C7;
+        color: #92400E;
+        font-weight: 600;
+    }
+
+    /* ── Post List ── */
+    .forum-post-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .forum-post-card {
+        background: white;
+        border-radius: 14px;
+        border: 2px solid #E5E7EB;
+        overflow: hidden;
+        transition: all 0.2s ease;
+    }
+
+        .forum-post-card:hover {
+            border-color: #4F46E5;
+            box-shadow: 0 4px 16px rgba(79,70,229,0.1);
+            transform: translateY(-2px);
+        }
+
+        .forum-post-card.pinned {
+            border-color: #F59E0B;
+        }
+
+    .forum-pin-banner {
+        background: linear-gradient(90deg, #FEF3C7, #FDE68A);
+        color: #92400E;
+        font-size: 0.78rem;
+        font-weight: 700;
+        padding: 0.3rem 1rem;
+    }
+
+    .forum-post-card-body {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.25rem;
+    }
+
+    .forum-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4F46E5, #7C3AED);
+        color: white;
+        font-weight: 700;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .forum-post-title-link {
+        font-weight: 700;
+        color: #1F2937;
+        text-decoration: none;
+        font-size: 0.95rem;
+        line-height: 1.3;
+    }
+
+        .forum-post-title-link:hover {
+            color: #4F46E5;
+        }
+
+    .forum-post-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-top: 0.35rem;
+        font-size: 0.78rem;
+        color: #6B7280;
+    }
+
+    .forum-badge-category-sm {
+        background: #EEF2FF;
+        color: #4F46E5;
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 0.2rem 0.5rem;
+        border-radius: 6px;
+    }
+
+    .forum-badge-closed {
+        background: #FEE2E2;
+        color: #991B1B;
+        font-size: 0.72rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 6px;
+    }
+
+    .forum-post-stats {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        flex-shrink: 0;
+        text-align: right;
+    }
+
+    .forum-stat {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.82rem;
+        color: #9CA3AF;
+        justify-content: flex-end;
+    }
+
+        .forum-stat i {
+            width: 14px;
+        }
+
+    /* ── Empty State ── */
+    .forum-empty {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: 16px;
+        border: 2px dashed #E5E7EB;
+    }
+
+        .forum-empty i {
+            font-size: 4rem;
+            color: #D1D5DB;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .forum-empty h4 {
+            color: #6B7280;
+            margin-bottom: 0.5rem;
+        }
+
+        .forum-empty p {
+            color: #9CA3AF;
+            margin-bottom: 1.5rem;
+        }
+</style>

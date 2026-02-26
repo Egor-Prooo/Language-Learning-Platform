@@ -1,0 +1,197 @@
+﻿@{
+    ViewData["Title"] = "New Forum Post";
+    var categories = ViewBag.Categories as IEnumerable<string> ?? Enumerable.Empty<string>();
+}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Forum
+                </a>
+                <div>
+                    <h1 class="h3 mb-0 fw-bold"><i class="fas fa-pen me-2 text-primary"></i>New Post</h1>
+                    <p class="text-muted small mb-0">Share something with the community</p>
+                </div>
+            </div>
+
+            <div class="create-post-card">
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger mb-4">
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <div><i class="fas fa-exclamation-circle me-2"></i>@error.ErrorMessage</div>
+                            }
+                        </div>
+                    }
+
+                    <!-- Category -->
+                    <div class="mb-4">
+                        <label class="create-label">
+                            <i class="fas fa-tag me-2 text-primary"></i>Category
+                        </label>
+                        <div class="category-grid">
+                            @foreach (var cat in categories)
+                            {
+                                <label class="category-option">
+                                    <input type="radio" name="category" value="@cat"
+                                           class="d-none category-radio"
+                                           @(cat == "General Discussion" ? "checked" : "") />
+                                    <span class="category-option-label">@cat</span>
+                                </label>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Title -->
+                    <div class="mb-4">
+                        <label class="create-label">
+                            <i class="fas fa-heading me-2 text-primary"></i>Title <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" name="title" class="form-control create-input"
+                               placeholder="What's your question or topic?" maxlength="200" required />
+                        <div class="form-text">Make it specific and clear so others can help you better.</div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="mb-4">
+                        <label class="create-label">
+                            <i class="fas fa-align-left me-2 text-primary"></i>Content <span class="text-danger">*</span>
+                        </label>
+                        <textarea name="content" class="form-control create-textarea" rows="10"
+                                  placeholder="Describe your question, share your experience, or start a discussion..." required></textarea>
+                        <div class="form-text">Be as detailed as possible. Include examples if helpful.</div>
+                    </div>
+
+                    <!-- Tips -->
+                    <div class="create-tips mb-4">
+                        <div class="create-tips-title"><i class="fas fa-lightbulb me-2"></i>Tips for a great post</div>
+                        <ul class="create-tips-list">
+                            <li>Use a clear, descriptive title</li>
+                            <li>Include specific examples when asking about grammar or vocabulary</li>
+                            <li>Mention which language you're studying</li>
+                            <li>Be respectful and welcoming to all learners</li>
+                        </ul>
+                    </div>
+
+                    <div class="d-flex gap-3">
+                        <button type="submit" class="btn btn-primary px-5">
+                            <i class="fas fa-paper-plane me-2"></i>Publish Post
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .create-post-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+    }
+
+    .create-label {
+        display: block;
+        font-weight: 700;
+        color: #374151;
+        margin-bottom: 0.6rem;
+        font-size: 0.95rem;
+    }
+
+    .create-input {
+        border: 2px solid #E5E7EB;
+        border-radius: 12px;
+        font-size: 1rem;
+        padding: 0.8rem 1rem;
+        transition: border-color 0.2s;
+    }
+
+        .create-input:focus {
+            border-color: #4F46E5;
+            box-shadow: none;
+        }
+
+    .create-textarea {
+        border: 2px solid #E5E7EB;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        padding: 0.8rem 1rem;
+        transition: border-color 0.2s;
+        resize: vertical;
+        line-height: 1.7;
+    }
+
+        .create-textarea:focus {
+            border-color: #4F46E5;
+            box-shadow: none;
+        }
+
+    /* Category grid */
+    .category-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+    }
+
+    .category-option {
+        cursor: pointer;
+    }
+
+    .category-option-label {
+        display: block;
+        padding: 0.5rem 1rem;
+        border: 2px solid #E5E7EB;
+        border-radius: 25px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #4B5563;
+        transition: all 0.15s;
+        cursor: pointer;
+        user-select: none;
+    }
+
+        .category-option-label:hover {
+            border-color: #4F46E5;
+            color: #4F46E5;
+            background: #EEF2FF;
+        }
+
+    .category-radio:checked + .category-option-label {
+        border-color: #4F46E5;
+        background: #4F46E5;
+        color: white;
+    }
+
+    /* Tips */
+    .create-tips {
+        background: #FFFBEB;
+        border-radius: 12px;
+        padding: 1.25rem;
+        border: 2px solid #FDE68A;
+    }
+
+    .create-tips-title {
+        font-weight: 700;
+        color: #92400E;
+        margin-bottom: 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    .create-tips-list {
+        margin: 0;
+        padding-left: 1.25rem;
+        color: #78350F;
+        font-size: 0.85rem;
+        line-height: 1.9;
+    }
+</style>

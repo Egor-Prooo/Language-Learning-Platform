@@ -1,0 +1,442 @@
+﻿@model LanguageLearningPlatform.Services.Contracts.ForumPostViewModel
+
+@{
+    ViewData["Title"] = Model.Title;
+    var isAuth = User.Identity?.IsAuthenticated == true;
+    var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var isAdmin = User.IsInRole("Admin");
+    var isAuthor = currentUserId == Model.AuthorId;
+}
+
+<div class="container my-5">
+    <div class="row g-4">
+
+        <!-- Main Content -->
+        <div class="col-lg-8">
+
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb" style="font-size:0.85rem;">
+                    <li class="breadcrumb-item"><a asp-action="Index">Forum</a></li>
+                    <li class="breadcrumb-item">
+                        <a asp-action="Index" asp-route-category="@Model.Category">@Model.Category</a>
+                    </li>
+                    <li class="breadcrumb-item active text-truncate" style="max-width:200px;">@Model.Title</li>
+                </ol>
+            </nav>
+
+            <!-- Post Card -->
+            <div class="forum-post-detail">
+                <!-- Post Header -->
+                <div class="fpd-header">
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="forum-avatar-lg">@Model.AuthorInitials</div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                                @if (Model.IsPinned)
+                                {
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="fas fa-thumbtack me-1"></i>Pinned
+                                    </span>
+                                }
+                                @if (Model.IsClosed)
+                                {
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-lock me-1"></i>Closed
+                                    </span>
+                                }
+                                <span class="forum-badge-category-sm">@Model.Category</span>
+                            </div>
+                            <h1 class="fpd-title">@Model.Title</h1>
+                            <div class="fpd-meta">
+                                <span><i class="fas fa-user me-1"></i><strong>@Model.AuthorName</strong></span>
+                                <span><i class="fas fa-calendar me-1"></i>@Model.CreatedAt.ToString("MMM dd, yyyy · HH:mm")</span>
+                                <span><i class="fas fa-eye me-1"></i>@Model.Views views</span>
+                                <span><i class="fas fa-comment me-1"></i>@Model.CommentCount replies</span>
+                            </div>
+                        </div>
+
+                        <!-- Post Actions -->
+                        <div class="fpd-actions">
+                            @if (isAdmin)
+                            {
+                                <form asp-action="TogglePin" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="postId" value="@Model.Id" />
+                                    <button type="submit" class="btn btn-sm @(Model.IsPinned ? "btn-warning" : "btn-outline-warning")" title="@(Model.IsPinned ? "Unpin" : "Pin")">
+                                        <i class="fas fa-thumbtack"></i>
+                                    </button>
+                                </form>
+                                <form asp-action="ToggleClose" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="postId" value="@Model.Id" />
+                                    <button type="submit" class="btn btn-sm @(Model.IsClosed ? "btn-danger" : "btn-outline-danger")" title="@(Model.IsClosed ? "Reopen" : "Close")">
+                                        <i class="fas fa-@(Model.IsClosed ? "unlock" : "lock")"></i>
+                                    </button>
+                                </form>
+                            }
+                            @if (isAuthor || isAdmin)
+                            {
+                                <form asp-action="DeletePost" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="postId" value="@Model.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"
+                                            onclick="return confirm('Delete this post and all its replies?')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Post Body -->
+                <div class="fpd-body">
+                    @Html.Raw(Model.Content.Replace("\n", "<br/>"))
+                </div>
+            </div>
+
+            <!-- Replies -->
+            <div class="mt-4">
+                <h4 class="mb-3">
+                    <i class="fas fa-comments me-2 text-primary"></i>
+                    @Model.CommentCount @(Model.CommentCount == 1 ? "Reply" : "Replies")
+                </h4>
+
+                @if (!Model.Comments.Any())
+                {
+                    <div class="forum-no-replies">
+                        <i class="fas fa-comment-dots me-2"></i>
+                        No replies yet. Be the first to respond!
+                    </div>
+                }
+                else
+                {
+                    <div class="forum-comments">
+                        @foreach (var comment in Model.Comments)
+                        {
+                            <div class="forum-comment" id="comment-@comment.Id">
+                                <div class="forum-avatar-sm">@comment.AuthorInitials</div>
+                                <div class="forum-comment-body flex-grow-1">
+                                    <div class="forum-comment-header">
+                                        <strong class="forum-comment-author">@comment.AuthorName</strong>
+                                        <span class="forum-comment-time">@comment.CreatedAt.ToString("MMM dd, yyyy · HH:mm")</span>
+                                        @if (comment.AuthorId == currentUserId || isAdmin)
+                                        {
+                                            <form asp-action="DeleteComment" method="post" class="d-inline ms-auto">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="commentId" value="@comment.Id" />
+                                                <input type="hidden" name="postId" value="@Model.Id" />
+                                                <button type="submit" class="btn btn-xs btn-link text-danger p-0"
+                                                        title="Delete" onclick="return confirm('Delete this reply?')">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                    <div class="forum-comment-content">
+                                        @Html.Raw(comment.Content.Replace("\n", "<br/>"))
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- Reply Box -->
+            @if (isAuth && !Model.IsClosed)
+            {
+                <div class="forum-reply-box mt-4">
+                    <h5 class="mb-3"><i class="fas fa-reply me-2 text-primary"></i>Write a Reply</h5>
+                    <form asp-action="Comment" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="postId" value="@Model.Id" />
+                        <textarea name="content" class="form-control forum-textarea" rows="5"
+                              placeholder="Share your thoughts, ask a question, or help others..." required></textarea>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <span class="text-muted small">
+                                <i class="fas fa-info-circle me-1"></i>Be respectful and helpful
+                            </span>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="fas fa-paper-plane me-2"></i>Post Reply
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            }
+            else if (!isAuth)
+            {
+                <div class="forum-login-prompt mt-4">
+                    <i class="fas fa-lock me-2"></i>
+                    <a asp-area="Identity" asp-page="/Account/Login">Sign in</a> to join the conversation.
+                </div>
+            }
+            else if (Model.IsClosed)
+            {
+                <div class="forum-closed-prompt mt-4">
+                    <i class="fas fa-lock me-2"></i>This thread is closed for new replies.
+                </div>
+            }
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="forum-sidebar-widget">
+                <div class="fsw-title"><i class="fas fa-info-circle me-2 text-primary"></i>Post Info</div>
+                <div class="fsw-row"><span>Category</span><strong>@Model.Category</strong></div>
+                <div class="fsw-row"><span>Posted</span><strong>@Model.CreatedAt.ToString("MMM dd, yyyy")</strong></div>
+                <div class="fsw-row"><span>Views</span><strong>@Model.Views</strong></div>
+                <div class="fsw-row"><span>Replies</span><strong>@Model.CommentCount</strong></div>
+                <div class="fsw-row">
+                    <span>Status</span>
+                    <strong>
+                        @if (Model.IsClosed)
+                        {
+                            <span class="text-danger">Closed</span>
+                        }
+                        else
+                        {
+
+                            <span class="text-success">Open</span>
+                        }
+                    </strong>
+                </div>
+                <div class="mt-3">
+                    <a asp-action="Index" class="btn btn-outline-secondary w-100 btn-sm">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Forum
+                    </a>
+                    @if (isAuth)
+                    {
+                        <a asp-action="Create" class="btn btn-primary w-100 btn-sm mt-2">
+                            <i class="fas fa-pen me-2"></i>New Post
+                        </a>
+                    }
+                </div>
+            </div>
+
+            <!-- Browse Categories -->
+            <div class="forum-sidebar-widget mt-3">
+                <div class="fsw-title"><i class="fas fa-tags me-2 text-primary"></i>Browse Categories</div>
+                @foreach (var cat in (ViewBag.Categories as IEnumerable<string> ?? Enumerable.Empty<string>()))
+                {
+                    <a asp-action="Index" asp-route-category="@cat"
+                       class="forum-category-link @(Model.Category == cat ? "active" : "")">
+                        @cat
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .forum-post-detail {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+        overflow: hidden;
+    }
+
+    .fpd-header {
+        padding: 1.75rem;
+        border-bottom: 2px solid #F3F4F6;
+    }
+
+    .fpd-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #1F2937;
+        margin: 0.5rem 0;
+        line-height: 1.3;
+    }
+
+    .fpd-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        font-size: 0.82rem;
+        color: #6B7280;
+    }
+
+    .fpd-body {
+        padding: 1.75rem;
+        font-size: 1rem;
+        color: #374151;
+        line-height: 1.8;
+    }
+
+    .fpd-actions {
+        display: flex;
+        gap: 0.4rem;
+        flex-shrink: 0;
+    }
+
+    .forum-avatar-lg {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4F46E5, #7C3AED);
+        color: white;
+        font-weight: 700;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .forum-avatar-sm {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #10B981, #059669);
+        color: white;
+        font-weight: 700;
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .forum-no-replies {
+        background: #F9FAFB;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        color: #9CA3AF;
+        border: 2px dashed #E5E7EB;
+    }
+
+    .forum-comments {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .forum-comment {
+        display: flex;
+        gap: 1rem;
+        background: white;
+        border-radius: 14px;
+        padding: 1.25rem;
+        border: 2px solid #F3F4F6;
+        transition: border-color 0.2s;
+    }
+
+        .forum-comment:hover {
+            border-color: #E0E7FF;
+        }
+
+    .forum-comment-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.6rem;
+        flex-wrap: wrap;
+    }
+
+    .forum-comment-author {
+        color: #1F2937;
+        font-size: 0.9rem;
+    }
+
+    .forum-comment-time {
+        color: #9CA3AF;
+        font-size: 0.78rem;
+    }
+
+    .forum-comment-content {
+        color: #374151;
+        font-size: 0.92rem;
+        line-height: 1.7;
+    }
+
+    .forum-reply-box {
+        background: white;
+        border-radius: 16px;
+        padding: 1.75rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    }
+
+    .forum-textarea {
+        border: 2px solid #E5E7EB;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        transition: border-color 0.2s;
+        resize: vertical;
+    }
+
+        .forum-textarea:focus {
+            border-color: #4F46E5;
+            box-shadow: none;
+        }
+
+    .forum-login-prompt, .forum-closed-prompt {
+        background: #F9FAFB;
+        border-radius: 12px;
+        padding: 1.25rem;
+        color: #6B7280;
+        border: 2px dashed #E5E7EB;
+        text-align: center;
+    }
+
+    .forum-sidebar-widget {
+        background: white;
+        border-radius: 14px;
+        padding: 1.25rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .fsw-title {
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: #1F2937;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #F3F4F6;
+    }
+
+    .fsw-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #F9FAFB;
+        font-size: 0.85rem;
+        color: #6B7280;
+    }
+
+    .forum-category-link {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 0.6rem;
+        border-radius: 8px;
+        color: #4B5563;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: all 0.15s;
+        margin-bottom: 2px;
+    }
+
+        .forum-category-link:hover {
+            background: #F3F4F6;
+            color: #4F46E5;
+        }
+
+        .forum-category-link.active {
+            background: #EEF2FF;
+            color: #4F46E5;
+            font-weight: 700;
+        }
+
+    .forum-badge-category-sm {
+        background: #EEF2FF;
+        color: #4F46E5;
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 0.2rem 0.6rem;
+        border-radius: 6px;
+    }
+</style>

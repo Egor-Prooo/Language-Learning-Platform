@@ -34,6 +34,11 @@
                                 <i class="fas fa-book me-1"></i> Courses
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Forum" asp-action="Index">
+                                <i class="fas fa-comments me-1"></i> Forum
+                            </a>
+                        </li>
                         @if (User.Identity?.IsAuthenticated == true)
                         {
                             <li class="nav-item">

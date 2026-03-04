@@ -9,7 +9,8 @@ namespace LanguageLearningPlatform.Services
     {
         private readonly ApplicationDbContext _context;
 
-        // Built-in categories for a language learning platform
+        private static readonly Guid ForumCourseId = new Guid("00000000-0000-0000-0000-000000000001");
+
         private static readonly List<string> DefaultCategories = new()
         {
             "General Discussion", "Grammar Help", "Vocabulary", "Pronunciation",
@@ -23,16 +24,14 @@ namespace LanguageLearningPlatform.Services
 
         public async Task<IEnumerable<ForumPostViewModel>> GetAllPostsAsync(string? category = null, string? search = null)
         {
-            // We'll use the existing ForumPost table but treat CourseId as optional
-            // by using a "forum-only" sentinel CourseId or querying all posts
             var query = _context.ForumPosts
                 .Include(p => p.User)
                 .Include(p => p.Comments)
+                .Where(p => p.CourseId == ForumCourseId)
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(category))
-                query = query.Where(p => p.Content.StartsWith($"[CAT:{category}]") ||
-                                         EF.Functions.Like(p.Title, $"%[{category}]%"));
+                query = query.Where(p => p.Content.StartsWith($"[CAT:{category}]"));
 
             if (!string.IsNullOrEmpty(search))
                 query = query.Where(p => p.Title.Contains(search) || p.Content.Contains(search));
@@ -51,24 +50,21 @@ namespace LanguageLearningPlatform.Services
                 .Include(p => p.User)
                 .Include(p => p.Comments)
                     .ThenInclude(c => c.User)
-                .FirstOrDefaultAsync(p => p.Id == id);
+                .FirstOrDefaultAsync(p => p.Id == id && p.CourseId == ForumCourseId);
 
             return post == null ? null : MapToViewModel(post);
         }
 
         public async Task<ForumPost> CreatePostAsync(string userId, string title, string content, string category)
         {
-            // We encode the category in the content using a prefix for compatibility
-            // with existing schema (which requires CourseId). 
-            // We use a well-known placeholder CourseId for "community forum" posts.
-            var forumCourseId = await GetOrCreateForumPlaceholderCourseId();
+            await EnsureForumPlaceholderCourseExists();
 
             var post = new ForumPost
             {
                 Id = Guid.NewGuid(),
                 Title = title,
                 Content = $"[CAT:{category}]\n{content}",
-                CourseId = forumCourseId,
+                CourseId = ForumCourseId,
                 UserId = userId,
                 CreatedAt = DateTime.UtcNow,
                 Views = 0,
@@ -222,17 +218,14 @@ namespace LanguageLearningPlatform.Services
             return f + l;
         }
 
-        private async Task<Guid> GetOrCreateForumPlaceholderCourseId()
+        private async Task EnsureForumPlaceholderCourseExists()
         {
-            // Use a fixed, well-known ID for "Community Forum" placeholder course
-            var forumId = new Guid("00000000-0000-0000-0000-000000000001");
-
-            var exists = await _context.Courses.AnyAsync(c => c.Id == forumId);
+            var exists = await _context.Courses.AnyAsync(c => c.Id == ForumCourseId);
             if (!exists)
             {
                 _context.Courses.Add(new Course
                 {
-                    Id = forumId,
+                    Id = ForumCourseId,
                     Title = "Community Forum",
                     Language = "Community",
                     Level = "All",
@@ -242,8 +235,6 @@ namespace LanguageLearningPlatform.Services
                 });
                 await _context.SaveChangesAsync();
             }
-
-            return forumId;
         }
     }
 }

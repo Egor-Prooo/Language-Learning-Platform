@@ -1,0 +1,59 @@
+﻿@{
+    ViewData["Title"] = "Add Lesson";
+}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <a asp-action="CourseDetails" asp-route-id="@ViewBag.CourseId" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back
+                </a>
+                <div>
+                    <h2 class="fw-bold mb-0">Add Lesson</h2>
+                    <p class="text-secondary mb-0 small">@ViewBag.CourseName</p>
+                </div>
+            </div>
+
+            <div class="card shadow-sm" style="border-radius:16px;border:none;">
+                <div class="card-body p-4">
+                    <form asp-action="AddLesson" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="courseId" value="@ViewBag.CourseId" />
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Lesson Title *</label>
+                            <input type="text" name="title" class="form-control" required maxlength="200"
+                                   placeholder="e.g. Greetings and Introductions" />
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Short Description</label>
+                            <input type="text" name="description" class="form-control" maxlength="1000"
+                                   placeholder="Brief overview of this lesson..." />
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Lesson Content *</label>
+                            <textarea name="content" class="form-control" rows="12" required
+                                      placeholder="Write the lesson content here. HTML is supported for formatting."></textarea>
+                            <div class="form-text">HTML is supported for rich formatting (bold, lists, headings, etc.)</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Duration (minutes)</label>
+                            <input type="number" name="durationMinutes" class="form-control" value="15" min="1" max="300" />
+                        </div>
+
+                        <div class="d-flex gap-3">
+                            <button type="submit" class="btn btn-primary px-5">
+                                <i class="fas fa-plus me-2"></i>Add Lesson
+                            </button>
+                            <a asp-action="CourseDetails" asp-route-id="@ViewBag.CourseId" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

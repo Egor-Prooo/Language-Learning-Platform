@@ -61,7 +61,7 @@ namespace LanguageLearningPlatform.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Achievements");
+                    b.ToTable("Achievements", (string)null);
                 });
 
             modelBuilder.Entity("LanguageLearningPlatform.Data.Models.ChatMessage", b =>
@@ -101,7 +101,7 @@ namespace LanguageLearningPlatform.Data.Migrations
 
                     b.HasIndex("UserId1");
 
-                    b.ToTable("ChatMessages");
+                    b.ToTable("ChatMessages", (string)null);
                 });
 
             modelBuilder.Entity("LanguageLearningPlatform.Data.Models.Course", b =>
@@ -162,7 +162,7 @@ namespace LanguageLearningPlatform.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Courses");
+                    b.ToTable("Courses", (string)null);
                 });
 
             modelBuilder.Entity("LanguageLearningPlatform.Data.Models.CourseEnrollment", b =>
@@ -192,7 +192,7 @@ namespace LanguageLearningPlatform.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("CourseEnrollments");
+                    b.ToTable("CourseEnrollments", (string)null);
                 });
 
             modelBuilder.Entity("LanguageLearningPlatform.Data.Models.CourseSection", b =>
@@ -229,7 +229,7 @@ namespace LanguageLearningPlatform.Data.Migrations
 
                     b.HasIndex("CourseId");
 
-                    b.ToTable("CourseSections");
+                    b.ToTable("CourseSections", (string)null);
                 });
 
             modelBuilder.Entity("LanguageLearningPlatform.Data.Models.Exercise", b =>
@@ -299,7 +299,7 @@ namespace LanguageLearningPlatform.Data.Migrations
 
                     b.HasIndex("LessonId");
 
-                    b.ToTable("Exercises");
+                    b.ToTable("Exercises", (string)null);
                 });
 
             modelBuilder.Entity("LanguageLearningPlatform.Data.Models.ForumComment", b =>
@@ -334,7 +334,7 @@ namespace LanguageLearningPlatform.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ForumComments");
+                    b.ToTable("ForumComments", (string)null);
                 });
 
             modelBuilder.Entity("LanguageLearningPlatform.Data.Models.ForumPost", b =>
@@ -382,7 +382,7 @@ namespace LanguageLearningPlatform.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ForumPosts");
+                    b.ToTable("ForumPosts", (string)null);
                 });
 
             modelBuilder.Entity("LanguageLearningPlatform.Data.Models.Lesson", b =>
@@ -421,7 +421,7 @@ namespace LanguageLearningPlatform.Data.Migrations
 
                     b.HasIndex("CourseId");
 
-                    b.ToTable("Lessons");
+                    b.ToTable("Lessons", (string)null);
                 });
 
             modelBuilder.Entity("LanguageLearningPlatform.Data.Models.Progress", b =>
@@ -461,7 +461,7 @@ namespace LanguageLearningPlatform.Data.Migrations
 
                     b.HasIndex("UserId", "CourseId");
 
-                    b.ToTable("Progresses");
+                    b.ToTable("Progresses", (string)null);
                 });
 
             modelBuilder.Entity("LanguageLearningPlatform.Data.Models.TeacherLesson", b =>
@@ -521,7 +521,7 @@ namespace LanguageLearningPlatform.Data.Migrations
 
                     b.HasIndex("TeacherId");
 
-                    b.ToTable("TeacherLessons");
+                    b.ToTable("TeacherLessons", (string)null);
                 });
 
             modelBuilder.Entity("LanguageLearningPlatform.Data.Models.Tutor", b =>
@@ -569,7 +569,7 @@ namespace LanguageLearningPlatform.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Tutors");
+                    b.ToTable("Tutors", (string)null);
                 });
 
             modelBuilder.Entity("LanguageLearningPlatform.Data.Models.User", b =>
@@ -710,7 +710,7 @@ namespace LanguageLearningPlatform.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserAchievements");
+                    b.ToTable("UserAchievements", (string)null);
                 });
 
             modelBuilder.Entity("LanguageLearningPlatform.Data.Models.UserExerciseResult", b =>
@@ -755,7 +755,7 @@ namespace LanguageLearningPlatform.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserExerciseResults");
+                    b.ToTable("UserExerciseResults", (string)null);
                 });
 
             modelBuilder.Entity("LanguageLearningPlatform.Data.Models.UserLevel", b =>
@@ -798,7 +798,7 @@ namespace LanguageLearningPlatform.Data.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("UserLevels");
+                    b.ToTable("UserLevels", (string)null);
                 });
 
             modelBuilder.Entity("LanguageLearningPlatform.Data.Models.UserVideoProgress", b =>
@@ -829,7 +829,7 @@ namespace LanguageLearningPlatform.Data.Migrations
 
                     b.HasIndex("VideoLessonId");
 
-                    b.ToTable("UserVideoProgresses");
+                    b.ToTable("UserVideoProgresses", (string)null);
                 });
 
             modelBuilder.Entity("LanguageLearningPlatform.Data.Models.VideoLesson", b =>
@@ -877,7 +877,7 @@ namespace LanguageLearningPlatform.Data.Migrations
 
                     b.HasIndex("LessonId");
 
-                    b.ToTable("VideoLessons");
+                    b.ToTable("VideoLessons", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

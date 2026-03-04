@@ -112,6 +112,24 @@ namespace LanguageLearningPlatform.Data
                 .HasForeignKey(cs => cs.CourseId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<TeacherMessage>(entity =>
+            {
+                entity.HasOne(m => m.Teacher)
+                      .WithMany()
+                      .HasForeignKey(m => m.TeacherId)
+                      .OnDelete(DeleteBehavior.NoAction);
+
+                entity.HasOne(m => m.Student)
+                      .WithMany()
+                      .HasForeignKey(m => m.StudentId)
+                      .OnDelete(DeleteBehavior.NoAction);
+
+                entity.HasOne(m => m.Course)
+                      .WithMany()
+                      .HasForeignKey(m => m.CourseId)
+                      .OnDelete(DeleteBehavior.NoAction);
+            });
+
             // Indexes
             modelBuilder.Entity<Exercise>()
                 .HasIndex(e => e.CourseId);

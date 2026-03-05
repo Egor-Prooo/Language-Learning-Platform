@@ -3,8 +3,24 @@
   "WorkspaceRootPath": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|c:\\users\\epros\\source\\repos\\languagelearningplatform\\languagelearningplatform\\views\\teacher\\messages.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|solutionrelative:languagelearningplatform\\views\\teacher\\messages.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|c:\\users\\epros\\source\\repos\\languagelearningplatform\\languagelearningplatform\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|solutionrelative:languagelearningplatform\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|c:\\users\\epros\\source\\repos\\languagelearningplatform\\languagelearningplatform\\controllers\\messagingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|solutionrelative:languagelearningplatform\\controllers\\messagingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{45F58F51-2E6B-426E-9CAA-DB9EC2EEE17C}|LanguageLearningPlatform.Data\\LanguageLearningPlatform.Data.csproj|c:\\users\\epros\\source\\repos\\languagelearningplatform\\languagelearningplatform.data\\models\\course.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{45F58F51-2E6B-426E-9CAA-DB9EC2EEE17C}|LanguageLearningPlatform.Data\\LanguageLearningPlatform.Data.csproj|solutionrelative:languagelearningplatform.data\\models\\course.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{45F58F51-2E6B-426E-9CAA-DB9EC2EEE17C}|LanguageLearningPlatform.Data\\LanguageLearningPlatform.Data.csproj|c:\\users\\epros\\source\\repos\\languagelearningplatform\\languagelearningplatform.data\\models\\chatmessage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{45F58F51-2E6B-426E-9CAA-DB9EC2EEE17C}|LanguageLearningPlatform.Data\\LanguageLearningPlatform.Data.csproj|solutionrelative:languagelearningplatform.data\\models\\chatmessage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|c:\\users\\epros\\source\\repos\\languagelearningplatform\\languagelearningplatform\\controllers\\teachercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -25,10 +41,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|c:\\users\\epros\\source\\repos\\languagelearningplatform\\languagelearningplatform\\views\\teacher\\dashboard.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|solutionrelative:languagelearningplatform\\views\\teacher\\dashboard.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Migrations\\20260304195641_FixTeacherMessageCascade.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:LanguageLearningPlatform.Data\\Migrations\\20260304195641_FixTeacherMessageCascade.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Migrations\\20260304195151_FixTeacherMessageCascade.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -57,10 +69,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|c:\\users\\epros\\source\\repos\\languagelearningplatform\\languagelearningplatform\\views\\forum\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|solutionrelative:languagelearningplatform\\views\\forum\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|c:\\users\\epros\\source\\repos\\languagelearningplatform\\languagelearningplatform\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|solutionrelative:languagelearningplatform\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|c:\\users\\epros\\source\\repos\\languagelearningplatform\\languagelearningplatform\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -289,6 +297,10 @@
     {
       "AbsoluteMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|c:\\users\\epros\\source\\repos\\languagelearningplatform\\languagelearningplatform\\wwwroot\\js\\site.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
       "RelativeMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|solutionrelative:languagelearningplatform\\wwwroot\\js\\site.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{45F58F51-2E6B-426E-9CAA-DB9EC2EEE17C}|LanguageLearningPlatform.Data\\LanguageLearningPlatform.Data.csproj|c:\\users\\epros\\source\\repos\\languagelearningplatform\\languagelearningplatform.data\\migrations\\20260304195641_fixteachermessagecascade.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{45F58F51-2E6B-426E-9CAA-DB9EC2EEE17C}|LanguageLearningPlatform.Data\\LanguageLearningPlatform.Data.csproj|solutionrelative:languagelearningplatform.data\\migrations\\20260304195641_fixteachermessagecascade.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -323,19 +335,45 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "Messages.cshtml",
+              "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Views\\Teacher\\Messages.cshtml",
+              "RelativeDocumentMoniker": "LanguageLearningPlatform\\Views\\Teacher\\Messages.cshtml",
+              "ToolTip": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Views\\Teacher\\Messages.cshtml",
+              "RelativeToolTip": "LanguageLearningPlatform\\Views\\Teacher\\Messages.cshtml",
+              "ViewState": "AgIAAB0AAAAAAAAAAAAuwEUAAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-05T08:00:02.562Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Course.cs",
+              "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Models\\Course.cs",
+              "RelativeDocumentMoniker": "LanguageLearningPlatform.Data\\Models\\Course.cs",
+              "ToolTip": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Models\\Course.cs",
+              "RelativeToolTip": "LanguageLearningPlatform.Data\\Models\\Course.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-04T20:10:23.219Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "MessagingController.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Controllers\\MessagingController.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Controllers\\MessagingController.cs",
               "ToolTip": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Controllers\\MessagingController.cs",
               "RelativeToolTip": "LanguageLearningPlatform\\Controllers\\MessagingController.cs",
-              "ViewState": "AgIAAD8AAAAAAAAAAAAuwIIAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAEUAAAAAAAAAAAAuwIIAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-03-04T20:09:20.849Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 6,
               "Title": "AddLesson.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Views\\Teacher\\AddLesson.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Views\\Teacher\\AddLesson.cshtml",
@@ -343,12 +381,11 @@
               "RelativeToolTip": "LanguageLearningPlatform\\Views\\Teacher\\AddLesson.cshtml",
               "ViewState": "AgIAABsAAAAAAAAAAAAAADoAAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-03-04T20:07:23.596Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-04T20:07:23.596Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 7,
               "Title": "CreateCourse.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Views\\Teacher\\CreateCourse.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Views\\Teacher\\CreateCourse.cshtml",
@@ -356,12 +393,11 @@
               "RelativeToolTip": "LanguageLearningPlatform\\Views\\Teacher\\CreateCourse.cshtml",
               "ViewState": "AgIAABoAAAAAAAAAAAAuwEgAAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-03-04T20:05:12.146Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-04T20:05:12.146Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 8,
               "Title": "CourseDetails.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Views\\Teacher\\CourseDetails.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Views\\Teacher\\CourseDetails.cshtml",
@@ -369,12 +405,11 @@
               "RelativeToolTip": "LanguageLearningPlatform\\Views\\Teacher\\CourseDetails.cshtml",
               "ViewState": "AgIAAEwAAAAAAAAAAAAuwIMAAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-03-04T20:01:52.994Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-04T20:01:52.994Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 9,
               "Title": "Dashboard.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Views\\Teacher\\Dashboard.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Views\\Teacher\\Dashboard.cshtml",
@@ -382,12 +417,36 @@
               "RelativeToolTip": "LanguageLearningPlatform\\Views\\Teacher\\Dashboard.cshtml",
               "ViewState": "AgIAAGYAAAAAAAAAAAAewIQAAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-03-04T19:59:18.825Z",
+              "WhenOpened": "2026-03-04T19:59:18.825Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "_Layout.cshtml",
+              "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Views\\Shared\\_Layout.cshtml",
+              "RelativeDocumentMoniker": "LanguageLearningPlatform\\Views\\Shared\\_Layout.cshtml",
+              "ToolTip": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Views\\Shared\\_Layout.cshtml",
+              "RelativeToolTip": "LanguageLearningPlatform\\Views\\Shared\\_Layout.cshtml",
+              "ViewState": "AgIAAB4AAAAAAAAAAAAewC8AAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-02-17T19:20:44.414Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 4,
+              "Title": "ChatMessage.cs",
+              "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Models\\ChatMessage.cs",
+              "RelativeDocumentMoniker": "LanguageLearningPlatform.Data\\Models\\ChatMessage.cs",
+              "ToolTip": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Models\\ChatMessage.cs",
+              "RelativeToolTip": "LanguageLearningPlatform.Data\\Models\\ChatMessage.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-04T20:10:21.666Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 74,
               "Title": "20260304195641_FixTeacherMessageCascade.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Migrations\\20260304195641_FixTeacherMessageCascade.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform.Data\\Migrations\\20260304195641_FixTeacherMessageCascade.cs",
@@ -395,12 +454,11 @@
               "RelativeToolTip": "LanguageLearningPlatform.Data\\Migrations\\20260304195641_FixTeacherMessageCascade.cs",
               "ViewState": "AgIAAA8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-04T19:56:42.021Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-04T19:56:42.021Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 5,
               "Title": "TeacherController.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Controllers\\TeacherController.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Controllers\\TeacherController.cs",
@@ -408,12 +466,11 @@
               "RelativeToolTip": "LanguageLearningPlatform\\Controllers\\TeacherController.cs",
               "ViewState": "AgIAAPIAAAAAAAAAAAAkwAcBAAApAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-04T10:47:12.741Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-04T10:47:12.741Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 10,
               "Title": "20260304195151_FixTeacherMessageCascade.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Migrations\\20260304195151_FixTeacherMessageCascade.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform.Data\\Migrations\\20260304195151_FixTeacherMessageCascade.cs",
@@ -421,12 +478,11 @@
               "RelativeToolTip": "LanguageLearningPlatform.Data\\Migrations\\20260304195151_FixTeacherMessageCascade.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-04T19:51:51.414Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-04T19:51:51.414Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 13,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Views\\Forum\\Index.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Views\\Forum\\Index.cshtml",
@@ -438,7 +494,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 18,
               "Title": "ForumController.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Controllers\\ForumController.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Controllers\\ForumController.cs",
@@ -450,7 +506,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 14,
               "Title": "ForumService.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Services\\ForumService.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform.Services\\ForumService.cs",
@@ -462,7 +518,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 19,
               "Title": "IForumService.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Services\\Contracts\\IForumService.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform.Services\\Contracts\\IForumService.cs",
@@ -474,7 +530,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 11,
               "Title": "ApplicationDbContext.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\ApplicationDbContext.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform.Data\\ApplicationDbContext.cs",
@@ -482,12 +538,11 @@
               "RelativeToolTip": "LanguageLearningPlatform.Data\\ApplicationDbContext.cs",
               "ViewState": "AgIAAB4AAAAAAAAAAAAAAHEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-19T19:39:59.269Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-19T19:39:59.269Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 12,
               "Title": "TeacherMessage.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Models\\TeacherMessage.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform.Data\\Models\\TeacherMessage.cs",
@@ -499,7 +554,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 15,
               "Title": "Post.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Views\\Forum\\Post.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Views\\Forum\\Post.cshtml",
@@ -511,7 +566,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 16,
               "Title": "Create.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Views\\Forum\\Create.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Views\\Forum\\Create.cshtml",
@@ -523,7 +578,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 23,
+              "DocumentIndex": 25,
               "Title": "Edit.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Areas\\Admin\\Views\\Courses\\Edit.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Areas\\Admin\\Views\\Courses\\Edit.cshtml",
@@ -535,7 +590,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 17,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Program.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Program.cs",
@@ -547,19 +602,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
-              "Title": "_Layout.cshtml",
-              "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Views\\Shared\\_Layout.cshtml",
-              "RelativeDocumentMoniker": "LanguageLearningPlatform\\Views\\Shared\\_Layout.cshtml",
-              "ToolTip": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Views\\Shared\\_Layout.cshtml",
-              "RelativeToolTip": "LanguageLearningPlatform\\Views\\Shared\\_Layout.cshtml",
-              "ViewState": "AgIAABAAAAAAAAAAAAAewCMAAAAdAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-02-17T19:20:44.414Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 22,
+              "DocumentIndex": 24,
               "Title": "ForCourse.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Areas\\Admin\\Views\\Lessons\\ForCourse.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Areas\\Admin\\Views\\Lessons\\ForCourse.cshtml",
@@ -571,7 +614,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 26,
+              "DocumentIndex": 28,
               "Title": "CreateEdit.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Areas\\Admin\\Views\\Achievements\\CreateEdit.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Areas\\Admin\\Views\\Achievements\\CreateEdit.cshtml",
@@ -583,7 +626,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 27,
+              "DocumentIndex": 29,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Areas\\Admin\\Views\\Achievements\\Index.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Areas\\Admin\\Views\\Achievements\\Index.cshtml",
@@ -595,7 +638,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 21,
               "Title": "VideoLessonsController.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Areas\\Admin\\Controllers\\VideoLessonsController.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Areas\\Admin\\Controllers\\VideoLessonsController.cs",
@@ -607,7 +650,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 21,
+              "DocumentIndex": 23,
               "Title": "Create.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Areas\\Admin\\Views\\Courses\\Create.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Areas\\Admin\\Views\\Courses\\Create.cshtml",
@@ -619,7 +662,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 20,
               "Title": "Create.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Areas\\Admin\\Views\\VideoLessons\\Create.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Areas\\Admin\\Views\\VideoLessons\\Create.cshtml",
@@ -631,7 +674,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 22,
               "Title": "VideoLessonService.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Services\\VideoLessonService.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform.Services\\VideoLessonService.cs",
@@ -643,7 +686,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 28,
+              "DocumentIndex": 30,
               "Title": "AchievementsController.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Areas\\Admin\\Controllers\\AchievementsController.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Areas\\Admin\\Controllers\\AchievementsController.cs",
@@ -655,7 +698,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 34,
+              "DocumentIndex": 36,
               "Title": "VideoLessonsController.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Controllers\\VideoLessonsController.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Controllers\\VideoLessonsController.cs",
@@ -667,7 +710,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 25,
+              "DocumentIndex": 27,
               "Title": "_AdminLayout.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Areas\\Admin\\Views\\Shared\\_AdminLayout.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Areas\\Admin\\Views\\Shared\\_AdminLayout.cshtml",
@@ -679,7 +722,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 24,
+              "DocumentIndex": 26,
               "Title": "ForLesson.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Areas\\Admin\\Views\\VideoLessons\\ForLesson.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Areas\\Admin\\Views\\VideoLessons\\ForLesson.cshtml",
@@ -691,7 +734,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 29,
+              "DocumentIndex": 31,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Areas\\Admin\\Views\\Courses\\Index.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Areas\\Admin\\Views\\Courses\\Index.cshtml",
@@ -703,7 +746,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 31,
+              "DocumentIndex": 33,
               "Title": "20260223141746_AddedVideoLessonTable.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Migrations\\20260223141746_AddedVideoLessonTable.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform.Data\\Migrations\\20260223141746_AddedVideoLessonTable.cs",
@@ -715,7 +758,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 30,
+              "DocumentIndex": 32,
               "Title": "LessonsController.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Areas\\Admin\\Controllers\\LessonsController.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Areas\\Admin\\Controllers\\LessonsController.cs",
@@ -727,7 +770,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 35,
+              "DocumentIndex": 37,
               "Title": "IVideoLessonService.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Services\\Contracts\\IVideoLessonService.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform.Services\\Contracts\\IVideoLessonService.cs",
@@ -739,7 +782,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 33,
+              "DocumentIndex": 35,
               "Title": "LessonsController.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Controllers\\LessonsController.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Controllers\\LessonsController.cs",
@@ -751,7 +794,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 32,
+              "DocumentIndex": 34,
               "Title": "Details.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Views\\Lessons\\Details.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Views\\Lessons\\Details.cshtml",
@@ -763,7 +806,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 36,
+              "DocumentIndex": 38,
               "Title": "VideoLessonViewModel.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Core\\Models\\VideoLessonViewModel.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform.Core\\Models\\VideoLessonViewModel.cs",
@@ -775,7 +818,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 37,
+              "DocumentIndex": 39,
               "Title": "Lesson.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Models\\Lesson.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform.Data\\Models\\Lesson.cs",
@@ -787,7 +830,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 39,
+              "DocumentIndex": 41,
               "Title": "UserVideoProgress.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Models\\UserVideoProgress.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform.Data\\Models\\UserVideoProgress.cs",
@@ -799,7 +842,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 38,
+              "DocumentIndex": 40,
               "Title": "VideoLesson.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Models\\VideoLesson.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform.Data\\Models\\VideoLesson.cs",
@@ -811,7 +854,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 41,
+              "DocumentIndex": 43,
               "Title": "_ViewImports.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Areas\\Admin\\Views\\_ViewImports.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Areas\\Admin\\Views\\_ViewImports.cshtml",
@@ -823,7 +866,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 42,
+              "DocumentIndex": 44,
               "Title": "UsersController.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Areas\\Admin\\Controllers\\UsersController.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Areas\\Admin\\Controllers\\UsersController.cs",
@@ -835,7 +878,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 40,
+              "DocumentIndex": 42,
               "Title": "_ViewStart.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Areas\\Admin\\Views\\_ViewStart.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Areas\\Admin\\Views\\_ViewStart.cshtml",
@@ -847,7 +890,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 43,
+              "DocumentIndex": 45,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Areas\\Admin\\Views\\Users\\Index.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Areas\\Admin\\Views\\Users\\Index.cshtml",
@@ -859,7 +902,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 44,
+              "DocumentIndex": 46,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Areas\\Admin\\Views\\Dashboard\\Index.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Areas\\Admin\\Views\\Dashboard\\Index.cshtml",
@@ -871,7 +914,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 45,
+              "DocumentIndex": 47,
               "Title": "Constants.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Seeding\\Constants\\Constants.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform.Data\\Seeding\\Constants\\Constants.cs",
@@ -883,7 +926,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 47,
+              "DocumentIndex": 49,
               "Title": "UserLevelSeeder.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Seeding\\UserLevelSeeder.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform.Data\\Seeding\\UserLevelSeeder.cs",
@@ -895,7 +938,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 48,
+              "DocumentIndex": 50,
               "Title": "UserSeeder.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Seeding\\UserSeeder.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform.Data\\Seeding\\UserSeeder.cs",
@@ -907,7 +950,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 52,
+              "DocumentIndex": 54,
               "Title": "interactive-exercises.js",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\wwwroot\\js\\interactive-exercises.js",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\wwwroot\\js\\interactive-exercises.js",
@@ -919,7 +962,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 56,
+              "DocumentIndex": 58,
               "Title": "ExerciseService.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Services\\ExerciseService.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform.Services\\ExerciseService.cs",
@@ -931,7 +974,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 51,
+              "DocumentIndex": 53,
               "Title": "site.css",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\wwwroot\\css\\site.css",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\wwwroot\\css\\site.css",
@@ -943,7 +986,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 46,
+              "DocumentIndex": 48,
               "Title": "LessonAndExerciseSeeder.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Seeding\\LessonAndExerciseSeeder.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform.Data\\Seeding\\LessonAndExerciseSeeder.cs",
@@ -955,7 +998,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 53,
+              "DocumentIndex": 55,
               "Title": "Exercises.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Views\\Lessons\\Exercises.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Views\\Lessons\\Exercises.cshtml",
@@ -967,7 +1010,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 54,
+              "DocumentIndex": 56,
               "Title": "ExercisesController.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Controllers\\ExercisesController.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Controllers\\ExercisesController.cs",
@@ -979,7 +1022,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 50,
+              "DocumentIndex": 52,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Views\\Courses\\Index.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Views\\Courses\\Index.cshtml",
@@ -991,7 +1034,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 49,
+              "DocumentIndex": 51,
               "Title": "Details.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Views\\Courses\\Details.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Views\\Courses\\Details.cshtml",
@@ -1003,7 +1046,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 57,
+              "DocumentIndex": 59,
               "Title": "IExerciseService.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Services\\Contracts\\IExerciseService.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform.Services\\Contracts\\IExerciseService.cs",
@@ -1015,7 +1058,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 59,
+              "DocumentIndex": 61,
               "Title": "InteractiveExerciseViewModel.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Core\\Models\\InteractiveExerciseViewModel.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform.Core\\Models\\InteractiveExerciseViewModel.cs",
@@ -1027,7 +1070,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 55,
+              "DocumentIndex": 57,
               "Title": "20260212083233_InitialExercisesForAllLanguages.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Migrations\\20260212083233_InitialExercisesForAllLanguages.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform.Data\\Migrations\\20260212083233_InitialExercisesForAllLanguages.cs",
@@ -1039,7 +1082,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 60,
+              "DocumentIndex": 62,
               "Title": "exercises.css",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\wwwroot\\css\\exercises.css",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\wwwroot\\css\\exercises.css",
@@ -1051,7 +1094,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 58,
+              "DocumentIndex": 60,
               "Title": "ExercisesStatsViewModel.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Core\\Models\\ExercisesStatsViewModel.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform.Core\\Models\\ExercisesStatsViewModel.cs",
@@ -1063,7 +1106,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 61,
+              "DocumentIndex": 63,
               "Title": "20260205095658_UpdatedCourseNames.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Migrations\\20260205095658_UpdatedCourseNames.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform.Data\\Migrations\\20260205095658_UpdatedCourseNames.cs",
@@ -1075,7 +1118,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 63,
+              "DocumentIndex": 65,
               "Title": "IProgressService.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Services\\Contracts\\IProgressService.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform.Services\\Contracts\\IProgressService.cs",
@@ -1087,7 +1130,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 64,
+              "DocumentIndex": 66,
               "Title": "CourseSeeder.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Seeding\\CourseSeeder.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform.Data\\Seeding\\CourseSeeder.cs",
@@ -1099,7 +1142,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 62,
+              "DocumentIndex": 64,
               "Title": "exercise.js",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\wwwroot\\js\\exercise.js",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\wwwroot\\js\\exercise.js",
@@ -1111,7 +1154,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 65,
+              "DocumentIndex": 67,
               "Title": "CourseService.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Services\\CourseService.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform.Services\\CourseService.cs",
@@ -1123,7 +1166,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 66,
+              "DocumentIndex": 68,
               "Title": "ExerciseViewModel.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Core\\Models\\ExerciseViewModel.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform.Core\\Models\\ExerciseViewModel.cs",
@@ -1135,7 +1178,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 69,
+              "DocumentIndex": 71,
               "Title": "CoursesController.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Controllers\\CoursesController.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Controllers\\CoursesController.cs",
@@ -1147,7 +1190,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 70,
+              "DocumentIndex": 72,
               "Title": "HomeController.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Controllers\\HomeController.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Controllers\\HomeController.cs",
@@ -1159,7 +1202,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 67,
+              "DocumentIndex": 69,
               "Title": "DatabaseSeeder.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Seeding\\DatabaseSeeder.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform.Data\\Seeding\\DatabaseSeeder.cs",
@@ -1171,7 +1214,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 68,
+              "DocumentIndex": 70,
               "Title": "ProfileController.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Controllers\\ProfileController.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Controllers\\ProfileController.cs",
@@ -1183,7 +1226,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 71,
+              "DocumentIndex": 73,
               "Title": "site.js",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\wwwroot\\js\\site.js",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\wwwroot\\js\\site.js",

@@ -1,0 +1,87 @@
+﻿@{
+    ViewData["Title"] = "Contact Teacher";
+    var course = ViewBag.Course as LanguageLearningPlatform.Data.Models.Course;
+    var teacher = ViewBag.Teacher as LanguageLearningPlatform.Data.Models.User;
+    var previousMessages = ViewBag.PreviousMessages as List<LanguageLearningPlatform.Data.Models.TeacherMessage>;
+}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <a asp-controller="Courses" asp-action="Details" asp-route-id="@course!.Id" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Course
+                </a>
+                <div>
+                    <h2 class="fw-bold mb-0">Contact Teacher</h2>
+                    <p class="text-secondary mb-0 small">@course.Title</p>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4" style="border-radius:16px;border:none;">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0"
+                             style="width:56px;height:56px;font-size:1.1rem;">
+                            @(teacher?.FirstName?.Substring(0, 1))@(teacher?.LastName?.Substring(0, 1))
+                        </div>
+                        <div>
+                            <div class="fw-bold fs-5">@teacher?.FirstName @teacher?.LastName</div>
+                            <div class="text-secondary small">Course Instructor · @course.Language</div>
+                            @if (!string.IsNullOrEmpty(teacher?.TeacherBio))
+                            {
+                                <p class="text-secondary small mt-1 mb-0">@teacher.TeacherBio</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (previousMessages?.Any() == true)
+            {
+                <div class="card shadow-sm mb-4" style="border-radius:16px;border:none;">
+                    <div class="card-body p-4">
+                        <h6 class="fw-bold mb-3"><i class="fas fa-history me-2 text-secondary"></i>Conversation History</h6>
+                        <div class="d-flex flex-column gap-2" style="max-height:300px;overflow-y:auto;">
+                            @foreach (var msg in previousMessages)
+                            {
+                                <div class="d-flex @(msg.IsFromTeacher ? "justify-content-start" : "justify-content-end")">
+                                    <div class="p-3 rounded-3" style="max-width:80%;background:@(msg.IsFromTeacher ? "#EEF2FF" : "#F0FFF4");border:1px solid @(msg.IsFromTeacher ? "#C7D2FE" : "#A7F3D0");">
+                                        <div class="small text-secondary mb-1">
+                                            @(msg.IsFromTeacher ? $"{teacher?.FirstName} (Teacher)" : "You") · @msg.SentAt.ToString("MMM dd, HH:mm")
+                                        </div>
+                                        <div>@msg.Message</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <div class="card shadow-sm" style="border-radius:16px;border:none;">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-pen me-2 text-primary"></i>Send a Message</h5>
+                    <form asp-action="SendMessage" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="courseId" value="@course.Id" />
+                        <div class="mb-3">
+                            <textarea name="message" class="form-control" rows="5" required
+                                      placeholder="Ask your question about the course material..."></textarea>
+                        </div>
+                        <div class="d-flex gap-3">
+                            <button type="submit" class="btn btn-primary px-5">
+                                <i class="fas fa-paper-plane me-2"></i>Send Message
+                            </button>
+                            <a asp-controller="Messaging" asp-action="MyMessages" class="btn btn-outline-secondary">
+                                <i class="fas fa-inbox me-1"></i>My Messages
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

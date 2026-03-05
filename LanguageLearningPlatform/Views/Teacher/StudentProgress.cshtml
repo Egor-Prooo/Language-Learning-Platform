@@ -1,0 +1,138 @@
+﻿@model IEnumerable<LanguageLearningPlatform.Data.Models.Progress>
+
+@{
+    ViewData["Title"] = "Student Progress";
+    var student = ViewBag.Student as LanguageLearningPlatform.Data.Models.User;
+    var exercises = ViewBag.ExerciseResults as List<LanguageLearningPlatform.Data.Models.UserExerciseResult>;
+    var correctCount = exercises?.Count(e => e.IsCorrect) ?? 0;
+    var totalCount = exercises?.Count ?? 0;
+    var accuracy = totalCount > 0 ? (double)correctCount / totalCount * 100 : 0;
+}
+
+<div class="container my-5">
+
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <a asp-action="Students" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Students
+        </a>
+        <h2 class="fw-bold mb-0">Student Progress</h2>
+    </div>
+
+    <!-- Student Info -->
+    <div class="card shadow-sm mb-4" style="border-radius:16px;border:none;">
+        <div class="card-body p-4">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold"
+                     style="width:60px;height:60px;font-size:1.2rem;">
+                    @(student?.FirstName?.Substring(0, 1))@(student?.LastName?.Substring(0, 1))
+                </div>
+                <div>
+                    <h4 class="fw-bold mb-0">@student?.FirstName @student?.LastName</h4>
+                    <div class="text-secondary">@student?.Email</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="stat-icon primary"><i class="fas fa-book"></i></div>
+                <div class="stat-value">@Model.Count()</div>
+                <div class="stat-label">Enrolled Courses</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="stat-icon success"><i class="fas fa-dumbbell"></i></div>
+                <div class="stat-value">@totalCount</div>
+                <div class="stat-label">Exercises Attempted</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="stat-icon warning"><i class="fas fa-bullseye"></i></div>
+                <div class="stat-value">@accuracy.ToString("F0")%</div>
+                <div class="stat-label">Accuracy Rate</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Course Progress -->
+    <div class="card shadow-sm mb-4" style="border-radius:16px;border:none;">
+        <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="fas fa-chart-line me-2 text-primary"></i>Course Progress</h5>
+            @if (!Model.Any())
+            {
+                <p class="text-secondary">No course data available.</p>
+            }
+            else
+            {
+                <div class="d-flex flex-column gap-3">
+                    @foreach (var p in Model)
+                    {
+                        <div class="p-3 rounded-3" style="background:#F9FAFB;border:1px solid #E5E7EB;">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="fw-semibold">@p.Course?.Title</div>
+                                <span class="badge bg-primary">@p.CompletionPercentage.ToString("F0")%</span>
+                            </div>
+                            <div class="progress mb-1" style="height:8px;">
+                                <div class="progress-bar bg-primary" style="width:@p.CompletionPercentage%"></div>
+                            </div>
+                            <div class="d-flex gap-3 small text-secondary mt-1">
+                                <span><i class="fas fa-check me-1"></i>@p.CompletedLessons lessons done</span>
+                                <span><i class="fas fa-star me-1"></i>@p.PointsEarned points</span>
+                                <span><i class="fas fa-clock me-1"></i>Last active @p.LastAccessedAt.ToString("MMM dd")</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Recent Exercise Results -->
+    @if (exercises?.Any() == true)
+    {
+        <div class="card shadow-sm" style="border-radius:16px;border:none;">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-3"><i class="fas fa-history me-2 text-primary"></i>Recent Exercise Activity</h5>
+                <div class="table-responsive">
+                    <table class="table table-sm mb-0">
+                        <thead style="background:#F9FAFB;">
+                            <tr>
+                                <th class="py-2">Exercise</th>
+                                <th class="py-2">Course</th>
+                                <th class="py-2">Result</th>
+                                <th class="py-2">Points</th>
+                                <th class="py-2">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var r in exercises)
+                            {
+                                <tr>
+                                    <td class="py-2">@r.Exercise?.Title</td>
+                                    <td class="py-2 text-secondary small">@r.Exercise?.Course?.Title</td>
+                                    <td class="py-2">
+                                        @if (r.IsCorrect)
+                                        {
+                                            <span class="badge bg-success"><i class="fas fa-check me-1"></i>Correct</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger"><i class="fas fa-times me-1"></i>Wrong</span>
+                                        }
+                                    </td>
+                                    <td class="py-2 fw-semibold text-primary">@r.PointsEarned</td>
+                                    <td class="py-2 text-secondary small">@r.CompletedAt.ToString("MMM dd, HH:mm")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,374 @@
+﻿@model LanguageLearningPlatform.Data.Models.User
+
+@{
+    ViewData["Title"] = "User Details";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var roles = ViewBag.UserRoles as IList<string> ?? new List<string>();
+    var enrollments = ViewBag.Enrollments as List<LanguageLearningPlatform.Data.Models.CourseEnrollment> ?? new();
+    var roleLabel = roles.Contains("Admin") ? "Admin" : roles.Contains("Teacher") ? "Teacher" : "Student";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0"><i class="fas fa-user me-2"></i>User Details</h1>
+        <p class="text-muted small mb-0">@Model.FirstName @Model.LastName</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Users
+    </a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="row g-4">
+
+    <!-- Left Column: Profile + Role Management -->
+    <div class="col-lg-4">
+
+        <!-- Profile Card -->
+        <div class="admin-card mb-4">
+            <div class="admin-card-body text-center">
+                <div class="user-avatar-lg mx-auto mb-3">
+                    @(Model.FirstName?.Substring(0, 1))@(Model.LastName?.Substring(0, 1))
+                </div>
+                <h4 class="fw-bold mb-1">@Model.FirstName @Model.LastName</h4>
+                <p class="text-muted small mb-2">@Model.Email</p>
+
+                @if (roleLabel == "Admin")
+                {
+                    <span class="badge rounded-pill bg-danger-subtle text-danger mb-2">
+                        <i class="fas fa-shield-alt me-1"></i>Admin
+                    </span>
+                }
+                else if (roleLabel == "Teacher")
+                {
+                    <span class="badge rounded-pill bg-primary-subtle text-primary mb-2">
+                        <i class="fas fa-chalkboard-teacher me-1"></i>Teacher
+                    </span>
+                }
+                else
+                {
+                    <span class="badge rounded-pill bg-secondary-subtle text-secondary mb-2">
+                        <i class="fas fa-graduation-cap me-1"></i>Student
+                    </span>
+                }
+
+                <div class="text-muted small mt-2">
+                    <i class="fas fa-calendar me-1"></i>
+                    Joined @Model.RegistrationDate.ToString("MMM dd, yyyy")
+                </div>
+                @if (Model.LastLoginDate.HasValue)
+                {
+                    <div class="text-muted small">
+                        <i class="fas fa-clock me-1"></i>
+                        Last login @Model.LastLoginDate.Value.ToString("MMM dd, yyyy")
+                    </div>
+                }
+
+                <hr class="my-3" />
+
+                <div class="d-flex justify-content-center gap-2 flex-wrap">
+                    @if (!Model.IsActive)
+                    {
+                        <span class="badge bg-danger">Inactive</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success">Active</span>
+                    }
+                    @if (Model.IsVerifiedTeacher)
+                    {
+                        <span class="badge bg-info">Verified Teacher</span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Role Management -->
+        <div class="admin-card mb-4">
+            <div class="admin-card-header">
+                <h6 class="admin-card-title"><i class="fas fa-user-tag me-2 text-primary"></i>Role Management</h6>
+            </div>
+            <div class="admin-card-body">
+                @if (roleLabel != "Admin")
+                {
+                    @if (roleLabel == "Teacher")
+                    {
+                        <form asp-action="RemoveRole" method="post" class="mb-2">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="userId" value="@Model.Id" />
+                            <input type="hidden" name="role" value="Teacher" />
+                            <button type="submit" class="btn btn-outline-warning w-100"
+                                    onclick="return confirm('Remove Teacher role from this user?')">
+                                <i class="fas fa-user-minus me-2"></i>Remove Teacher Role
+                            </button>
+                        </form>
+                        <a asp-action="AssignCourses" asp-route-id="@Model.Id"
+                           class="btn btn-outline-primary w-100 mb-2">
+                            <i class="fas fa-book me-2"></i>Assign Courses
+                        </a>
+                    }
+                    else
+                    {
+                        <form asp-action="AssignRole" method="post" class="mb-2">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="userId" value="@Model.Id" />
+                            <input type="hidden" name="role" value="Teacher" />
+                            <button type="submit" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-chalkboard-teacher me-2"></i>Make Teacher
+                            </button>
+                        </form>
+                    }
+
+                    <form asp-action="ToggleActive" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        @if (Model.IsActive)
+                        {
+                            <button type="submit" class="btn btn-outline-danger w-100"
+                                    onclick="return confirm('Deactivate this user?')">
+                                <i class="fas fa-ban me-2"></i>Deactivate User
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="submit" class="btn btn-outline-success w-100"
+                                    onclick="return confirm('Activate this user?')">
+                                <i class="fas fa-check me-2"></i>Activate User
+                            </button>
+                        }
+                    </form>
+                }
+                else
+                {
+                    <p class="text-muted small mb-0">Admin role cannot be modified here.</p>
+                }
+            </div>
+        </div>
+
+        <!-- Teacher Info (if applicable) -->
+        @if (roleLabel == "Teacher" && (!string.IsNullOrEmpty(Model.TeacherBio) || !string.IsNullOrEmpty(Model.Specialization)))
+        {
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h6 class="admin-card-title"><i class="fas fa-chalkboard-teacher me-2 text-primary"></i>Teacher Info</h6>
+                </div>
+                <div class="admin-card-body">
+                    @if (!string.IsNullOrEmpty(Model.Specialization))
+                    {
+                        <div class="mb-2">
+                            <div class="text-muted small">Specialization</div>
+                            <div class="fw-semibold">@Model.Specialization</div>
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.TeacherBio))
+                    {
+                        <div>
+                            <div class="text-muted small">Bio</div>
+                            <div class="small">@Model.TeacherBio</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Right Column: Stats + Enrollments + Achievements -->
+    <div class="col-lg-8">
+
+        <!-- Stats -->
+        <div class="row g-3 mb-4">
+            @{
+                var totalPoints = Model.Progresses.Sum(p => p.PointsEarned);
+                var totalExercises = Model.ExerciseResults.Count;
+                var correctExercises = Model.ExerciseResults.Count(e => e.IsCorrect);
+                var accuracy = totalExercises > 0 ? (double)correctExercises / totalExercises * 100 : 0;
+            }
+            <div class="col-sm-3">
+                <div class="mini-stat-card" style="border-left-color:#4F46E5;">
+                    <div class="fw-bold" style="font-size:1.4rem;color:#4F46E5;">@totalPoints</div>
+                    <div class="text-muted small">Total Points</div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="mini-stat-card" style="border-left-color:#10B981;">
+                    <div class="fw-bold" style="font-size:1.4rem;color:#10B981;">@enrollments.Count</div>
+                    <div class="text-muted small">Enrolled Courses</div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="mini-stat-card" style="border-left-color:#F59E0B;">
+                    <div class="fw-bold" style="font-size:1.4rem;color:#F59E0B;">@totalExercises</div>
+                    <div class="text-muted small">Exercises Done</div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="mini-stat-card" style="border-left-color:#EF4444;">
+                    <div class="fw-bold" style="font-size:1.4rem;color:#EF4444;">@accuracy.ToString("F0")%</div>
+                    <div class="text-muted small">Accuracy</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enrolled Courses -->
+        <div class="admin-card mb-4">
+            <div class="admin-card-header">
+                <h6 class="admin-card-title"><i class="fas fa-book me-2 text-primary"></i>Enrolled Courses (@enrollments.Count)</h6>
+            </div>
+            <div class="admin-card-body p-0">
+                @if (!enrollments.Any())
+                {
+                    <div class="p-4 text-center text-muted small">No course enrollments yet.</div>
+                }
+                else
+                {
+                    <table class="table table-sm table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Course</th>
+                                <th>Language</th>
+                                <th>Enrolled</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var enrollment in enrollments)
+                            {
+                                <tr>
+                                    <td class="ps-3 fw-semibold" style="font-size:0.875rem;">
+                                        @enrollment.Course?.Title
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark">@enrollment.Course?.Language</span>
+                                    </td>
+                                    <td class="text-muted small">
+                                        @enrollment.EnrollmentDate.ToString("MMM dd, yyyy")
+                                    </td>
+                                    <td>
+                                        @if (enrollment.IsActive)
+                                        {
+                                            <span class="badge bg-success-subtle text-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary-subtle text-secondary">Inactive</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+
+        <!-- Achievements -->
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h6 class="admin-card-title">
+                    <i class="fas fa-trophy me-2 text-warning"></i>
+                    Achievements (@Model.UserAchievements.Count)
+                </h6>
+            </div>
+            <div class="admin-card-body">
+                @if (!Model.UserAchievements.Any())
+                {
+                    <p class="text-muted small mb-0">No achievements unlocked yet.</p>
+                }
+                else
+                {
+                    <div class="row g-2">
+                        @foreach (var ua in Model.UserAchievements.OrderByDescending(a => a.UnlockedAt).Take(9))
+                        {
+                            <div class="col-md-4">
+                                <div class="d-flex align-items-center gap-2 p-2 rounded-3"
+                                     style="background:#F9FAFB;border:1px solid #E5E7EB;">
+                                    <div style="font-size:1.5rem;">
+                                        @if (ua.Achievement?.IsRare == true)
+                                        {
+                                            <i class="fas fa-medal text-warning"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="fas fa-award text-success"></i>
+                                        }
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="fw-semibold text-truncate" style="font-size:0.8rem;">
+                                            @ua.Achievement?.Title
+                                        </div>
+                                        <div class="text-muted" style="font-size:0.7rem;">
+                                            @ua.UnlockedAt.ToString("MMM dd, yyyy")
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .admin-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        overflow: hidden;
+    }
+
+    .admin-card-header {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #F3F4F6;
+        display: flex;
+        align-items: center;
+    }
+
+    .admin-card-title {
+        margin: 0;
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: #1F2937;
+    }
+
+    .admin-card-body {
+        padding: 1.25rem;
+    }
+
+    .user-avatar-lg {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4F46E5, #7C3AED);
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .mini-stat-card {
+        background: white;
+        border-radius: 10px;
+        border-left: 4px solid transparent;
+        padding: 0.875rem 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+</style>

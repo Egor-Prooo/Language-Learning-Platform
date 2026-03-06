@@ -29,6 +29,7 @@ namespace LanguageLearningPlatform.Data
         public DbSet<VideoLesson> VideoLessons { get; set; }
         public DbSet<UserVideoProgress> UserVideoProgresses { get; set; }
         public DbSet<TeacherMessage> TeacherMessages { get; set; }
+        public DbSet<CourseTeacher> CourseTeachers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

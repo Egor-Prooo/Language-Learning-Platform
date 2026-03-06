@@ -56,6 +56,7 @@ namespace LanguageLearningPlatform.Data.Models
         public virtual ICollection<ForumPost> ForumPosts { get; set; } = new List<ForumPost>();
         public virtual ICollection<ForumComment> ForumComments { get; set; } = new List<ForumComment>();
         public virtual ICollection<TeacherLesson> TeacherLessons { get; set; } = new List<TeacherLesson>();
+        public virtual ICollection<CourseTeacher> AssignedCourses { get; set; } = new List<CourseTeacher>();
         public virtual UserLevel UserLevel { get; set; }
     }
 }

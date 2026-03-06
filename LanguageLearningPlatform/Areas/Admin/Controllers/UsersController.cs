@@ -91,12 +91,39 @@ namespace LanguageLearningPlatform.Web.Areas.Admin.Controllers
         public async Task<IActionResult> AssignRole(string userId, string role)
         {
             var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-                return NotFound();
+            if (user == null) return NotFound();
 
             if (!await _userManager.IsInRoleAsync(user, role))
             {
                 await _userManager.AddToRoleAsync(user, role);
+
+                // If becoming a Teacher, auto-assign them to any courses they created
+                if (role == "Teacher")
+                {
+                    var createdCourses = await _context.Courses
+                        .Where(c => c.CreatorId == userId)
+                        .ToListAsync();
+
+                    foreach (var course in createdCourses)
+                    {
+                        var alreadyAssigned = await _context.CourseTeachers
+                            .AnyAsync(ct => ct.CourseId == course.Id && ct.TeacherId == userId);
+
+                        if (!alreadyAssigned)
+                        {
+                            _context.CourseTeachers.Add(new CourseTeacher
+                            {
+                                Id = Guid.NewGuid(),
+                                CourseId = course.Id,
+                                TeacherId = userId,
+                                AssignedAt = DateTime.UtcNow,
+                                IsPrimary = true
+                            });
+                        }
+                    }
+                    await _context.SaveChangesAsync();
+                }
+
                 TempData["SuccessMessage"] = $"Role '{role}' assigned successfully!";
             }
 
@@ -191,6 +218,68 @@ namespace LanguageLearningPlatform.Web.Areas.Admin.Controllers
 
             TempData["SuccessMessage"] = $"Teacher account for {FirstName} {LastName} created successfully!";
             return RedirectToAction(nameof(Index));
+        }
+
+        // GET: Admin/Users/AssignCourses/userId
+        public async Task<IActionResult> AssignCourses(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) return NotFound();
+
+            var isTeacher = await _userManager.IsInRoleAsync(user, "Teacher");
+            if (!isTeacher)
+            {
+                TempData["ErrorMessage"] = "User is not a teacher.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            var allCourses = await _context.Courses
+                .Where(c => c.IsPublished || c.CreatorId == id)
+                .OrderBy(c => c.Title)
+                .ToListAsync();
+
+            var assignedCourseIds = await _context.CourseTeachers
+                .Where(ct => ct.TeacherId == id)
+                .Select(ct => ct.CourseId)
+                .ToListAsync();
+
+            ViewBag.Teacher = user;
+            ViewBag.AllCourses = allCourses;
+            ViewBag.AssignedCourseIds = assignedCourseIds;
+
+            return View();
+        }
+
+        // POST: Admin/Users/AssignCourses
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AssignCourses(string teacherId, List<Guid> courseIds)
+        {
+            var user = await _userManager.FindByIdAsync(teacherId);
+            if (user == null) return NotFound();
+
+            // Remove existing assignments
+            var existing = await _context.CourseTeachers
+                .Where(ct => ct.TeacherId == teacherId)
+                .ToListAsync();
+            _context.CourseTeachers.RemoveRange(existing);
+
+            // Add new assignments
+            foreach (var courseId in courseIds ?? new List<Guid>())
+            {
+                _context.CourseTeachers.Add(new CourseTeacher
+                {
+                    Id = Guid.NewGuid(),
+                    CourseId = courseId,
+                    TeacherId = teacherId,
+                    AssignedAt = DateTime.UtcNow,
+                    IsPrimary = false
+                });
+            }
+
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Course assignments updated successfully!";
+            return RedirectToAction(nameof(Details), new { id = teacherId });
         }
 
         // ---------------------------------------------------------------

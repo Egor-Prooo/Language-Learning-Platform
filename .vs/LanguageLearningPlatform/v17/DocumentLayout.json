@@ -3,6 +3,14 @@
   "WorkspaceRootPath": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|c:\\users\\epros\\source\\repos\\languagelearningplatform\\languagelearningplatform\\controllers\\messagingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|solutionrelative:languagelearningplatform\\controllers\\messagingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|c:\\users\\epros\\source\\repos\\languagelearningplatform\\languagelearningplatform\\views\\messaging\\contactteacher.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|solutionrelative:languagelearningplatform\\views\\messaging\\contactteacher.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|c:\\users\\epros\\source\\repos\\languagelearningplatform\\languagelearningplatform\\areas\\admin\\views\\users\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|solutionrelative:languagelearningplatform\\areas\\admin\\views\\users\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
@@ -51,10 +59,6 @@
       "RelativeMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|solutionrelative:languagelearningplatform\\views\\messaging\\mymessages.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|c:\\users\\epros\\source\\repos\\languagelearningplatform\\languagelearningplatform\\views\\messaging\\contactteacher.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|solutionrelative:languagelearningplatform\\views\\messaging\\contactteacher.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|c:\\users\\epros\\source\\repos\\languagelearningplatform\\languagelearningplatform\\views\\teacher\\studentprogress.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|solutionrelative:languagelearningplatform\\views\\teacher\\studentprogress.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
@@ -65,10 +69,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|c:\\users\\epros\\source\\repos\\languagelearningplatform\\languagelearningplatform\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|solutionrelative:languagelearningplatform\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|c:\\users\\epros\\source\\repos\\languagelearningplatform\\languagelearningplatform\\controllers\\messagingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CE16B61A-2CC9-4681-9C48-4998A7892898}|LanguageLearningPlatform\\LanguageLearningPlatform.Web.csproj|solutionrelative:languagelearningplatform\\controllers\\messagingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{45F58F51-2E6B-426E-9CAA-DB9EC2EEE17C}|LanguageLearningPlatform.Data\\LanguageLearningPlatform.Data.csproj|c:\\users\\epros\\source\\repos\\languagelearningplatform\\languagelearningplatform.data\\models\\chatmessage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -346,7 +346,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 11,
           "Children": [
             {
               "$type": "Bookmark",
@@ -370,7 +370,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 2,
               "Title": "Details.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Areas\\Admin\\Views\\Users\\Details.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Areas\\Admin\\Views\\Users\\Details.cshtml",
@@ -383,7 +383,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "AssignCourses.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Areas\\Admin\\Views\\Users\\AssignCourses.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Areas\\Admin\\Views\\Users\\AssignCourses.cshtml",
@@ -396,27 +396,65 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "User.cs",
-              "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Models\\User.cs",
-              "RelativeDocumentMoniker": "LanguageLearningPlatform.Data\\Models\\User.cs",
-              "ToolTip": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Models\\User.cs",
-              "RelativeToolTip": "LanguageLearningPlatform.Data\\Models\\User.cs",
-              "ViewState": "AgIAABsAAAAAAAAAAAAAADoAAABsAAAAAAAAAA==",
+              "DocumentIndex": 12,
+              "Title": "Achievement.cs",
+              "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Models\\Achievement.cs",
+              "RelativeDocumentMoniker": "LanguageLearningPlatform.Data\\Models\\Achievement.cs",
+              "ToolTip": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Models\\Achievement.cs",
+              "RelativeToolTip": "LanguageLearningPlatform.Data\\Models\\Achievement.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB8AAAA0AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-06T09:12:21.939Z"
+              "WhenOpened": "2026-03-06T08:16:53.77Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "CourseTeacher.cs",
-              "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Models\\CourseTeacher.cs",
-              "RelativeDocumentMoniker": "LanguageLearningPlatform.Data\\Models\\CourseTeacher.cs",
-              "ToolTip": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Models\\CourseTeacher.cs",
-              "RelativeToolTip": "LanguageLearningPlatform.Data\\Models\\CourseTeacher.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAA1AAAAAAAAAA==",
+              "DocumentIndex": 8,
+              "Title": "Course.cs",
+              "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Models\\Course.cs",
+              "RelativeDocumentMoniker": "LanguageLearningPlatform.Data\\Models\\Course.cs",
+              "ToolTip": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Models\\Course.cs",
+              "RelativeToolTip": "LanguageLearningPlatform.Data\\Models\\Course.cs",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAAADEAAABrAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-06T09:11:41.139Z"
+              "WhenOpened": "2026-03-04T20:10:23.219Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "ApplicationDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\ApplicationDbContext.cs",
+              "RelativeDocumentMoniker": "LanguageLearningPlatform.Data\\ApplicationDbContext.cs",
+              "ToolTip": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\ApplicationDbContext.cs",
+              "RelativeToolTip": "LanguageLearningPlatform.Data\\ApplicationDbContext.cs",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAAAB8AAABAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-19T19:39:59.269Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ContactTeacher.cshtml",
+              "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Views\\Messaging\\ContactTeacher.cshtml",
+              "RelativeDocumentMoniker": "LanguageLearningPlatform\\Views\\Messaging\\ContactTeacher.cshtml",
+              "ToolTip": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Views\\Messaging\\ContactTeacher.cshtml",
+              "RelativeToolTip": "LanguageLearningPlatform\\Views\\Messaging\\ContactTeacher.cshtml",
+              "ViewState": "AgIAADcAAAAAAAAAAAAuwEkAAABPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-05T08:03:39.766Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "MessagingController.cs",
+              "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Controllers\\MessagingController.cs",
+              "RelativeDocumentMoniker": "LanguageLearningPlatform\\Controllers\\MessagingController.cs",
+              "ToolTip": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Controllers\\MessagingController.cs",
+              "RelativeToolTip": "LanguageLearningPlatform\\Controllers\\MessagingController.cs",
+              "ViewState": "AgIAAEcAAAAAAAAAAAAuwGwAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-04T20:09:20.849Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -432,43 +470,31 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "Achievement.cs",
-              "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Models\\Achievement.cs",
-              "RelativeDocumentMoniker": "LanguageLearningPlatform.Data\\Models\\Achievement.cs",
-              "ToolTip": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Models\\Achievement.cs",
-              "RelativeToolTip": "LanguageLearningPlatform.Data\\Models\\Achievement.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB8AAAA0AAAAAAAAAA==",
+              "DocumentIndex": 9,
+              "Title": "CourseTeacher.cs",
+              "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Models\\CourseTeacher.cs",
+              "RelativeDocumentMoniker": "LanguageLearningPlatform.Data\\Models\\CourseTeacher.cs",
+              "ToolTip": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Models\\CourseTeacher.cs",
+              "RelativeToolTip": "LanguageLearningPlatform.Data\\Models\\CourseTeacher.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAA1AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-06T08:16:53.77Z"
+              "WhenOpened": "2026-03-06T09:11:41.139Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "Course.cs",
-              "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Models\\Course.cs",
-              "RelativeDocumentMoniker": "LanguageLearningPlatform.Data\\Models\\Course.cs",
-              "ToolTip": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Models\\Course.cs",
-              "RelativeToolTip": "LanguageLearningPlatform.Data\\Models\\Course.cs",
-              "ViewState": "AgIAAA8AAAAAAAAAAAAAADEAAABrAAAAAAAAAA==",
+              "DocumentIndex": 7,
+              "Title": "User.cs",
+              "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Models\\User.cs",
+              "RelativeDocumentMoniker": "LanguageLearningPlatform.Data\\Models\\User.cs",
+              "ToolTip": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\Models\\User.cs",
+              "RelativeToolTip": "LanguageLearningPlatform.Data\\Models\\User.cs",
+              "ViewState": "AgIAABsAAAAAAAAAAAAAADoAAABsAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-04T20:10:23.219Z"
+              "WhenOpened": "2026-03-06T09:12:21.939Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 4,
-              "Title": "ApplicationDbContext.cs",
-              "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\ApplicationDbContext.cs",
-              "RelativeDocumentMoniker": "LanguageLearningPlatform.Data\\ApplicationDbContext.cs",
-              "ToolTip": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Data\\ApplicationDbContext.cs",
-              "RelativeToolTip": "LanguageLearningPlatform.Data\\ApplicationDbContext.cs",
-              "ViewState": "AgIAAA8AAAAAAAAAAAAAAB8AAABAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-19T19:39:59.269Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Areas\\Admin\\Views\\Users\\Index.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Areas\\Admin\\Views\\Users\\Index.cshtml",
@@ -481,7 +507,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 5,
               "Title": "UsersController.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Areas\\Admin\\Controllers\\UsersController.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Areas\\Admin\\Controllers\\UsersController.cs",
@@ -493,7 +519,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 13,
               "Title": "MyMessages.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Views\\Messaging\\MyMessages.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Views\\Messaging\\MyMessages.cshtml",
@@ -505,7 +531,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 15,
               "Title": "Messages.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Views\\Teacher\\Messages.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Views\\Teacher\\Messages.cshtml",
@@ -517,19 +543,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
-              "Title": "MessagingController.cs",
-              "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Controllers\\MessagingController.cs",
-              "RelativeDocumentMoniker": "LanguageLearningPlatform\\Controllers\\MessagingController.cs",
-              "ToolTip": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Controllers\\MessagingController.cs",
-              "RelativeToolTip": "LanguageLearningPlatform\\Controllers\\MessagingController.cs",
-              "ViewState": "AgIAAEUAAAAAAAAAAAAuwIIAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-04T20:09:20.849Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 11,
               "Title": "AchievementsController.cs",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Areas\\Admin\\Controllers\\AchievementsController.cs",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Areas\\Admin\\Controllers\\AchievementsController.cs",
@@ -541,7 +555,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 10,
               "Title": "CreateEdit.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Areas\\Admin\\Views\\Achievements\\CreateEdit.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Areas\\Admin\\Views\\Achievements\\CreateEdit.cshtml",
@@ -553,7 +567,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 14,
               "Title": "StudentProgress.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Views\\Teacher\\StudentProgress.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Views\\Teacher\\StudentProgress.cshtml",
@@ -562,18 +576,6 @@
               "ViewState": "AgIAAGEAAAAAAAAAAAAuwIkAAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2026-03-05T08:02:01.891Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 12,
-              "Title": "ContactTeacher.cshtml",
-              "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Views\\Messaging\\ContactTeacher.cshtml",
-              "RelativeDocumentMoniker": "LanguageLearningPlatform\\Views\\Messaging\\ContactTeacher.cshtml",
-              "ToolTip": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Views\\Messaging\\ContactTeacher.cshtml",
-              "RelativeToolTip": "LanguageLearningPlatform\\Views\\Messaging\\ContactTeacher.cshtml",
-              "ViewState": "AgIAADcAAAAAAAAAAAAuwEkAAABPAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-03-05T08:03:39.766Z"
             },
             {
               "$type": "Document",
@@ -625,7 +627,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 16,
               "Title": "_Layout.cshtml",
               "DocumentMoniker": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform\\Views\\Shared\\_Layout.cshtml",
               "RelativeDocumentMoniker": "LanguageLearningPlatform\\Views\\Shared\\_Layout.cshtml",

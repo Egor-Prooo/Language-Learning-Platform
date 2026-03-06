@@ -25,7 +25,17 @@ namespace LanguageLearningPlatform.Web.Controllers
                 .FirstOrDefaultAsync(c => c.Id == courseId);
 
             if (course == null) return NotFound();
-            if (course.Creator == null)
+
+            // Find primary assigned teacher, fall back to course creator
+            var courseTeacher = await _context.CourseTeachers
+                .Include(ct => ct.Teacher)
+                .Where(ct => ct.CourseId == courseId)
+                .OrderByDescending(ct => ct.IsPrimary)
+                .FirstOrDefaultAsync();
+
+            var teacher = courseTeacher?.Teacher ?? course.Creator;
+
+            if (teacher == null)
             {
                 TempData["ErrorMessage"] = "This course has no assigned teacher.";
                 return RedirectToAction("Details", "Courses", new { id = courseId });
@@ -33,14 +43,13 @@ namespace LanguageLearningPlatform.Web.Controllers
 
             var studentId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
-            // Load previous messages in this conversation
             var previousMessages = await _context.TeacherMessages
                 .Where(m => m.StudentId == studentId && m.CourseId == courseId)
                 .OrderBy(m => m.SentAt)
                 .ToListAsync();
 
             ViewBag.Course = course;
-            ViewBag.Teacher = course.Creator;
+            ViewBag.Teacher = teacher;
             ViewBag.PreviousMessages = previousMessages;
 
             return View();
@@ -58,7 +67,21 @@ namespace LanguageLearningPlatform.Web.Controllers
             }
 
             var course = await _context.Courses.FindAsync(courseId);
-            if (course?.CreatorId == null)
+            if (course == null)
+            {
+                TempData["ErrorMessage"] = "Course not found.";
+                return RedirectToAction("Details", "Courses", new { id = courseId });
+            }
+
+            // Find assigned teacher or fall back to creator
+            var courseTeacher = await _context.CourseTeachers
+                .Where(ct => ct.CourseId == courseId)
+                .OrderByDescending(ct => ct.IsPrimary)
+                .FirstOrDefaultAsync();
+
+            var teacherId = courseTeacher?.TeacherId ?? course.CreatorId;
+
+            if (teacherId == null)
             {
                 TempData["ErrorMessage"] = "No teacher found for this course.";
                 return RedirectToAction("Details", "Courses", new { id = courseId });
@@ -69,7 +92,7 @@ namespace LanguageLearningPlatform.Web.Controllers
             var msg = new TeacherMessage
             {
                 Id = Guid.NewGuid(),
-                TeacherId = course.CreatorId,
+                TeacherId = teacherId,
                 StudentId = studentId,
                 CourseId = courseId,
                 Message = message,

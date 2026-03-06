@@ -71,16 +71,36 @@
 
                         <div class="col-md-6">
                             <label asp-for="PointsRequired" class="form-label fw-semibold">Points Required</label>
-                            <input asp-for="PointsRequired" type="number" min="0" class="form-control"
-                                   placeholder="e.g. 100" />
-                            <div class="form-text">How many points the user needs to unlock this.</div>
+                            <input asp-for="PointsRequired" type="number" min="0" class="form-control" placeholder="e.g. 100" />
+                            <div class="form-text">Minimum points the user needs to be eligible.</div>
                         </div>
 
                         <div class="col-md-6">
                             <label asp-for="PointsReward" class="form-label fw-semibold">Points Reward</label>
-                            <input asp-for="PointsReward" type="number" min="0" class="form-control"
-                                   placeholder="e.g. 50" />
+                            <input asp-for="PointsReward" type="number" min="0" class="form-control" placeholder="e.g. 50" />
                             <div class="form-text">Points awarded when this achievement is unlocked.</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="TriggerType" class="form-label fw-semibold">
+                                Trigger Event <span class="text-danger">*</span>
+                            </label>
+                            <select asp-for="TriggerType" class="form-select" id="TriggerType">
+                                <option value="">Select a trigger</option>
+                                <option value="PointsReached">Points Reached</option>
+                                <option value="LessonsCompleted">Lessons Completed</option>
+                                <option value="StreakDays">Streak Days</option>
+                                <option value="AccuracyRate">Accuracy Rate (%)</option>
+                                <option value="CoursesCompleted">Courses Completed</option>
+                            </select>
+                            <div class="form-text">What action by the user unlocks this achievement.</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="TriggerValue" class="form-label fw-semibold">Trigger Value</label>
+                            <input asp-for="TriggerValue" type="number" min="0" class="form-control"
+                                   placeholder="e.g. 7" id="TriggerValue" />
+                            <div class="form-text" id="triggerValueHelp">The threshold that must be reached.</div>
                         </div>
 
                         <div class="col-12">
@@ -232,6 +252,26 @@
             icon.innerHTML = `<i class="fas fa-${isRare ? 'medal' : 'award'}"></i>`;
             badge.classList.toggle('d-none', !isRare);
         }
+
+        document.getElementById('TriggerType')?.addEventListener('change', function () {
+            const help = document.getElementById('triggerValueHelp');
+            const map = {
+                'PointsReached':      'Total points the user must accumulate.',
+                'LessonsCompleted':   'Number of lessons the user must finish.',
+                'StreakDays':         'Number of consecutive active days.',
+                'AccuracyRate':       'Minimum exercise accuracy percentage (0–100).',
+                'CoursesCompleted':   'Number of full courses the user must complete.'
+            };
+            help.textContent = map[this.value] || 'The threshold that must be reached.';
+        });
+        ```
+
+        ### Step 4 — Add a migration
+
+        Run this in Package Manager Console (targeting the Data project):
+        ```
+        Add-Migration AddAchievementTrigger
+        Update-Database
 
         ['Title','Description','PointsRequired','PointsReward','Category'].forEach(id => {
             document.getElementById(id)?.addEventListener('input', updatePreview);

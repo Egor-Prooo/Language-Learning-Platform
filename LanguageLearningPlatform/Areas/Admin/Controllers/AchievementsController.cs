@@ -72,6 +72,8 @@ namespace LanguageLearningPlatform.Web.Areas.Admin.Controllers
                 existing.PointsReward = achievement.PointsReward;
                 existing.IsRare = achievement.IsRare;
                 existing.IconUrl = achievement.IconUrl;
+                existing.TriggerType = achievement.TriggerType;
+                existing.TriggerValue = achievement.TriggerValue;
 
                 _context.Achievements.Update(existing);
                 TempData["SuccessMessage"] = "Achievement updated successfully!";

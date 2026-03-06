@@ -24,6 +24,13 @@ namespace LanguageLearningPlatform.Data.Models
         [MaxLength(50)]
         public string Category { get; set; } = string.Empty; // "Streak", "Points", "Completion"
 
+        [MaxLength(50)]
+        public string TriggerType { get; set; } = string.Empty;
+        // e.g. "PointsReached", "LessonsCompleted", "StreakDays", "AccuracyRate", "CoursesCompleted"
+
+        public int TriggerValue { get; set; } = 0;
+        // e.g. 100 points, 10 lessons, 7 day streak
+
         public int PointsReward { get; set; } = 0;
 
         public bool IsRare { get; set; } = false;

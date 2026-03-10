@@ -31,22 +31,30 @@ namespace LanguageLearningPlatform.Web.Controllers
         {
             var teacherId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
-            var teacherCourses = await _context.Courses
+            var createdCourseIds = await _context.Courses
                 .Where(c => c.CreatorId == teacherId)
+                .Select(c => c.Id)
+                .ToListAsync();
+
+            var assignedCourseIds = await _context.CourseTeachers
+                .Where(ct => ct.TeacherId == teacherId)
+                .Select(ct => ct.CourseId)
+                .ToListAsync();
+
+            var allCourseIds = createdCourseIds.Union(assignedCourseIds).ToList();
+
+            var teacherCourses = await _context.Courses
+                .Where(c => allCourseIds.Contains(c.Id))
                 .Include(c => c.Enrollments)
                 .Include(c => c.Lessons)
                 .ToListAsync();
 
-            var totalStudents = teacherCourses.SelectMany(c => c.Enrollments).Select(e => e.UserId).Distinct().Count();
-            var totalLessons = teacherCourses.Sum(c => c.Lessons.Count);
-            var publishedCourses = teacherCourses.Count(c => c.IsPublished);
-
-            ViewBag.TotalStudents = totalStudents;
-            ViewBag.TotalLessons = totalLessons;
-            ViewBag.PublishedCourses = publishedCourses;
+            ViewBag.CreatedCourseIds = createdCourseIds.ToHashSet();
+            ViewBag.TotalStudents = teacherCourses.SelectMany(c => c.Enrollments).Select(e => e.UserId).Distinct().Count();
+            ViewBag.TotalLessons = teacherCourses.Sum(c => c.Lessons.Count);
+            ViewBag.PublishedCourses = teacherCourses.Count(c => c.IsPublished);
             ViewBag.TotalCourses = teacherCourses.Count;
 
-            // Recent messages from students
             var recentMessages = await _context.TeacherMessages
                 .Where(m => m.TeacherId == teacherId && !m.IsRead)
                 .Include(m => m.Student)
@@ -60,18 +68,16 @@ namespace LanguageLearningPlatform.Web.Controllers
             return View(teacherCourses);
         }
 
+        // ── Students ─────────────────────────────────────────────────
+
         // GET: /Teacher/Students
         public async Task<IActionResult> Students(Guid? courseId = null)
         {
             var teacherId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-
-            var teacherCourseIds = await _context.Courses
-                .Where(c => c.CreatorId == teacherId)
-                .Select(c => c.Id)
-                .ToListAsync();
+            var allCourseIds = await GetAllTeacherCourseIdsAsync(teacherId);
 
             var enrollmentsQuery = _context.CourseEnrollments
-                .Where(e => teacherCourseIds.Contains(e.CourseId) && e.IsActive)
+                .Where(e => allCourseIds.Contains(e.CourseId) && e.IsActive)
                 .Include(e => e.User)
                 .Include(e => e.Course)
                 .AsQueryable();
@@ -80,28 +86,28 @@ namespace LanguageLearningPlatform.Web.Controllers
                 enrollmentsQuery = enrollmentsQuery.Where(e => e.CourseId == courseId.Value);
 
             var enrollments = await enrollmentsQuery.ToListAsync();
-
-            // Get progress for each enrollment
             var progressData = await _context.Progresses
-                .Where(p => teacherCourseIds.Contains(p.CourseId))
+                .Where(p => allCourseIds.Contains(p.CourseId))
                 .ToListAsync();
 
-            ViewBag.TeacherCourses = await _context.Courses
-                .Where(c => c.CreatorId == teacherId)
-                .ToListAsync();
+            ViewBag.TeacherCourses = await _context.Courses.Where(c => allCourseIds.Contains(c.Id)).ToListAsync();
             ViewBag.SelectedCourseId = courseId;
             ViewBag.ProgressData = progressData.ToDictionary(p => (p.UserId, p.CourseId), p => p);
 
             return View(enrollments);
         }
 
+        // ── Course management ─────────────────────────────────────────
+
         // GET: /Teacher/CourseDetails/id
         public async Task<IActionResult> CourseDetails(Guid id)
         {
             var teacherId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
+            if (!await IsTeacherOfCourseAsync(teacherId, id)) return NotFound();
+
             var course = await _context.Courses
-                .Where(c => c.Id == id && c.CreatorId == teacherId)
+                .Where(c => c.Id == id)
                 .Include(c => c.Lessons.OrderBy(l => l.OrderIndex))
                     .ThenInclude(l => l.Exercises)
                 .Include(c => c.Enrollments)
@@ -109,6 +115,8 @@ namespace LanguageLearningPlatform.Web.Controllers
                 .FirstOrDefaultAsync();
 
             if (course == null) return NotFound();
+
+            ViewBag.IsCreator = await _context.Courses.AnyAsync(c => c.Id == id && c.CreatorId == teacherId);
 
             var progresses = await _context.Progresses
                 .Where(p => p.CourseId == id)
@@ -149,7 +157,7 @@ namespace LanguageLearningPlatform.Web.Controllers
             return RedirectToAction(nameof(CourseDetails), new { id = course.Id });
         }
 
-        // POST: /Teacher/TogglePublish/id
+        // POST: /Teacher/TogglePublish/id  (creator only)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> TogglePublish(Guid id)
@@ -171,7 +179,10 @@ namespace LanguageLearningPlatform.Web.Controllers
         public async Task<IActionResult> AddLesson(Guid courseId)
         {
             var teacherId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-            var course = await _context.Courses.FirstOrDefaultAsync(c => c.Id == courseId && c.CreatorId == teacherId);
+
+            if (!await IsTeacherOfCourseAsync(teacherId, courseId)) return NotFound();
+
+            var course = await _context.Courses.FindAsync(courseId);
             if (course == null) return NotFound();
 
             ViewBag.CourseId = courseId;
@@ -185,9 +196,12 @@ namespace LanguageLearningPlatform.Web.Controllers
         public async Task<IActionResult> AddLesson(Guid courseId, string title, string description, string content, int durationMinutes)
         {
             var teacherId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+            if (!await IsTeacherOfCourseAsync(teacherId, courseId)) return NotFound();
+
             var course = await _context.Courses
                 .Include(c => c.Lessons)
-                .FirstOrDefaultAsync(c => c.Id == courseId && c.CreatorId == teacherId);
+                .FirstOrDefaultAsync(c => c.Id == courseId);
 
             if (course == null) return NotFound();
 
@@ -209,6 +223,8 @@ namespace LanguageLearningPlatform.Web.Controllers
             return RedirectToAction(nameof(CourseDetails), new { id = courseId });
         }
 
+        // ── Messaging ─────────────────────────────────────────────────
+
         // GET: /Teacher/Messages
         public async Task<IActionResult> Messages()
         {
@@ -226,7 +242,6 @@ namespace LanguageLearningPlatform.Web.Controllers
             unread.ForEach(m => m.IsRead = true);
             if (unread.Any()) await _context.SaveChangesAsync();
 
-            // Group by conversation (student + course)
             var conversations = messages
                 .GroupBy(m => (m.StudentId, m.CourseId))
                 .Select(g => new TeacherConversationViewModel
@@ -253,7 +268,7 @@ namespace LanguageLearningPlatform.Web.Controllers
         {
             var teacherId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
-            var reply = new TeacherMessage
+            _context.TeacherMessages.Add(new TeacherMessage
             {
                 Id = Guid.NewGuid(),
                 TeacherId = teacherId,
@@ -263,30 +278,27 @@ namespace LanguageLearningPlatform.Web.Controllers
                 IsFromTeacher = true,
                 SentAt = DateTime.UtcNow,
                 IsRead = false
-            };
+            });
 
-            _context.TeacherMessages.Add(reply);
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = "Reply sent!";
             return RedirectToAction(nameof(Messages));
         }
 
+        // ── Student progress ──────────────────────────────────────────
+
         // GET: /Teacher/StudentProgress/studentId
         public async Task<IActionResult> StudentProgress(string studentId)
         {
             var teacherId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            var allCourseIds = await GetAllTeacherCourseIdsAsync(teacherId);
 
             var student = await _context.Users.FindAsync(studentId);
             if (student == null) return NotFound();
 
-            var teacherCourseIds = await _context.Courses
-                .Where(c => c.CreatorId == teacherId)
-                .Select(c => c.Id)
-                .ToListAsync();
-
             var progresses = await _context.Progresses
-                .Where(p => p.UserId == studentId && teacherCourseIds.Contains(p.CourseId))
+                .Where(p => p.UserId == studentId && allCourseIds.Contains(p.CourseId))
                 .Include(p => p.Course)
                 .ToListAsync();
 
@@ -294,7 +306,7 @@ namespace LanguageLearningPlatform.Web.Controllers
                 .Where(r => r.UserId == studentId)
                 .Include(r => r.Exercise)
                     .ThenInclude(e => e.Course)
-                .Where(r => teacherCourseIds.Contains(r.Exercise.CourseId))
+                .Where(r => allCourseIds.Contains(r.Exercise.CourseId))
                 .OrderByDescending(r => r.CompletedAt)
                 .Take(20)
                 .ToListAsync();
@@ -303,6 +315,30 @@ namespace LanguageLearningPlatform.Web.Controllers
             ViewBag.ExerciseResults = exerciseResults;
 
             return View(progresses);
+        }
+
+        // ── Helpers ──────────────────────────────────────────────────
+
+        private async Task<bool> IsTeacherOfCourseAsync(string teacherId, Guid courseId)
+        {
+            var isCreator = await _context.Courses.AnyAsync(c => c.Id == courseId && c.CreatorId == teacherId);
+            var isAssigned = await _context.CourseTeachers.AnyAsync(ct => ct.CourseId == courseId && ct.TeacherId == teacherId);
+            return isCreator || isAssigned;
+        }
+
+        private async Task<List<Guid>> GetAllTeacherCourseIdsAsync(string teacherId)
+        {
+            var createdIds = await _context.Courses
+                .Where(c => c.CreatorId == teacherId)
+                .Select(c => c.Id)
+                .ToListAsync();
+
+            var assignedIds = await _context.CourseTeachers
+                .Where(ct => ct.TeacherId == teacherId)
+                .Select(ct => ct.CourseId)
+                .ToListAsync();
+
+            return createdIds.Union(assignedIds).ToList();
         }
     }
 

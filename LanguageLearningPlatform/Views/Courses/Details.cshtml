@@ -242,6 +242,10 @@
                     <a asp-controller="Courses" asp-action="MyCourses" class="btn btn-outline-primary w-100">
                         <i class="fas fa-bookmark me-2"></i>My Courses
                     </a>
+                    <a asp-controller="Messaging" asp-action="ContactTeacher" asp-route-courseId="@Model.Id"
+                       class="btn w-100 contact-teacher-btn">
+                        <i class="fas fa-chalkboard-teacher me-2"></i>Ask the Teacher
+                    </a>
                 }
                 else
                 {

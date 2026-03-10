@@ -26,7 +26,6 @@ namespace LanguageLearningPlatform.Web.Controllers
 
             if (course == null) return NotFound();
 
-            // Find primary assigned teacher, fall back to course creator
             var courseTeacher = await _context.CourseTeachers
                 .Include(ct => ct.Teacher)
                 .Where(ct => ct.CourseId == courseId)
@@ -73,7 +72,6 @@ namespace LanguageLearningPlatform.Web.Controllers
                 return RedirectToAction("Details", "Courses", new { id = courseId });
             }
 
-            // Find assigned teacher or fall back to creator
             var courseTeacher = await _context.CourseTeachers
                 .Where(ct => ct.CourseId == courseId)
                 .OrderByDescending(ct => ct.IsPrimary)
@@ -89,7 +87,7 @@ namespace LanguageLearningPlatform.Web.Controllers
 
             var studentId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
-            var msg = new TeacherMessage
+            _context.TeacherMessages.Add(new TeacherMessage
             {
                 Id = Guid.NewGuid(),
                 TeacherId = teacherId,
@@ -99,16 +97,15 @@ namespace LanguageLearningPlatform.Web.Controllers
                 IsFromTeacher = false,
                 SentAt = DateTime.UtcNow,
                 IsRead = false
-            };
+            });
 
-            _context.TeacherMessages.Add(msg);
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = "Message sent to teacher!";
-            return RedirectToAction(nameof(ContactTeacher), new { courseId });
+            return RedirectToAction(nameof(MyMessages));
         }
 
-        // GET: /Messaging/MyMessages — student inbox showing teacher replies
+        // GET: /Messaging/MyMessages
         public async Task<IActionResult> MyMessages()
         {
             var studentId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -128,6 +125,7 @@ namespace LanguageLearningPlatform.Web.Controllers
                     CourseId = g.Key.CourseId,
                     TeacherName = $"{g.First().Teacher?.FirstName} {g.First().Teacher?.LastName}".Trim(),
                     CourseName = g.First().Course?.Title ?? "Unknown",
+                    CourseLanguage = g.First().Course?.Language ?? string.Empty,
                     LastMessage = g.OrderByDescending(m => m.SentAt).First().Message,
                     LastMessageAt = g.Max(m => m.SentAt),
                     HasUnreadReplies = g.Any(m => m.IsFromTeacher && !m.IsRead),
@@ -135,6 +133,42 @@ namespace LanguageLearningPlatform.Web.Controllers
                 })
                 .OrderByDescending(c => c.LastMessageAt)
                 .ToList();
+
+            // Courses the student is enrolled in but hasn't messaged anyone about yet
+            var existingCourseIds = conversations.Select(c => c.CourseId).ToHashSet();
+
+            var enrolledCourses = await _context.CourseEnrollments
+                .Where(e => e.UserId == studentId && e.IsActive && !existingCourseIds.Contains(e.CourseId))
+                .Include(e => e.Course)
+                    .ThenInclude(c => c.Creator)
+                .Include(e => e.Course)
+                    .ThenInclude(c => c.CourseTeachers)
+                        .ThenInclude(ct => ct.Teacher)
+                .ToListAsync();
+
+            var availableCourses = enrolledCourses
+                .Where(e => e.Course != null)
+                .Select(e =>
+                {
+                    var primaryTeacher = e.Course.CourseTeachers
+                        .OrderByDescending(ct => ct.IsPrimary)
+                        .FirstOrDefault()?.Teacher ?? e.Course.Creator;
+
+                    return new AvailableCourseForMessaging
+                    {
+                        CourseId = e.CourseId,
+                        CourseName = e.Course.Title,
+                        CourseLanguage = e.Course.Language,
+                        CourseLevel = e.Course.Level,
+                        TeacherName = primaryTeacher != null
+                            ? $"{primaryTeacher.FirstName} {primaryTeacher.LastName}".Trim()
+                            : "No teacher assigned",
+                        HasTeacher = primaryTeacher != null
+                    };
+                })
+                .ToList();
+
+            ViewBag.AvailableCourses = availableCourses;
 
             return View(conversations);
         }
@@ -146,9 +180,20 @@ namespace LanguageLearningPlatform.Web.Controllers
         public Guid CourseId { get; set; }
         public string TeacherName { get; set; } = string.Empty;
         public string CourseName { get; set; } = string.Empty;
+        public string CourseLanguage { get; set; } = string.Empty;
         public string LastMessage { get; set; } = string.Empty;
         public DateTime LastMessageAt { get; set; }
         public bool HasUnreadReplies { get; set; }
         public List<TeacherMessage> Messages { get; set; } = new();
+    }
+
+    public class AvailableCourseForMessaging
+    {
+        public Guid CourseId { get; set; }
+        public string CourseName { get; set; } = string.Empty;
+        public string CourseLanguage { get; set; } = string.Empty;
+        public string CourseLevel { get; set; } = string.Empty;
+        public string TeacherName { get; set; } = string.Empty;
+        public bool HasTeacher { get; set; }
     }
 }

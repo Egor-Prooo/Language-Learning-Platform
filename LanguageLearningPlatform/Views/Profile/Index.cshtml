@@ -2,243 +2,1128 @@
 
 @{
     ViewData["Title"] = "My Profile";
+    double accuracy = ViewBag.AccuracyRate ?? 0.0;
+    int totalPoints = ViewBag.TotalPoints ?? 0;
+    int enrolledCourses = ViewBag.EnrolledCourses ?? 0;
+    int completedLessons = ViewBag.CompletedLessons ?? 0;
+    int totalExercises = ViewBag.TotalExercises ?? 0;
+    int learningStreak = ViewBag.LearningStreak ?? 0;
+    var recentAchievements = ViewBag.RecentAchievements as List<LanguageLearningPlatform.Data.Models.UserAchievement>;
 }
 
-<div class="container my-5">
-    <div class="row">
-        <!-- Profile Sidebar -->
-        <div class="col-lg-4 mb-4">
-            <div class="course-card">
-                <div class="course-card-body text-center">
-                    <!-- Avatar -->
-                    <div class="mb-3">
-                        <div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center"
-                             style="width: 100px; height: 100px; font-size: 2.5rem; color: white; font-weight: 700;">
-                            @Model.FirstName.Substring(0, 1)@Model.LastName.Substring(0, 1)
-                        </div>
-                    </div>
+@section Styles {
+    <style>
+        /* ── Google Font ── */
+        @@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Syne:wght@700;800&display=swap');
+        /* ── Token overrides for profile page ── */
+        .profile-root {
+            font-family: 'DM Sans', sans-serif;
+            background: #F5F4F9;
+            min-height: 100vh;
+            padding-bottom: 4rem;
+        }
 
-                    <!-- User Info -->
-                    <h3 class="mb-1">@Model.FirstName @Model.LastName</h3>
-                    <p class="text-secondary mb-3">@Model.Email</p>
+        /* ── Hero Banner ── */
+        .profile-hero {
+            background: linear-gradient(135deg, #1E1547 0%, #3B2A8A 45%, #5A3FC0 100%);
+            position: relative;
+            overflow: hidden;
+            padding: 3.5rem 0 0;
+        }
 
-                    <!-- User Level -->
-                    @if (Model.UserLevel != null)
-                    {
-                        <div class="mb-3">
-                            <span class="badge" style="background-color: @Model.UserLevel.Color; color: white; padding: 0.5rem 1rem; font-size: 0.9rem;">
-                                <i class="fas fa-star me-1"></i>
-                                Level @Model.UserLevel.Level - @Model.UserLevel.Name
-                            </span>
-                        </div>
-                    }
+            .profile-hero::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background-image: radial-gradient(circle at 10% 30%, rgba(255,255,255,0.06) 0%, transparent 50%), radial-gradient(circle at 85% 70%, rgba(139,92,246,0.25) 0%, transparent 55%);
+                pointer-events: none;
+            }
 
-                    <!-- Member Since -->
-                    <p class="small text-secondary">
-                        <i class="fas fa-calendar me-1"></i>
-                        Member since @Model.RegistrationDate.ToString("MMMM yyyy")
-                    </p>
+            .profile-hero::after {
+                content: '';
+                position: absolute;
+                bottom: -1px;
+                left: 0;
+                right: 0;
+                height: 60px;
+                background: #F5F4F9;
+                clip-path: ellipse(55% 100% at 50% 100%);
+            }
 
-                    <hr />
+        /* floating orb */
+        .hero-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            pointer-events: none;
+            opacity: 0.35;
+        }
 
-                    <!-- Quick Actions -->
-                    <div class="d-grid gap-2">
-                        <a asp-controller="Courses" asp-action="MyCourses" class="btn btn-outline-primary">
-                            <i class="fas fa-bookmark me-2"></i>My Courses
-                        </a>
-                        <a asp-action="Achievements" class="btn btn-outline-success">
-                            <i class="fas fa-trophy me-2"></i>Achievements
-                        </a>
-                        <a asp-action="Stats" class="btn btn-outline-info">
-                            <i class="fas fa-chart-bar me-2"></i>Learning Stats
-                        </a>
-                        <a asp-area="Identity" asp-page="/Account/Manage/Index" class="btn btn-outline-secondary">
-                            <i class="fas fa-cog me-2"></i>Settings
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
+        .hero-orb-1 {
+            width: 280px;
+            height: 280px;
+            background: #7C3AED;
+            top: -80px;
+            right: -60px;
+        }
 
-        <!-- Main Content -->
-        <div class="col-lg-8">
-            <!-- Stats Overview -->
-            <h2 class="mb-4">
-                <i class="fas fa-chart-line me-2"></i>Learning Overview
-            </h2>
+        .hero-orb-2 {
+            width: 180px;
+            height: 180px;
+            background: #F59E0B;
+            bottom: 20px;
+            left: -50px;
+        }
 
-            <div class="row g-4 mb-4">
-                <div class="col-md-6">
-                    <div class="stat-card">
-                        <div class="stat-icon success">
-                            <i class="fas fa-trophy"></i>
-                        </div>
-                        <div class="stat-value">@ViewBag.TotalPoints</div>
-                        <div class="stat-label">Total Points</div>
-                    </div>
-                </div>
+        /* ── Avatar ── */
+        .profile-avatar-wrap {
+            position: relative;
+            display: inline-block;
+        }
 
-                <div class="col-md-6">
-                    <div class="stat-card">
-                        <div class="stat-icon primary">
-                            <i class="fas fa-book"></i>
-                        </div>
-                        <div class="stat-value">@ViewBag.EnrolledCourses</div>
-                        <div class="stat-label">Enrolled Courses</div>
-                    </div>
-                </div>
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #A78BFA, #6D28D9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Syne', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: white;
+            border: 4px solid rgba(255,255,255,0.25);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            letter-spacing: -1px;
+        }
 
-                <div class="col-md-6">
-                    <div class="stat-card">
-                        <div class="stat-icon warning">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                        <div class="stat-value">@ViewBag.CompletedLessons</div>
-                        <div class="stat-label">Lessons Completed</div>
-                    </div>
-                </div>
+        .level-ring {
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            background: linear-gradient(135deg, #F59E0B, #EF4444, #8B5CF6) border-box;
+            -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: destination-out;
+            mask-composite: exclude;
+        }
 
-                <div class="col-md-6">
-                    <div class="stat-card">
-                        <div class="stat-icon success">
-                            <i class="fas fa-fire"></i>
-                        </div>
-                        <div class="stat-value">@ViewBag.LearningStreak</div>
-                        <div class="stat-label">Day Streak (7 days)</div>
-                    </div>
-                </div>
-            </div>
+        .level-badge {
+            position: absolute;
+            bottom: -4px;
+            right: -8px;
+            background: linear-gradient(135deg, #F59E0B, #D97706);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+            white-space: nowrap;
+            border: 2px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
 
-            <!-- Performance -->
-            <div class="course-card mb-4">
-                <div class="course-card-body">
-                    <h4 class="mb-3">
-                        <i class="fas fa-bullseye me-2"></i>Performance
-                    </h4>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p class="mb-2 text-secondary">Exercise Accuracy</p>
-                            <div class="progress-custom mb-3">
-                                <div class="progress-bar-custom" style="width: @ViewBag.AccuracyRate%"></div>
+        /* ── Hero text ── */
+        .profile-name {
+            font-family: 'Syne', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            color: white;
+            line-height: 1.1;
+            margin-bottom: 0.25rem;
+        }
+
+        .profile-email {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-since {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.75);
+            font-size: 0.78rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            backdrop-filter: blur(4px);
+        }
+
+        /* ── Hero quick-nav tabs ── */
+        .profile-tabs {
+            display: flex;
+            gap: 0;
+            margin-top: 2.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .profile-tab {
+            flex: 1;
+            text-align: center;
+            padding: 0.85rem 1rem;
+            color: rgba(255,255,255,0.55);
+            font-size: 0.82rem;
+            font-weight: 600;
+            text-decoration: none;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+
+            .profile-tab:hover, .profile-tab.active {
+                color: white;
+                border-bottom-color: #F59E0B;
+                background: rgba(255,255,255,0.05);
+            }
+
+        /* ── Body layout ── */
+        .profile-body {
+            padding-top: 2.5rem;
+        }
+
+        /* ── Stat chips row ── */
+        .stat-chips {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        @@media (max-width: 576px) {
+            .stat-chips
+
+        {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        }
+
+        .stat-chip {
+            background: white;
+            border-radius: 16px;
+            padding: 1.25rem 1rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            border: 1px solid rgba(0,0,0,0.04);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+            .stat-chip:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            }
+
+            .stat-chip::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 3px;
+            }
+
+            .stat-chip.chip-gold::before {
+                background: linear-gradient(90deg,#F59E0B,#FCD34D);
+            }
+
+            .stat-chip.chip-blue::before {
+                background: linear-gradient(90deg,#4F46E5,#818CF8);
+            }
+
+            .stat-chip.chip-green::before {
+                background: linear-gradient(90deg,#10B981,#34D399);
+            }
+
+            .stat-chip.chip-red::before {
+                background: linear-gradient(90deg,#EF4444,#F87171);
+            }
+
+            .stat-chip.chip-purple::before {
+                background: linear-gradient(90deg,#8B5CF6,#C4B5FD);
+            }
+
+            .stat-chip.chip-teal::before {
+                background: linear-gradient(90deg,#06B6D4,#67E8F9);
+            }
+
+        .stat-chip-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            margin: 0 auto 0.6rem;
+        }
+
+        .chip-gold .stat-chip-icon {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+
+        .chip-blue .stat-chip-icon {
+            background: #EEF2FF;
+            color: #4F46E5;
+        }
+
+        .chip-green .stat-chip-icon {
+            background: #D1FAE5;
+            color: #059669;
+        }
+
+        .chip-red .stat-chip-icon {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+        .chip-purple.stat-chip-icon {
+            background: #EDE9FE;
+            color: #7C3AED;
+        }
+
+        .chip-teal .stat-chip-icon {
+            background: #CFFAFE;
+            color: #0891B2;
+        }
+
+        .stat-chip-value {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #1a1a2e;
+            line-height: 1;
+            margin-bottom: 0.2rem;
+        }
+
+        .stat-chip-label {
+            font-size: 0.73rem;
+            color: #9CA3AF;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* ── Section card ── */
+        .profile-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            border: 1px solid rgba(0,0,0,0.04);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .profile-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #F3F4F6;
+        }
+
+        .profile-card-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0;
+        }
+
+            .profile-card-title i {
+                width: 28px;
+                height: 28px;
+                border-radius: 8px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.8rem;
+            }
+
+        .icon-bg-blue {
+            background: #EEF2FF;
+            color: #4F46E5;
+        }
+
+        .icon-bg-yellow {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+
+        .icon-bg-green {
+            background: #D1FAE5;
+            color: #059669;
+        }
+
+        .profile-card-body {
+            padding: 1.5rem;
+        }
+
+        /* ── Accuracy gauge ── */
+        .accuracy-section {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .gauge-wrap {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            flex-shrink: 0;
+        }
+
+        .gauge-svg {
+            width: 120px;
+            height: 120px;
+            transform: rotate(-90deg);
+        }
+
+        .gauge-track {
+            fill: none;
+            stroke: #F3F4F6;
+            stroke-width: 10;
+        }
+
+        .gauge-fill {
+            fill: none;
+            stroke-width: 10;
+            stroke-linecap: round;
+            stroke: url(#gaugeGrad);
+            transition: stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1);
+        }
+
+        .gauge-label {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .gauge-pct {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #1a1a2e;
+            line-height: 1;
+        }
+
+        .gauge-sub {
+            font-size: 0.65rem;
+            color: #9CA3AF;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .perf-details {
+            flex: 1;
+            min-width: 160px;
+        }
+
+        .perf-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid #F9FAFB;
+            font-size: 0.87rem;
+        }
+
+            .perf-row:last-child {
+                border-bottom: none;
+            }
+
+        .perf-row-label {
+            color: #6B7280;
+        }
+
+        .perf-row-value {
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        /* ── Achievement cards ── */
+        .achievement-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+
+        .achievement-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.85rem;
+            padding: 1rem;
+            border-radius: 14px;
+            border: 1.5px solid #F3F4F6;
+            background: #FAFAFA;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .achievement-card:hover {
+                border-color: #D1D5DB;
+                background: white;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            }
+
+            .achievement-card.rare {
+                border-color: #FDE68A;
+                background: linear-gradient(135deg, #FFFBEB, #FEF3C7 60%, #FFFBEB);
+            }
+
+                .achievement-card.rare::after {
+                    content: '★';
+                    position: absolute;
+                    top: 0.5rem;
+                    right: 0.6rem;
+                    font-size: 0.9rem;
+                    color: #D97706;
+                }
+
+        .achievement-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .achievement-card.rare .achievement-icon {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+
+        .achievement-card:not(.rare) .achievement-icon {
+            background: #EDE9FE;
+            color: #7C3AED;
+        }
+
+        .achievement-name {
+            font-weight: 700;
+            font-size: 0.87rem;
+            color: #1a1a2e;
+            margin-bottom: 0.2rem;
+        }
+
+        .achievement-desc {
+            font-size: 0.75rem;
+            color: #9CA3AF;
+            line-height: 1.4;
+        }
+
+        .achievement-pts {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            margin-top: 0.4rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #059669;
+            background: #D1FAE5;
+            padding: 0.15rem 0.5rem;
+            border-radius: 20px;
+        }
+
+        /* ── Course progress rows ── */
+        .course-progress-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid #F3F4F6;
+        }
+
+            .course-progress-row:last-child {
+                border-bottom: none;
+            }
+
+        .course-lang-dot {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #4F46E5, #7C3AED);
+            color: white;
+        }
+
+        .course-progress-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .course-progress-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #1a1a2e;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 0.35rem;
+        }
+
+        .course-progress-meta {
+            font-size: 0.75rem;
+            color: #9CA3AF;
+            margin-bottom: 0.5rem;
+        }
+
+        .mini-bar-track {
+            height: 6px;
+            border-radius: 10px;
+            background: #F3F4F6;
+            overflow: hidden;
+        }
+
+        .mini-bar-fill {
+            height: 100%;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #4F46E5, #7C3AED);
+            transition: width 0.8s cubic-bezier(.4,0,.2,1);
+        }
+
+        .course-pct-badge {
+            font-family: 'Syne', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: #4F46E5;
+            flex-shrink: 0;
+            min-width: 36px;
+            text-align: right;
+        }
+
+        /* ── Sidebar action links ── */
+        .sidebar-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .sidebar-action-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.85rem 1rem;
+            border-radius: 14px;
+            background: #FAFAFA;
+            border: 1.5px solid #F3F4F6;
+            color: #374151;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.15s;
+        }
+
+            .sidebar-action-btn:hover {
+                background: #EEF2FF;
+                border-color: #C7D2FE;
+                color: #4F46E5;
+                transform: translateX(4px);
+            }
+
+            .sidebar-action-btn i {
+                width: 32px;
+                height: 32px;
+                border-radius: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.85rem;
+                flex-shrink: 0;
+            }
+
+        .btn-icon-blue {
+            background: #EEF2FF;
+            color: #4F46E5;
+        }
+
+        .btn-icon-green {
+            background: #D1FAE5;
+            color: #059669;
+        }
+
+        .btn-icon-amber {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+
+        .btn-icon-slate {
+            background: #F1F5F9;
+            color: #475569;
+        }
+
+        /* ── Empty state ── */
+        .empty-state {
+            text-align: center;
+            padding: 2.5rem 1rem;
+            color: #9CA3AF;
+        }
+
+            .empty-state i {
+                font-size: 2.5rem;
+                opacity: 0.3;
+                display: block;
+                margin-bottom: 0.75rem;
+            }
+
+            .empty-state p {
+                font-size: 0.875rem;
+                margin: 0;
+            }
+
+        /* ── Streak badge ── */
+        .streak-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+            color: #92400E;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.25rem 0.65rem;
+            border-radius: 20px;
+            border: 1px solid #FCD34D;
+        }
+    </style>
+}
+
+<div class="profile-root">
+
+    <!-- ═══════════════════════════ HERO ═══════════════════════════ -->
+    <div class="profile-hero">
+        <div class="hero-orb hero-orb-1"></div>
+        <div class="hero-orb hero-orb-2"></div>
+
+        <div class="container">
+            <div class="row align-items-end g-4">
+
+                <!-- Avatar + name -->
+                <div class="col-lg-6">
+                    <div class="d-flex align-items-center gap-4">
+                        <div class="profile-avatar-wrap">
+                            <div class="level-ring"></div>
+                            <div class="profile-avatar">
+                                @Model.FirstName.Substring(0, 1)@Model.LastName.Substring(0, 1)
                             </div>
-                            <p class="text-end small fw-bold text-success">@ViewBag.AccuracyRate.ToString("F1")%</p>
+                            @if (Model.UserLevel != null)
+                            {
+                                <span class="level-badge">
+                                    <i class="fas fa-bolt me-1"></i>Lv.@Model.UserLevel.Level
+                                </span>
+                            }
                         </div>
-                        <div class="col-md-6">
-                            <p class="mb-2 text-secondary">Total Exercises</p>
-                            <h3 class="text-primary">@ViewBag.TotalExercises</h3>
-                            <p class="small text-secondary mb-0">
-                                <i class="fas fa-check text-success me-1"></i>
-                                @(ViewBag.TotalExercises - (ViewBag.TotalExercises - @ViewBag.TotalExercises * @ViewBag.AccuracyRate / 100)) correct
-                            </p>
+
+                        <div>
+                            <div class="profile-name">@Model.FirstName @Model.LastName</div>
+                            <div class="profile-email">@Model.Email</div>
+                            <div class="d-flex flex-wrap gap-2 mt-2">
+                                <span class="profile-since">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    Member since @Model.RegistrationDate.ToString("MMMM yyyy")
+                                </span>
+                                @if (learningStreak > 0)
+                                {
+                                    <span class="streak-badge">
+                                        <i class="fas fa-fire"></i> @learningStreak-day streak
+                                    </span>
+                                }
+                                @if (Model.UserLevel != null)
+                                {
+                                    <span class="streak-badge" style="background:linear-gradient(135deg,#EDE9FE,#DDD6FE);color:#5B21B6;border-color:#C4B5FD;">
+                                        <i class="fas fa-star"></i> @Model.UserLevel.Name
+                                    </span>
+                                }
+                            </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Quick total points -->
+                <div class="col-lg-6 text-lg-end pb-3">
+                    <div style="color:rgba(255,255,255,0.55);font-size:0.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.25rem;">
+                        Total XP Earned
+                    </div>
+                    <div style="font-family:'Syne',sans-serif;font-size:3.2rem;font-weight:800;color:white;line-height:1;text-shadow:0 4px 20px rgba(0,0,0,0.3);">
+                        @totalPoints.ToString("N0")
+                    </div>
+                    <div style="color:#F59E0B;font-size:0.8rem;font-weight:700;letter-spacing:.04em;">
+                        <i class="fas fa-star me-1"></i>Experience Points
                     </div>
                 </div>
             </div>
 
-            <!-- Recent Achievements -->
-            <div class="course-card mb-4">
-                <div class="course-card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h4 class="mb-0">
-                            <i class="fas fa-trophy me-2"></i>Recent Achievements
-                        </h4>
-                        <a asp-action="Achievements" class="btn btn-sm btn-outline-primary">
-                            View All
-                        </a>
-                    </div>
-
-                    @if (ViewBag.RecentAchievements != null && ((List<LanguageLearningPlatform.Data.Models.UserAchievement>)ViewBag.RecentAchievements).Any())
-                    {
-                        <div class="row g-3">
-                            @foreach (var ua in (List<LanguageLearningPlatform.Data.Models.UserAchievement>)ViewBag.RecentAchievements)
-                            {
-                                <div class="col-md-6">
-                                    <div class="p-3 border rounded @(ua.Achievement.IsRare ? "border-warning bg-light" : "")">
-                                        <div class="d-flex align-items-start gap-3">
-                                            <div style="font-size: 2rem;">
-                                                @if (ua.Achievement.IsRare)
-                                                {
-                                                    <i class="fas fa-medal" style="color: var(--accent-color);"></i>
-                                                }
-                                                else
-                                                {
-                                                    <i class="fas fa-award" style="color: var(--secondary-color);"></i>
-                                                }
-                                            </div>
-                                            <div>
-                                                <h6 class="mb-1">@ua.Achievement.Title</h6>
-                                                <p class="small text-secondary mb-1">@ua.Achievement.Description</p>
-                                                <span class="badge bg-success small">
-                                                    +@ua.Achievement.PointsReward pts
-                                                </span>
-                                                <p class="small text-secondary mb-0 mt-1">
-                                                    <i class="fas fa-clock me-1"></i>
-                                                    @ua.UnlockedAt.ToString("MMM dd, yyyy")
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="text-center py-4 text-secondary">
-                            <i class="fas fa-trophy" style="font-size: 3rem; opacity: 0.3;"></i>
-                            <p class="mt-2">No achievements yet. Keep learning to unlock them!</p>
-                        </div>
-                    }
-                </div>
-            </div>
-
-            <!-- Active Courses -->
-            <div class="course-card">
-                <div class="course-card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h4 class="mb-0">
-                            <i class="fas fa-graduation-cap me-2"></i>Active Courses
-                        </h4>
-                        <a asp-controller="Courses" asp-action="MyCourses" class="btn btn-sm btn-outline-primary">
-                            View All
-                        </a>
-                    </div>
-
-                    @if (Model.Progresses.Any())
-                    {
-                        <div class="list-group list-group-flush">
-                            @foreach (var progress in Model.Progresses.OrderByDescending(p => p.LastAccessedAt).Take(5))
-                            {
-                                <div class="list-group-item border-0 px-0">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <div>
-                                            <h6 class="mb-1">@progress.Course.Title</h6>
-                                            <p class="small text-secondary mb-0">
-                                                <i class="fas fa-clock me-1"></i>
-                                                Last accessed @progress.LastAccessedAt.ToString("MMM dd")
-                                            </p>
-                                        </div>
-                                        <span class="badge bg-primary">@progress.CompletionPercentage.ToString("F0")%</span>
-                                    </div>
-                                    <div class="progress-custom">
-                                        <div class="progress-bar-custom" style="width: @progress.CompletionPercentage%"></div>
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="text-center py-4 text-secondary">
-                            <i class="fas fa-book-open" style="font-size: 3rem; opacity: 0.3;"></i>
-                            <p class="mt-2 mb-3">You haven't enrolled in any courses yet</p>
-                            <a asp-controller="Courses" asp-action="Index" class="btn btn-primary">
-                                <i class="fas fa-compass me-2"></i>Explore Courses
-                            </a>
-                        </div>
-                    }
-                </div>
+            <!-- Tabs -->
+            <div class="profile-tabs">
+                <a href="#overview" class="profile-tab active">Overview</a>
+                <a asp-action="Achievements" class="profile-tab">Achievements</a>
+                <a asp-action="Stats" class="profile-tab">Statistics</a>
+                <a asp-area="Identity" asp-page="/Account/Manage/Index" class="profile-tab">Settings</a>
             </div>
         </div>
     </div>
+
+    <!-- ═══════════════════════════ BODY ══════════════════════════ -->
+    <div class="container profile-body">
+        <div class="row g-4" id="overview">
+
+            <!-- ── LEFT COLUMN ── -->
+            <div class="col-lg-8">
+
+                <!-- Stat Chips -->
+                <div class="stat-chips">
+                    <div class="stat-chip chip-gold">
+                        <div class="stat-chip-icon"><i class="fas fa-trophy"></i></div>
+                        <div class="stat-chip-value">@totalPoints.ToString("N0")</div>
+                        <div class="stat-chip-label">Total Points</div>
+                    </div>
+                    <div class="stat-chip chip-blue">
+                        <div class="stat-chip-icon"><i class="fas fa-book-open"></i></div>
+                        <div class="stat-chip-value">@enrolledCourses</div>
+                        <div class="stat-chip-label">Courses</div>
+                    </div>
+                    <div class="stat-chip chip-green">
+                        <div class="stat-chip-icon"><i class="fas fa-check-circle"></i></div>
+                        <div class="stat-chip-value">@completedLessons</div>
+                        <div class="stat-chip-label">Lessons Done</div>
+                    </div>
+                    <div class="stat-chip chip-red">
+                        <div class="stat-chip-icon"><i class="fas fa-fire"></i></div>
+                        <div class="stat-chip-value">@learningStreak</div>
+                        <div class="stat-chip-label">Day Streak</div>
+                    </div>
+                    <div class="stat-chip chip-teal">
+                        <div class="stat-chip-icon"><i class="fas fa-dumbbell"></i></div>
+                        <div class="stat-chip-value">@totalExercises</div>
+                        <div class="stat-chip-label">Exercises</div>
+                    </div>
+                    <div class="stat-chip chip-purple" style="--chip-color:#8B5CF6;">
+                        <div class="stat-chip-icon" style="background:#EDE9FE;color:#7C3AED;"><i class="fas fa-bullseye"></i></div>
+                        <div class="stat-chip-value">@accuracy.ToString("F0")%</div>
+                        <div class="stat-chip-label">Accuracy</div>
+                    </div>
+                </div>
+
+                <!-- Performance card -->
+                <div class="profile-card">
+                    <div class="profile-card-header">
+                        <h5 class="profile-card-title">
+                            <i class="fas fa-chart-pie icon-bg-blue"></i>
+                            Performance
+                        </h5>
+                    </div>
+                    <div class="profile-card-body">
+                        <div class="accuracy-section">
+
+                            <!-- SVG Gauge -->
+                            <div class="gauge-wrap">
+                                @{
+                                    double r = 50;
+                                    double circ = 2 * Math.PI * r;
+                                    double offset = circ * (1.0 - accuracy / 100.0);
+                                }
+                                <svg class="gauge-svg" viewBox="0 0 120 120">
+                                    <defs>
+                                        <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stop-color="#4F46E5" />
+                                            <stop offset="100%" stop-color="#10B981" />
+                                        </linearGradient>
+                                    </defs>
+                                    <circle class="gauge-track" cx="60" cy="60" r="@r" />
+                                    <circle class="gauge-fill"
+                                            cx="60" cy="60" r="@r"
+                                            stroke-dasharray="@circ.ToString("F2")"
+                                            stroke-dashoffset="@offset.ToString("F2")"
+                                            id="gauge-circle" />
+                                </svg>
+                                <div class="gauge-label">
+                                    <span class="gauge-pct">@accuracy.ToString("F0")%</span>
+                                    <span class="gauge-sub">Accuracy</span>
+                                </div>
+                            </div>
+
+                            <!-- Details -->
+                            <div class="perf-details">
+                                @{
+                                    int correctCount = (int)Math.Round(totalExercises * accuracy / 100.0);
+                                    int incorrectCount = totalExercises - correctCount;
+                                }
+                                <div class="perf-row">
+                                    <span class="perf-row-label"><i class="fas fa-check text-success me-2"></i>Correct</span>
+                                    <span class="perf-row-value" style="color:#059669;">@correctCount</span>
+                                </div>
+                                <div class="perf-row">
+                                    <span class="perf-row-label"><i class="fas fa-times text-danger me-2"></i>Incorrect</span>
+                                    <span class="perf-row-value" style="color:#DC2626;">@incorrectCount</span>
+                                </div>
+                                <div class="perf-row">
+                                    <span class="perf-row-label"><i class="fas fa-list-alt text-secondary me-2"></i>Total Attempts</span>
+                                    <span class="perf-row-value">@totalExercises</span>
+                                </div>
+                                <div class="perf-row">
+                                    <span class="perf-row-label"><i class="fas fa-fire text-warning me-2"></i>Active Days</span>
+                                    <span class="perf-row-value" style="color:#D97706;">@learningStreak / 7</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Courses card -->
+                <div class="profile-card">
+                    <div class="profile-card-header">
+                        <h5 class="profile-card-title">
+                            <i class="fas fa-graduation-cap icon-bg-blue"></i>
+                            Active Courses
+                        </h5>
+                        <a asp-controller="Courses" asp-action="MyCourses"
+                           class="btn btn-sm btn-outline-primary" style="border-radius:10px;font-size:0.78rem;">
+                            View All
+                        </a>
+                    </div>
+                    <div class="profile-card-body" style="padding-top:0.5rem;padding-bottom:0.5rem;">
+                        @if (Model.Progresses.Any())
+                        {
+                            @foreach (var progress in Model.Progresses.OrderByDescending(p => p.LastAccessedAt).Take(5))
+                            {
+                                <div class="course-progress-row">
+                                    <div class="course-lang-dot">
+                                        @switch (progress.Course?.Language?.ToLower())
+                                        {
+                                            case "spanish":
+                                                <i class="fas fa-language"></i>
+                                                break;
+                                            case "french":
+
+                                                <i class="fas fa-flag"></i>
+                                                break;
+                                            case "german":
+
+                                                <i class="fas fa-book"></i>
+                                                break;
+                                            case "japanese":
+
+                                                <i class="fas fa-yen-sign"></i>
+                                                break;
+                                            default:
+
+                                                <i class="fas fa-globe"></i>
+                                                break;
+                                        }
+                                    </div>
+                                    <div class="course-progress-info">
+                                        <div class="course-progress-name">@progress.Course?.Title</div>
+                                        <div class="course-progress-meta">
+                                            @progress.CompletedLessons lessons done
+                                            &nbsp;·&nbsp;
+                                            @progress.PointsEarned pts
+                                            &nbsp;·&nbsp;
+                                            Last active @progress.LastAccessedAt.ToString("MMM dd")
+                                        </div>
+                                        <div class="mini-bar-track">
+                                            <div class="mini-bar-fill" style="width:@progress.CompletionPercentage%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="course-pct-badge">@progress.CompletionPercentage.ToString("F0")%</div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="empty-state">
+                                <i class="fas fa-book-open"></i>
+                                <p>
+                                    No courses enrolled yet.<br>
+                                    <a asp-controller="Courses" asp-action="Index" class="text-primary fw-semibold">Explore courses →</a>
+                                </p>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Achievements card -->
+                <div class="profile-card">
+                    <div class="profile-card-header">
+                        <h5 class="profile-card-title">
+                            <i class="fas fa-trophy icon-bg-yellow"></i>
+                            Recent Achievements
+                        </h5>
+                        <a asp-action="Achievements"
+                           class="btn btn-sm btn-outline-primary" style="border-radius:10px;font-size:0.78rem;">
+                            View All
+                        </a>
+                    </div>
+                    <div class="profile-card-body">
+                        @if (recentAchievements != null && recentAchievements.Any())
+                        {
+                            <div class="achievement-grid">
+                                @foreach (var ua in recentAchievements)
+                                {
+                                    <div class="achievement-card @(ua.Achievement.IsRare ? "rare" : "")">
+                                        <div class="achievement-icon">
+                                            @if (ua.Achievement.IsRare)
+                                            {
+                                                <i class="fas fa-medal"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="fas fa-award"></i>
+                                            }
+                                        </div>
+                                        <div>
+                                            <div class="achievement-name">@ua.Achievement.Title</div>
+                                            <div class="achievement-desc">@ua.Achievement.Description</div>
+                                            <div class="achievement-pts">
+                                                <i class="fas fa-star"></i>+@ua.Achievement.PointsReward pts
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="empty-state">
+                                <i class="fas fa-trophy"></i>
+                                <p>No achievements yet — keep learning to unlock them!</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+            </div><!-- /col-lg-8 -->
+            <!-- ── RIGHT SIDEBAR ── -->
+            <div class="col-lg-4">
+                <div style="position:sticky;top:1.5rem;">
+
+                    <!-- Quick actions -->
+                    <div class="profile-card">
+                        <div class="profile-card-header">
+                            <h5 class="profile-card-title">
+                                <i class="fas fa-bolt icon-bg-blue"></i>
+                                Quick Actions
+                            </h5>
+                        </div>
+                        <div class="profile-card-body">
+                            <div class="sidebar-actions">
+                                <a asp-controller="Courses" asp-action="MyCourses" class="sidebar-action-btn">
+                                    <i class="fas fa-bookmark btn-icon-blue"></i>
+                                    My Courses
+                                </a>
+                                <a asp-action="Achievements" class="sidebar-action-btn">
+                                    <i class="fas fa-trophy btn-icon-amber"></i>
+                                    Achievements
+                                </a>
+                                <a asp-action="Stats" class="sidebar-action-btn">
+                                    <i class="fas fa-chart-bar btn-icon-green"></i>
+                                    Detailed Stats
+                                </a>
+                                <a asp-controller="Forum" asp-action="Index" class="sidebar-action-btn">
+                                    <i class="fas fa-comments btn-icon-blue"></i>
+                                    Community Forum
+                                </a>
+                                <a asp-area="Identity" asp-page="/Account/Manage/Index" class="sidebar-action-btn">
+                                    <i class="fas fa-cog btn-icon-slate"></i>
+                                    Account Settings
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Level progress (if level exists) -->
+                    @if (Model.UserLevel != null)
+                    {
+                        <div class="profile-card">
+                            <div class="profile-card-header">
+                                <h5 class="profile-card-title">
+                                    <i class="fas fa-star icon-bg-yellow"></i>
+                                    Level Progress
+                                </h5>
+                            </div>
+                            <div class="profile-card-body text-center">
+                                <div style="font-family:'Syne',sans-serif;font-size:2.5rem;font-weight:800;color:#4F46E5;line-height:1;">
+                                    @Model.UserLevel.Level
+                                </div>
+                                <div style="font-weight:700;color:#374151;margin-bottom:0.25rem;">@Model.UserLevel.Name</div>
+                                <div style="font-size:0.8rem;color:#9CA3AF;margin-bottom:1rem;">
+                                    @Model.UserLevel.MinPoints – @Model.UserLevel.MaxPoints XP
+                                </div>
+
+                                @{
+                                    double levelProgress = Model.UserLevel.MaxPoints > Model.UserLevel.MinPoints
+                                    ? Math.Min(100, (double)(totalPoints - Model.UserLevel.MinPoints)
+                                    / (Model.UserLevel.MaxPoints - Model.UserLevel.MinPoints) * 100)
+                                    : 100;
+                                    int ptsToNext = Math.Max(0, Model.UserLevel.MaxPoints - totalPoints);
+                                }
+
+                                <div class="mini-bar-track" style="height:10px;">
+                                    <div class="mini-bar-fill" style="width:@levelProgress.ToString("F0")%;background:linear-gradient(90deg,#F59E0B,#EF4444);"></div>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:#9CA3AF;margin-top:0.4rem;">
+                                    <span>@totalPoints XP</span>
+                                    <span>@ptsToNext XP to next</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                </div>
+            </div><!-- /col-lg-4 -->
+
+        </div><!-- /row -->
+    </div><!-- /container -->
 </div>
+
+@section Scripts {
+    <script>
+        // Animate gauge on load
+        document.addEventListener('DOMContentLoaded', () => {
+            // The SVG gauge starts at full offset (hidden), animate to target
+            const circle = document.getElementById('gauge-circle');
+            if (!circle) return;
+
+            const target = parseFloat(circle.getAttribute('stroke-dashoffset'));
+            const full   = parseFloat(circle.getAttribute('stroke-dasharray'));
+
+            circle.setAttribute('stroke-dashoffset', full.toString());
+
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    circle.style.transition = 'stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1)';
+                    circle.setAttribute('stroke-dashoffset', target.toString());
+                });
+            });
+
+            // Animate mini progress bars
+            document.querySelectorAll('.mini-bar-fill').forEach(bar => {
+                const w = bar.style.width;
+                bar.style.width = '0';
+                setTimeout(() => { bar.style.width = w; }, 200);
+            });
+        });
+    </script>
+}

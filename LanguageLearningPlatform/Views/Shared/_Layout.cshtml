@@ -5,17 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - LingoLearn</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
+    <script>
+        (function () {
+            var path = window.location.pathname.toLowerCase();
+            var page = 'home';
+            if      (path.includes('/courses'))   page = 'courses';
+            else if (path.includes('/lessons'))   page = 'lessons';
+            else if (path.includes('/teacher'))   page = 'teacher';
+            else if (path.includes('/forum'))     page = 'forum';
+            else if (path.includes('/profile'))   page = 'profile';
+            else if (path.includes('/messaging')) page = 'messaging';
+            document.body.setAttribute('data-page', page);
+        })();
+    </script>
+
     <header>
         <nav class="navbar navbar-expand-lg navbar-custom">
             <div class="container">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
-                    <i class="fas fa-graduation-cap me-2"></i>
+                    <i class="fas fa-graduation-cap"></i>
                     <span class="brand-text">LingoLearn</span>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -26,37 +42,37 @@
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
-                                <i class="fas fa-home me-1"></i> Home
+                                <i class="fas fa-house"></i> Home
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Courses" asp-action="Index">
-                                <i class="fas fa-book me-1"></i> Courses
+                                <i class="fas fa-book-open"></i> Courses
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Forum" asp-action="Index">
-                                <i class="fas fa-comments me-1"></i> Forum
+                                <i class="fas fa-comments"></i> Forum
                             </a>
                         </li>
                         @if (User.Identity?.IsAuthenticated == true)
                         {
                             <li class="nav-item">
                                 <a class="nav-link" asp-area="" asp-controller="Courses" asp-action="MyCourses">
-                                    <i class="fas fa-bookmark me-1"></i> My Courses
+                                    <i class="fas fa-bookmark"></i> My Courses
                                 </a>
                             </li>
                             @if (User.IsInRole("Teacher") || User.IsInRole("Admin"))
                             {
                                 <li class="nav-item">
                                     <a class="nav-link" asp-controller="Teacher" asp-action="Dashboard">
-                                        <i class="fas fa-chalkboard-teacher me-1"></i> Teacher
+                                        <i class="fas fa-chalkboard-teacher"></i> Teach
                                     </a>
                                 </li>
                             }
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Messaging" asp-action="MyMessages">
-                                    <i class="fas fa-inbox me-1"></i> Messages
+                                    <i class="fas fa-inbox"></i> Messages
                                 </a>
                             </li>
                         }
@@ -95,21 +111,22 @@
 
     <footer class="footer-custom mt-5">
         <div class="container">
-            <div class="row py-4">
-                <div class="col-md-4 mb-3">
+            <div class="row py-5">
+                <div class="col-md-4 mb-4">
                     <h5 class="footer-heading">
-                        <i class="fas fa-graduation-cap me-2"></i>LingoLearn
+                        <i class="fas fa-graduation-cap me-2" style="color:#F4623A;"></i>LingoLearn
                     </h5>
-                    <p class="footer-text">Your journey to language mastery starts here.</p>
+                    <p class="footer-text">Your journey to language mastery starts here. Learn, practice, and connect with a global community.</p>
                 </div>
-                <div class="col-md-4 mb-3">
+                <div class="col-md-4 mb-4">
                     <h6 class="footer-heading">Quick Links</h6>
                     <ul class="list-unstyled footer-links">
                         <li><a asp-controller="Courses" asp-action="Index">Browse Courses</a></li>
+                        <li><a asp-controller="Forum" asp-action="Index">Community Forum</a></li>
                         <li><a asp-controller="Home" asp-action="Privacy">Privacy Policy</a></li>
                     </ul>
                 </div>
-                <div class="col-md-4 mb-3">
+                <div class="col-md-4 mb-4">
                     <h6 class="footer-heading">Connect</h6>
                     <div class="social-links">
                         <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
@@ -119,7 +136,7 @@
                     </div>
                 </div>
             </div>
-            <div class="border-top pt-3 pb-2">
+            <div class="border-top pt-3 pb-2" style="border-color: rgba(255,255,255,.06) !important;">
                 <p class="text-center footer-copyright mb-0">
                     &copy; 2025 LingoLearn. All rights reserved.
                 </p>

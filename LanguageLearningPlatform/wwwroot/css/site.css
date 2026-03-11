@@ -9,18 +9,18 @@
 /* ?? CSS Variables ??????????????????????????????????????????? */
 :root {
     /* Core brand */
-    --primary-color: #4F46E5; /* indigo  – exercises / lessons */
+    --primary-color: #4F46E5;
     --primary-dark: #3730A3;
     --primary-light: #EEF2FF;
     /* Section accents */
-    --accent-coral: #F4623A; /* courses / enroll CTAs */
-    --accent-teal: #0D9488; /* profile / progress */
-    --accent-amber: #D97706; /* teacher dashboard */
-    --accent-rose: #E11D48; /* forum */
-    --accent-violet: #7C3AED; /* achievements */
-    --accent-green: #059669; /* success / completion */
+    --accent-coral: #F4623A;
+    --accent-teal: #0D9488;
+    --accent-amber: #D97706;
+    --accent-rose: #E11D48;
+    --accent-violet: #7C3AED;
+    --accent-green: #059669;
     /* Neutral palette */
-    --bg-base: #F7F6F3; /* warm off-white page bg */
+    --bg-base: #F7F6F3;
     --bg-card: #FFFFFF;
     --bg-muted: #F1F0EC;
     --border-color: #E8E6E1;
@@ -196,12 +196,7 @@ a {
     background: linear-gradient(135deg, var(--primary-color), var(--accent-violet)) !important;
 }
 
-/* ?? Page Wrappers / Section Colors ??????????????????????????
-   JS adds a data-page attribute to <body>. Each page gets its
-   own accent that tints headers, sidebar panels, etc.
-   ??????????????????????????????????????????????????????????? */
-
-/* Courses pages ? coral */
+/* Courses pages – coral */
 body[data-page="courses"] .page-header,
 body[data-page="courses"] .content-section-title i:first-child {
     color: var(--accent-coral);
@@ -220,12 +215,12 @@ body[data-page="courses"] .progress-bar-custom {
     background: linear-gradient(90deg, var(--accent-coral), #F4623A);
 }
 
-/* Lessons pages ? indigo/violet (keep default) */
+/* Lessons pages – indigo/violet (keep default) */
 body[data-page="lessons"] .page-header-meta span {
     color: var(--primary-color);
 }
 
-/* Teacher pages ? amber */
+/* Teacher pages – amber */
 body[data-page="teacher"] .stat-card .stat-icon.primary {
     background: rgba(217,119,6,.12);
 }
@@ -238,13 +233,13 @@ body[data-page="teacher"] h1 i, body[data-page="teacher"] h5 i.text-primary {
     color: var(--accent-amber) !important;
 }
 
-/* Forum pages ? rose */
+/* Forum pages – rose */
 body[data-page="forum"] .page-header h1,
 body[data-page="forum"] .content-section-title i:first-child {
     color: var(--accent-rose);
 }
 
-/* Profile pages ? teal */
+/* Profile pages – teal */
 body[data-page="profile"] .stat-card .stat-value {
     color: var(--accent-teal);
 }
@@ -257,7 +252,7 @@ body[data-page="profile"] .stat-icon.primary {
         color: var(--accent-teal);
     }
 
-/* Messaging pages ? violet */
+/* Messaging pages – violet */
 body[data-page="messaging"] h1 i {
     color: var(--accent-violet);
 }
@@ -303,7 +298,6 @@ body[data-page="messaging"] h1 i {
     overflow: hidden;
 }
 
-    /* Subtle colored left accent bar per section */
     .content-section::before {
         content: '';
         position: absolute;
@@ -366,7 +360,6 @@ body[data-page="messaging"] h1 i {
     box-shadow: var(--shadow-sm);
 }
 
-/* Lesson nav items in sidebar */
 .lesson-nav-item {
     display: flex;
     align-items: center;
@@ -434,6 +427,55 @@ body[data-page="messaging"] h1 i {
         transform: translateY(-2px);
         box-shadow: 0 6px 18px rgba(79,70,229,.38);
         color: white;
+    }
+
+/* Hero-specific button overrides */
+.btn-custom-primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-violet));
+    color: #ffffff !important;
+    border: none;
+    padding: 0.75rem 1.75rem;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all var(--transition);
+    box-shadow: 0 4px 14px rgba(79,70,229,.35);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    text-decoration: none;
+}
+
+    .btn-custom-primary:hover {
+        background: linear-gradient(135deg, var(--primary-dark), #6D28D9);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 22px rgba(79,70,229,.45);
+        color: #ffffff !important;
+    }
+
+.btn-custom-secondary {
+    background: rgba(255,255,255,.12);
+    color: #ffffff !important;
+    border: 2px solid rgba(255,255,255,.4);
+    padding: 0.75rem 1.75rem;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    text-decoration: none;
+    backdrop-filter: blur(4px);
+}
+
+    .btn-custom-secondary:hover {
+        background: rgba(255,255,255,.22);
+        border-color: rgba(255,255,255,.7);
+        color: #ffffff !important;
+        transform: translateY(-2px);
     }
 
 .contact-teacher-btn {
@@ -628,7 +670,6 @@ body[data-page="messaging"] h1 i {
     overflow: hidden;
 }
 
-    /* Subtle pattern overlay on card images */
     .course-card-image::before {
         content: '';
         position: absolute;
@@ -707,7 +748,7 @@ body[data-page="messaging"] h1 i {
     color: #9F1239;
 }
 
-/* ?? Filter Section (Courses Index) ??????????????????????????? */
+/* ?? Filter Section ?????????????????????????????????????????? */
 .filter-section {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -744,7 +785,7 @@ body[data-page="messaging"] h1 i {
         outline: none;
     }
 
-/* ?? Exercise Type Badges ?????????????????????????????????????? */
+/* ?? Exercise Type Badges ???????????????????????????????????? */
 .exercise-type-badge {
     display: inline-flex;
     align-items: center;
@@ -878,7 +919,7 @@ body[data-page="messaging"] h1 i {
     font-family: 'DM Sans', sans-serif;
 }
 
-/* ?? Cards (generic Bootstrap override) ??????????????????????? */
+/* ?? Cards (generic Bootstrap override) ?????????????????????? */
 .card {
     border: 1px solid var(--border-color) !important;
     border-radius: var(--radius-lg) !important;
@@ -890,7 +931,7 @@ body[data-page="messaging"] h1 i {
     padding: 1.75rem;
 }
 
-/* ?? Breadcrumb ??????????????????????????????????????????????? */
+/* ?? Breadcrumb ?????????????????????????????????????????????? */
 .breadcrumb {
     margin: 0;
 }
@@ -908,14 +949,14 @@ body[data-page="messaging"] h1 i {
     color: var(--text-muted);
 }
 
-/* ?? Badges ??????????????????????????????????????????????????? */
+/* ?? Badges ?????????????????????????????????????????????????? */
 .badge.bg-light {
     background: var(--bg-muted) !important;
     color: var(--text-secondary) !important;
     border: 1px solid var(--border-color);
 }
 
-/* ?? Table ???????????????????????????????????????????????????? */
+/* ?? Table ??????????????????????????????????????????????????? */
 .table {
     color: var(--text-primary);
 }
@@ -934,7 +975,7 @@ body[data-page="messaging"] h1 i {
         background: var(--bg-muted);
     }
 
-/* ?? Home page hero (applied via inline styles in Index.cshtml) */
+/* ?? Hero Section ???????????????????????????????????????????? */
 .hero-section {
     background: linear-gradient(135deg, #12111A 0%, #1C1B2E 50%, #1A1228 100%);
     color: white;
@@ -951,7 +992,40 @@ body[data-page="messaging"] h1 i {
         pointer-events: none;
     }
 
-/* ?? Responsive ??????????????????????????????????????????????? */
+    /* ?? CONTRAST FIX: all text inside hero sections must be light ?? */
+    .hero-section h1,
+    .hero-section h2,
+    .hero-section h3,
+    .hero-section h4,
+    .hero-section h5,
+    .hero-section h6 {
+        color: #FFFFFF;
+    }
+
+    .hero-section p,
+    .hero-section .hero-subtitle,
+    .hero-section .lead {
+        color: rgba(255, 255, 255, 0.82);
+    }
+
+.hero-title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    color: #FFFFFF;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin-bottom: 1.25rem;
+}
+
+.hero-subtitle {
+    font-size: 1.15rem;
+    color: rgba(255, 255, 255, 0.80);
+    line-height: 1.7;
+    margin-bottom: 2rem;
+    max-width: 540px;
+}
+
+/* ?? Responsive ?????????????????????????????????????????????? */
 @media (max-width: 992px) {
     .sidebar-panel {
         position: static;
@@ -959,11 +1033,11 @@ body[data-page="messaging"] h1 i {
     }
 
     .page-header {
-        padding: 1.25rem 1.25rem;
+        padding: 1.25rem;
     }
 
     .content-section {
-        padding: 1.25rem 1.25rem;
+        padding: 1.25rem;
     }
 }
 
@@ -982,7 +1056,7 @@ body[data-page="messaging"] h1 i {
     }
 }
 
-/* ?? Utility ??????????????????????????????????????????????????? */
+/* ?? Utility ????????????????????????????????????????????????? */
 .text-primary {
     color: var(--primary-color) !important;
 }
@@ -997,4 +1071,21 @@ body[data-page="messaging"] h1 i {
 
 .min-w-0 {
     min-width: 0;
+}
+
+/* Fade-in animation for stat cards */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.5s ease both;
 }

@@ -8,18 +8,594 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/exercises.css" />
+    <style>
+        /* ── Listening Exercise ─────────────────────────── */
+        .listening-exercise {
+            text-align: center;
+        }
+
+        .audio-player-wrapper {
+            background: linear-gradient(135deg, #12111A, #1C1B2E);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .audio-player-wrapper::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: radial-gradient(ellipse 60% 80% at 50% 50%, rgba(79,70,229,.18) 0%, transparent 70%);
+                pointer-events: none;
+            }
+
+        /* Waveform bars (CSS animation) */
+        .waveform {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            height: 52px;
+            margin-bottom: 1.25rem;
+        }
+
+        .waveform-bar {
+            width: 4px;
+            background: rgba(255,255,255,.3);
+            border-radius: 2px;
+            transition: height 0.1s ease, background 0.3s ease;
+        }
+
+        .waveform.playing .waveform-bar {
+            background: #4F46E5;
+        }
+
+            .waveform.playing .waveform-bar:nth-child(1) {
+                animation: wave 1.1s ease-in-out infinite;
+            }
+
+            .waveform.playing .waveform-bar:nth-child(2) {
+                animation: wave 1.3s ease-in-out infinite 0.1s;
+            }
+
+            .waveform.playing .waveform-bar:nth-child(3) {
+                animation: wave 0.9s ease-in-out infinite 0.2s;
+            }
+
+            .waveform.playing .waveform-bar:nth-child(4) {
+                animation: wave 1.2s ease-in-out infinite 0.05s;
+            }
+
+            .waveform.playing .waveform-bar:nth-child(5) {
+                animation: wave 1.0s ease-in-out infinite 0.15s;
+            }
+
+            .waveform.playing .waveform-bar:nth-child(6) {
+                animation: wave 1.4s ease-in-out infinite 0.25s;
+            }
+
+            .waveform.playing .waveform-bar:nth-child(7) {
+                animation: wave 0.85s ease-in-out infinite 0.08s;
+            }
+
+            .waveform.playing .waveform-bar:nth-child(8) {
+                animation: wave 1.15s ease-in-out infinite 0.18s;
+            }
+
+            .waveform.playing .waveform-bar:nth-child(9) {
+                animation: wave 1.05s ease-in-out infinite 0.3s;
+            }
+
+            .waveform.playing .waveform-bar:nth-child(10) {
+                animation: wave 1.25s ease-in-out infinite 0.12s;
+            }
+
+            .waveform.playing .waveform-bar:nth-child(11) {
+                animation: wave 0.95s ease-in-out infinite 0.22s;
+            }
+
+            .waveform.playing .waveform-bar:nth-child(12) {
+                animation: wave 1.35s ease-in-out infinite 0.07s;
+            }
+
+        @@keyframes wave {
+            0%, 100%
+
+        {
+            height: 8px;
+        }
+
+        50% {
+            height: 40px;
+        }
+
+        }
+
+        .audio-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.25rem;
+        }
+
+        .btn-audio-play {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #4F46E5;
+            border: none;
+            color: white;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 16px rgba(79,70,229,.45);
+            flex-shrink: 0;
+        }
+
+            .btn-audio-play:hover {
+                background: #4338CA;
+                transform: scale(1.08);
+            }
+
+            .btn-audio-play.playing {
+                background: #E11D48;
+                box-shadow: 0 4px 16px rgba(225,29,72,.45);
+            }
+
+        .audio-progress-wrap {
+            flex: 1;
+            max-width: 260px;
+        }
+
+        .audio-progress-bar {
+            height: 6px;
+            background: rgba(255,255,255,.15);
+            border-radius: 3px;
+            overflow: hidden;
+            cursor: pointer;
+            margin-bottom: 0.35rem;
+        }
+
+        .audio-progress-fill {
+            height: 100%;
+            background: #4F46E5;
+            border-radius: 3px;
+            transition: width 0.3s linear;
+            width: 0%;
+        }
+
+        .audio-time {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,.5);
+            font-weight: 600;
+        }
+
+        .btn-replay {
+            background: rgba(255,255,255,.1);
+            border: 1px solid rgba(255,255,255,.15);
+            border-radius: 50px;
+            color: rgba(255,255,255,.8);
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.4rem 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+            .btn-replay:hover {
+                background: rgba(255,255,255,.18);
+                color: white;
+            }
+
+        /* Transcript reveal */
+        .transcript-section {
+            margin-top: 1.25rem;
+        }
+
+        .btn-reveal-transcript {
+            background: rgba(79,70,229,.1);
+            border: 2px solid rgba(79,70,229,.3);
+            border-radius: 50px;
+            color: #4F46E5;
+            font-weight: 700;
+            font-size: 0.875rem;
+            padding: 0.55rem 1.25rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .btn-reveal-transcript:hover {
+                background: rgba(79,70,229,.18);
+                border-color: rgba(79,70,229,.5);
+            }
+
+        .transcript-content {
+            display: none;
+            margin-top: 1rem;
+            background: rgba(79,70,229,.06);
+            border: 1px solid rgba(79,70,229,.15);
+            border-radius: 14px;
+            padding: 1.25rem 1.5rem;
+            text-align: left;
+            animation: fadeIn 0.3s ease;
+        }
+
+            .transcript-content.visible {
+                display: block;
+            }
+
+        .transcript-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #4F46E5;
+            opacity: 0.7;
+            margin-bottom: 0.5rem;
+        }
+
+        .transcript-text {
+            font-size: 1.05rem;
+            color: #1C1917;
+            font-weight: 500;
+            line-height: 1.65;
+        }
+
+        @@keyframes fadeIn {
+            from
+
+        {
+            opacity: 0;
+            transform: translateY(-8px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        }
+
+        /* Listening answer section */
+        .listening-answer-section {
+            margin-top: 1.5rem;
+            text-align: left;
+        }
+
+        .listening-answer-label {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #1C1917;
+            margin-bottom: 0.6rem;
+        }
+
+        /* ── Speaking Exercise ──────────────────────────── */
+        .speaking-exercise {
+            text-align: center;
+        }
+
+        .target-phrase-card {
+            background: linear-gradient(135deg, #12111A, #1C1B2E);
+            border-radius: 20px;
+            padding: 2rem 2.5rem;
+            margin-bottom: 1.75rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .target-phrase-card::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: radial-gradient(ellipse 50% 80% at 20% 50%, rgba(124,58,237,.25) 0%, transparent 65%), radial-gradient(ellipse 40% 60% at 80% 50%, rgba(79,70,229,.2) 0%, transparent 65%);
+                pointer-events: none;
+            }
+
+        .target-phrase-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: rgba(255,255,255,.5);
+            margin-bottom: 0.75rem;
+        }
+
+        .target-phrase-text {
+            font-family: 'Sora', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            color: #FFFFFF;
+            line-height: 1.2;
+            margin-bottom: 1.25rem;
+            position: relative;
+        }
+
+        .btn-listen-phrase {
+            background: rgba(255,255,255,.1);
+            border: 1px solid rgba(255,255,255,.2);
+            border-radius: 50px;
+            color: white;
+            font-size: 0.875rem;
+            font-weight: 600;
+            padding: 0.55rem 1.25rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+            .btn-listen-phrase:hover {
+                background: rgba(255,255,255,.18);
+            }
+
+        /* Microphone record button */
+        .mic-area {
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-record-mic {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4F46E5, #7C3AED);
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 24px rgba(79,70,229,.4);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+            .btn-record-mic:hover {
+                transform: scale(1.06);
+                box-shadow: 0 8px 30px rgba(79,70,229,.5);
+            }
+
+            .btn-record-mic.recording {
+                background: linear-gradient(135deg, #E11D48, #BE123C);
+                box-shadow: 0 6px 24px rgba(225,29,72,.5);
+                animation: recordPulse 1.4s ease-in-out infinite;
+            }
+
+        @@keyframes recordPulse {
+            0%, 100%
+
+        {
+            box-shadow: 0 6px 24px rgba(225,29,72,.5);
+        }
+
+        50% {
+            box-shadow: 0 6px 40px rgba(225,29,72,.75), 0 0 0 12px rgba(225,29,72,.12);
+        }
+
+        }
+
+        /* Recording waveform (animated while recording) */
+        .recording-waveform {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            height: 40px;
+            margin: 1rem 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+            .recording-waveform.active {
+                opacity: 1;
+            }
+
+        .rec-bar {
+            width: 5px;
+            height: 8px;
+            background: #E11D48;
+            border-radius: 3px;
+        }
+
+        .recording-waveform.active .rec-bar:nth-child(1) {
+            animation: recWave 0.8s ease-in-out infinite;
+        }
+
+        .recording-waveform.active .rec-bar:nth-child(2) {
+            animation: recWave 0.6s ease-in-out infinite 0.1s;
+        }
+
+        .recording-waveform.active .rec-bar:nth-child(3) {
+            animation: recWave 1.0s ease-in-out infinite 0.05s;
+        }
+
+        .recording-waveform.active .rec-bar:nth-child(4) {
+            animation: recWave 0.7s ease-in-out infinite 0.15s;
+        }
+
+        .recording-waveform.active .rec-bar:nth-child(5) {
+            animation: recWave 0.9s ease-in-out infinite 0.08s;
+        }
+
+        .recording-waveform.active .rec-bar:nth-child(6) {
+            animation: recWave 0.65s ease-in-out infinite 0.2s;
+        }
+
+        .recording-waveform.active .rec-bar:nth-child(7) {
+            animation: recWave 0.85s ease-in-out infinite 0.12s;
+        }
+
+        @@keyframes recWave {
+            0%, 100%
+
+        {
+            height: 8px;
+        }
+
+        50% {
+            height: 32px;
+        }
+
+        }
+
+        .record-status {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #6B6860;
+            margin-top: 0.5rem;
+        }
+
+            .record-status.recording-active {
+                color: #E11D48;
+            }
+
+        /* Recognized text display */
+        .recognized-text-box {
+            background: #F7F6F3;
+            border: 2px solid #E8E6E1;
+            border-radius: 14px;
+            padding: 1.25rem 1.5rem;
+            min-height: 70px;
+            text-align: left;
+            margin: 1.25rem 0;
+            transition: all 0.3s ease;
+        }
+
+            .recognized-text-box.has-text {
+                border-color: #4F46E5;
+                background: #EEF2FF;
+            }
+
+        .recognized-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #6B6860;
+            margin-bottom: 0.4rem;
+        }
+
+        .recognized-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #1C1917;
+            min-height: 1.5rem;
+        }
+
+            .recognized-text.empty {
+                color: #A9A7A0;
+                font-style: italic;
+                font-size: 0.9rem;
+            }
+
+        /* Accuracy meter */
+        .accuracy-meter {
+            display: none;
+            margin: 1.25rem 0;
+        }
+
+            .accuracy-meter.visible {
+                display: block;
+            }
+
+        .accuracy-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .accuracy-label {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: #1C1917;
+        }
+
+        .accuracy-pct {
+            font-family: 'Sora', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+            .accuracy-pct.great {
+                color: #059669;
+            }
+
+            .accuracy-pct.okay {
+                color: #D97706;
+            }
+
+            .accuracy-pct.poor {
+                color: #E11D48;
+            }
+
+        .accuracy-bar-wrap {
+            height: 10px;
+            background: #E8E6E1;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .accuracy-bar-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+        }
+
+            .accuracy-bar-fill.great {
+                background: linear-gradient(90deg, #059669, #34D399);
+            }
+
+            .accuracy-bar-fill.okay {
+                background: linear-gradient(90deg, #D97706, #FBBF24);
+            }
+
+            .accuracy-bar-fill.poor {
+                background: linear-gradient(90deg, #E11D48, #F87171);
+            }
+
+        .accuracy-note {
+            font-size: 0.8rem;
+            color: #6B6860;
+            margin-top: 0.4rem;
+        }
+
+        /* Browser unsupported warning */
+        .speech-unsupported {
+            display: none;
+            background: rgba(217,119,6,.1);
+            border: 1px solid rgba(217,119,6,.3);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            font-size: 0.9rem;
+            color: #92400E;
+            margin-bottom: 1rem;
+        }
+    </style>
 }
 
 <!-- Back to Lesson Button -->
-<div class="mb-4">
-    <a href="@Url.Action("Details", "Lessons", new { id = ViewBag.LessonId })"
-       class="btn btn-outline-secondary me-2">
-        <i class="fas fa-arrow-left me-2"></i>Back to Lesson
-    </a>
-    <a href="@Url.Action("Details", "Courses", new { id = ViewBag.CourseId })"
-       class="btn btn-outline-primary">
-        <i class="fas fa-book me-2"></i>Back to Course
-    </a>
+<div class="container pt-4 mb-2">
+    <div class="d-flex gap-2">
+        <a href="@Url.Action("Details", "Lessons", new { id = ViewBag.LessonId })" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-2"></i>Back to Lesson
+        </a>
+        <a href="@Url.Action("Details", "Courses", new { id = ViewBag.CourseId })" class="btn btn-outline-primary btn-sm">
+            <i class="fas fa-book me-2"></i>Back to Course
+        </a>
+    </div>
 </div>
 
 <div class="exercise-container">
@@ -32,7 +608,6 @@
             <div id="progress-bar" class="lesson-progress-bar" style="width: 0%"></div>
         </div>
 
-        <!-- Stats Row -->
         <div class="d-flex justify-content-between align-items-center mt-3">
             <div class="d-flex gap-3">
                 <div class="stat-badge">
@@ -48,15 +623,8 @@
         </div>
     </div>
 
-    <!-- Back to Lesson Button -->
-    <div class="mb-4">
-        <a href="@Url.Action("Details", "Lessons", new { id = lessonId })" class="btn btn-outline-primary">
-            <i class="fas fa-arrow-left me-2"></i>Back to Lesson
-        </a>
-    </div>
-
     <h1 class="mb-4">
-        <i class="fas fa-dumbbell me-2"></i>@lessonTitle - Practice
+        <i class="fas fa-dumbbell me-2 text-primary"></i>@lessonTitle — Practice
     </h1>
 
     @if (!Model.Any())
@@ -86,28 +654,41 @@
                         {
                             case "MultipleChoice":
                                 <i class="fas fa-list-ul me-2"></i>
+                
+                                <text>Multiple Choice</text>
                                 break;
                             case "FillInBlank":
                             case "FillInTheBlank":
                                 <i class="fas fa-keyboard me-2"></i>
+                
+                                <text>Fill in the Blank</text>
                                 break;
                             case "Translation":
                                 <i class="fas fa-language me-2"></i>
+                
+                                <text>Translation</text>
                                 break;
                             case "Listening":
                                 <i class="fas fa-headphones me-2"></i>
+                
+                                <text>Listening</text>
                                 break;
                             case "Speaking":
                                 <i class="fas fa-microphone me-2"></i>
+                
+                                <text>Speaking</text>
                                 break;
                             case "Matching":
                                 <i class="fas fa-link me-2"></i>
+                
+                                <text>Matching</text>
                                 break;
                             default:
                                 <i class="fas fa-question me-2"></i>
+                
+                                <text>@exercise.Type</text>
                                 break;
                         }
-                        @exercise.Type
                     </h3>
                     <div class="exercise-points">
                         <i class="fas fa-star"></i>
@@ -116,64 +697,206 @@
                 </div>
 
                 <div class="exercise-content">
-                    <!-- Question -->
+                    <!-- Question prompt -->
                     <div class="exercise-question">
                         @Html.Raw(exercise.Content)
                     </div>
 
-                    <!-- Audio for Listening Exercises -->
-                    @if (exercise.Type == "Listening" && !string.IsNullOrEmpty(exercise.AudioUrl))
-                    {
-                        <div class="mb-4 text-center">
-                            <audio controls class="w-100" style="max-width: 500px;">
-                                <source src="@exercise.AudioUrl" type="audio/mpeg">
-                                Your browser does not support the audio element.
-                            </audio>
-                        </div>
-                    }
-
-                    <!-- Image if available -->
+                    <!-- Image (if any) -->
                     @if (!string.IsNullOrEmpty(exercise.ImageUrl))
                     {
                         <div class="mb-4 text-center">
-                            <img src="@exercise.ImageUrl"
-                                 alt="Exercise image"
-                                 class="img-fluid rounded-3 shadow-sm"
-                                 style="max-height: 300px; object-fit: cover;">
+                            <img src="@exercise.ImageUrl" alt="Exercise image"
+                                 class="img-fluid rounded-3 shadow-sm" style="max-height:300px;object-fit:cover;">
                         </div>
                     }
 
-                    <!-- Multiple Choice Options -->
+                    <!-- ─── LISTENING EXERCISE ─────────────────── -->
+                    @if (exercise.Type == "Listening")
+                    {
+                        <div class="listening-exercise">
+                            <div class="audio-player-wrapper">
+                                <!-- Waveform visualization -->
+                                <div class="waveform" id="waveform-@exercise.Id">
+                                    @for (int w = 0; w < 12; w++)
+                                    {
+                                        <div class="waveform-bar" style="height: @(new Random().Next(8, 38))px;"></div>
+                                    }
+                                </div>
+
+                                <!-- Controls -->
+                                <div class="audio-controls">
+                                    <button class="btn-audio-play" id="playBtn-@exercise.Id"
+                                            onclick="toggleAudio('@exercise.Id', '@(exercise.ListeningData?.AudioUrl ?? exercise.AudioUrl)')">
+                                        <i class="fas fa-play" id="playIcon-@exercise.Id"></i>
+                                    </button>
+
+                                    <div class="audio-progress-wrap">
+                                        <div class="audio-progress-bar"
+                                             id="audioBar-@exercise.Id"
+                                             onclick="seekAudio(event, '@exercise.Id')">
+                                            <div class="audio-progress-fill" id="audioFill-@exercise.Id"></div>
+                                        </div>
+                                        <div class="audio-time">
+                                            <span id="audioTime-@exercise.Id">0:00</span>
+                                            <span id="audioDur-@exercise.Id">--:--</span>
+                                        </div>
+                                    </div>
+
+                                    <button class="btn-replay" onclick="replayAudio('@exercise.Id')">
+                                        <i class="fas fa-redo me-1"></i> Replay
+                                    </button>
+                                </div>
+
+                                <!-- Hidden audio element -->
+                                <audio id="audio-@exercise.Id" style="display:none;"
+                                       src="@(exercise.ListeningData?.AudioUrl ?? exercise.AudioUrl)">
+                                </audio>
+                            </div>
+
+                            <!-- Transcript reveal -->
+                            <div class="transcript-section">
+                                <button class="btn-reveal-transcript"
+                                        id="transcriptBtn-@exercise.Id"
+                                        onclick="toggleTranscript('@exercise.Id')">
+                                    <i class="fas fa-eye" id="transcriptIcon-@exercise.Id"></i>
+                                    Show Transcript
+                                </button>
+
+                                <div class="transcript-content" id="transcript-@exercise.Id">
+                                    <div class="transcript-label">Transcript</div>
+                                    <div class="transcript-text">
+                                        @(exercise.ListeningData?.Transcript ?? "No transcript available.")
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Answer input -->
+                            <div class="listening-answer-section">
+                                <div class="listening-answer-label">
+                                    <i class="fas fa-pencil me-2 text-primary"></i>
+                                    Listen carefully, then type what you heard:
+                                </div>
+                                <input type="text"
+                                       class="form-control exercise-input"
+                                       id="listeningInput-@exercise.Id"
+                                       placeholder="Type your answer here..."
+                                       autocomplete="off">
+                            </div>
+                        </div>
+                    }
+
+                    <!-- ─── SPEAKING EXERCISE ─────────────────── -->
+                    @if (exercise.Type == "Speaking" && exercise.SpeakingData != null)
+                    {
+                        <div class="speaking-exercise"
+                             data-target="@exercise.SpeakingData.TargetPhrase"
+                             data-lang="@exercise.SpeakingData.Language"
+                             data-min-accuracy="@exercise.SpeakingData.MinimumAccuracy"
+                             id="speakingEx-@exercise.Id">
+
+                            <!-- Target phrase display -->
+                            <div class="target-phrase-card">
+                                <div class="target-phrase-label">
+                                    <i class="fas fa-bullseye me-2"></i>Say this phrase
+                                </div>
+                                <div class="target-phrase-text" id="targetText-@exercise.Id">
+                                    @exercise.SpeakingData.TargetPhrase
+                                </div>
+                                <button class="btn-listen-phrase"
+                                        onclick="listenToPhrase('@exercise.SpeakingData.TargetPhrase', '@exercise.SpeakingData.Language')">
+                                    <i class="fas fa-volume-high"></i> Listen
+                                </button>
+                            </div>
+
+                            <!-- Browser unsupported warning -->
+                            <div class="speech-unsupported" id="speechUnsupported-@exercise.Id">
+                                <i class="fas fa-triangle-exclamation me-2"></i>
+                                Your browser doesn't support speech recognition. Please use Chrome or Edge for speaking exercises.
+                                You can still type your answer below instead.
+                            </div>
+
+                            <!-- Mic button + waveform -->
+                            <div class="mic-area">
+                                <button class="btn-record-mic"
+                                        id="micBtn-@exercise.Id"
+                                        onclick="toggleRecording('@exercise.Id', '@exercise.SpeakingData.Language')">
+                                    <i class="fas fa-microphone" id="micIcon-@exercise.Id"></i>
+                                </button>
+                                <div class="recording-waveform" id="recWave-@exercise.Id">
+                                    @for (int r = 0; r < 7; r++)
+                                    {
+                                        <div class="rec-bar"></div>
+                                    }
+                                </div>
+                                <div class="record-status" id="recStatus-@exercise.Id">
+                                    Tap the mic to start recording
+                                </div>
+                            </div>
+
+                            <!-- Recognized text -->
+                            <div class="recognized-text-box" id="recognizedBox-@exercise.Id">
+                                <div class="recognized-label">What we heard</div>
+                                <div class="recognized-text empty" id="recognizedText-@exercise.Id">
+                                    Your speech will appear here…
+                                </div>
+                            </div>
+
+                            <!-- Accuracy meter -->
+                            <div class="accuracy-meter" id="accuracyMeter-@exercise.Id">
+                                <div class="accuracy-header">
+                                    <span class="accuracy-label">Accuracy</span>
+                                    <span class="accuracy-pct" id="accuracyPct-@exercise.Id">—</span>
+                                </div>
+                                <div class="accuracy-bar-wrap">
+                                    <div class="accuracy-bar-fill" id="accuracyFill-@exercise.Id" style="width:0%"></div>
+                                </div>
+                                <div class="accuracy-note" id="accuracyNote-@exercise.Id"></div>
+                            </div>
+
+                            <!-- Fallback text input (always available) -->
+                            <div class="mt-3">
+                                <div class="listening-answer-label">
+                                    <i class="fas fa-keyboard me-2 text-muted"></i>
+                                    Or type your answer manually:
+                                </div>
+                                <input type="text"
+                                       class="form-control exercise-input"
+                                       id="speakingFallback-@exercise.Id"
+                                       placeholder="Type the phrase here..."
+                                       autocomplete="off">
+                            </div>
+                        </div>
+
+                        <!-- Hidden input that holds the final answer for submission -->
+                        <input type="hidden" class="exercise-input" id="speakingAnswer-@exercise.Id">
+                    }
+
+                    <!-- ─── MULTIPLE CHOICE ────────────────────── -->
                     @if (exercise.Type == "MultipleChoice" && exercise.Options != null && exercise.Options.Any())
                     {
                         <div class="exercise-options">
                             @foreach (var option in exercise.Options)
                             {
-                                <div class="exercise-option" data-value="@option">
-                                    @option
-                                </div>
+                                <div class="exercise-option" data-value="@option">@option</div>
                             }
                         </div>
                     }
 
-                    <!-- Fill in the Blank / Translation Input -->
+                    <!-- ─── FILL IN BLANK / TRANSLATION ──────── -->
                     @if (exercise.Type == "FillInBlank" || exercise.Type == "FillInTheBlank" || exercise.Type == "Translation")
                     {
                         <div class="mb-3">
-                            <input type="text"
-                                   class="form-control exercise-input"
-                                   placeholder="Type your answer here..."
-                                   autocomplete="off">
+                            <input type="text" class="form-control exercise-input"
+                                   placeholder="Type your answer here..." autocomplete="off">
                         </div>
                     }
 
-                    <!-- Word Bank for Fill in the Blank -->
+                    <!-- Word bank for fill-in-blank -->
                     @if ((exercise.Type == "FillInBlank" || exercise.Type == "FillInTheBlank") && exercise.WordBank != null && exercise.WordBank.Any())
                     {
                         <div class="word-bank mb-4">
-                            <div class="word-bank-label">
-                                <i class="fas fa-lightbulb me-2"></i>Word Bank:
-                            </div>
+                            <div class="word-bank-label"><i class="fas fa-lightbulb me-2"></i>Word Bank:</div>
                             <div class="word-bank-items">
                                 @foreach (var word in exercise.WordBank)
                                 {
@@ -183,30 +906,26 @@
                         </div>
                     }
 
-                    <!-- Matching Exercise -->
+                    <!-- ─── MATCHING ───────────────────────────── -->
                     @if (exercise.Type == "Matching" && exercise.MatchingPairs != null && exercise.MatchingPairs.Any())
                     {
                         <div class="matching-exercise">
                             <div class="row">
                                 <div class="col-md-6">
-                                    <h5 class="mb-3">Left Column</h5>
+                                    <h5 class="mb-3 fw-bold" style="font-size:.95rem;">Column A</h5>
                                     <div class="matching-column" id="left-column-@exercise.Id">
                                         @foreach (var pair in exercise.MatchingPairs)
                                         {
-                                            <div class="matching-item" data-pair-id="@pair.PairId">
-                                                @pair.Left
-                                            </div>
+                                            <div class="matching-item" data-pair-id="@pair.PairId">@pair.Left</div>
                                         }
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <h5 class="mb-3">Right Column</h5>
+                                    <h5 class="mb-3 fw-bold" style="font-size:.95rem;">Column B</h5>
                                     <div class="matching-column" id="right-column-@exercise.Id">
                                         @foreach (var pair in exercise.MatchingPairs.OrderBy(x => Guid.NewGuid()))
                                         {
-                                            <div class="matching-item" data-pair-id="@pair.PairId">
-                                                @pair.Right
-                                            </div>
+                                            <div class="matching-item" data-pair-id="@pair.PairId">@pair.Right</div>
                                         }
                                     </div>
                                 </div>
@@ -215,61 +934,35 @@
                         </div>
                     }
 
-                    <!-- Speaking Exercise -->
-                    @if (exercise.Type == "Speaking" && exercise.SpeakingData != null)
-                    {
-                        <div class="speaking-exercise">
-                            <div class="target-phrase mb-4 p-4 bg-light rounded-3 text-center">
-                                <h4>Say this phrase:</h4>
-                                <p class="display-6 fw-bold text-primary">@exercise.SpeakingData.TargetPhrase</p>
-                                <button type="button"
-                                        class="btn-pronunciation mt-3"
-                                        data-text="@exercise.SpeakingData.TargetPhrase"
-                                        data-lang="@exercise.SpeakingData.Language">
-                                    <i class="fas fa-volume-up"></i>
-                                    Listen
-                                </button>
-                            </div>
-
-                            <div class="text-center">
-                                <button type="button" class="btn btn-enroll btn-lg" id="btn-record-@exercise.Id">
-                                    <i class="fas fa-microphone me-2"></i>
-                                    Start Recording
-                                </button>
-                                <div class="mt-3 text-muted">
-                                    <small>
-                                        <i class="fas fa-info-circle me-1"></i>
-                                        Minimum accuracy: @(exercise.SpeakingData.MinimumAccuracy * 100)%
-                                    </small>
-                                </div>
-                            </div>
-                            <input type="hidden" class="exercise-input" id="speaking-answer-@exercise.Id">
-                        </div>
-                    }
-
-                    <!-- Hint Section -->
+                    <!-- Hint -->
                     @if (!string.IsNullOrEmpty(exercise.Hint))
                     {
                         <div class="exercise-hint">
                             <i class="fas fa-lightbulb"></i>
-                            <div>
-                                <strong>Hint:</strong><br>
-                                @exercise.Hint
-                            </div>
+                            <div><strong>Hint:</strong><br>@exercise.Hint</div>
                         </div>
                     }
                 </div>
 
                 <!-- Exercise Actions -->
                 <div class="exercise-actions">
-                    <button type="button" class="btn-check-answer" disabled>
-                        <i class="fas fa-check me-1"></i>Check Answer
-                    </button>
+                    @if (exercise.Type == "Listening" || exercise.Type == "Speaking")
+                    {
+                        <button type="button" class="btn-check-answer" disabled>
+                            <i class="fas fa-check me-1"></i>Submit Answer
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn-check-answer" disabled>
+                            <i class="fas fa-check me-1"></i>Check Answer
+                        </button>
+                    }
 
                     @if (!string.IsNullOrEmpty(exercise.Hint))
                     {
                         <button type="button" class="btn-hint" onclick="toggleHint(this)">
-                            <i class="fas fa-lightbulb me-1"></i>Show Hint
+                            <i class="fas fa-lightbulb me-1"></i>Hint
                         </button>
                     }
 
@@ -283,37 +976,39 @@
 </div>
 
 <!-- Summary Card -->
-<div class="card shadow-sm mt-4">
-    <div class="card-body text-center">
-        <h4 class="mb-3">
-            <i class="fas fa-chart-line me-2 text-primary"></i>Your Progress
-        </h4>
-        <div class="row">
-            <div class="col-md-4">
-                <div class="progress-stat">
-                    <div class="stat-icon bg-primary-soft">
-                        <i class="fas fa-check-circle text-primary"></i>
+<div class="container pb-5">
+    <div class="card shadow-sm">
+        <div class="card-body text-center">
+            <h4 class="mb-3">
+                <i class="fas fa-chart-line me-2 text-primary"></i>Your Progress
+            </h4>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="progress-stat">
+                        <div class="stat-icon primary mx-auto mb-2">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-value" id="final-completed">0</div>
+                        <div class="stat-label">Completed</div>
                     </div>
-                    <div class="stat-value" id="final-completed">0</div>
-                    <div class="stat-label">Completed</div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="progress-stat">
-                    <div class="stat-icon bg-success-soft">
-                        <i class="fas fa-star text-warning"></i>
+                <div class="col-md-4">
+                    <div class="progress-stat">
+                        <div class="stat-icon success mx-auto mb-2">
+                            <i class="fas fa-star text-warning"></i>
+                        </div>
+                        <div class="stat-value" id="final-points">0</div>
+                        <div class="stat-label">Points Earned</div>
                     </div>
-                    <div class="stat-value" id="final-points">0</div>
-                    <div class="stat-label">Points Earned</div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="progress-stat">
-                    <div class="stat-icon bg-danger-soft">
-                        <i class="fas fa-fire text-danger"></i>
+                <div class="col-md-4">
+                    <div class="progress-stat">
+                        <div class="stat-icon danger mx-auto mb-2">
+                            <i class="fas fa-fire text-danger"></i>
+                        </div>
+                        <div class="stat-value" id="final-streak">0</div>
+                        <div class="stat-label">Day Streak</div>
                     </div>
-                    <div class="stat-value" id="final-streak">0</div>
-                    <div class="stat-label">Day Streak</div>
                 </div>
             </div>
         </div>
@@ -323,36 +1018,275 @@
 @section Scripts {
     <script src="~/js/interactive-exercises.js"></script>
     <script>
-        // Initialize progress tracking
-        document.addEventListener('DOMContentLoaded', function() {
-            const totalExercises = @Model.Count();
-            document.getElementById('total-count').textContent = totalExercises;
-
-            // Load user stats
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('total-count').textContent = @Model.Count();
             loadUserStats();
+
+            // Wire up listening inputs → enable check button
+            document.querySelectorAll('.exercise-item[data-type="Listening"] .exercise-input, .exercise-item[data-type="Speaking"] .exercise-input').forEach(function(inp) {
+                inp.addEventListener('input', function () {
+                    var btn = this.closest('.exercise-item').querySelector('.btn-check-answer');
+                    if (btn) btn.disabled = this.value.trim().length === 0;
+                });
+            });
+
+            // Speaking fallback text syncs to hidden answer
+            document.querySelectorAll('[id^="speakingFallback-"]').forEach(function (inp) {
+                inp.addEventListener('input', function () {
+                    var id = this.id.replace('speakingFallback-', '');
+                    var hidden = document.getElementById('speakingAnswer-' + id);
+                    if (hidden) { hidden.value = this.value; }
+                    var btn = this.closest('.exercise-item').querySelector('.btn-check-answer');
+                    if (btn) btn.disabled = this.value.trim().length === 0;
+                });
+            });
         });
 
         async function loadUserStats() {
             try {
-                const response = await fetch('/api/exercises/stats');
-                if (response.ok) {
-                    const stats = await response.json();
-                    document.getElementById('user-total-points').textContent = stats.totalPoints || 0;
-                    document.getElementById('user-streak').textContent = stats.currentStreak || 0;
-
-                    // Update final stats
-                    document.getElementById('final-points').textContent = stats.totalPoints || 0;
-                    document.getElementById('final-streak').textContent = stats.currentStreak || 0;
+                const r = await fetch('/api/exercises/stats');
+                if (r.ok) {
+                    const s = await r.json();
+                    document.getElementById('user-total-points').textContent = s.totalPoints  || 0;
+                    document.getElementById('user-streak').textContent        = s.currentStreak || 0;
+                    document.getElementById('final-points').textContent       = s.totalPoints  || 0;
+                    document.getElementById('final-streak').textContent       = s.currentStreak || 0;
                 }
-            } catch (error) {
-                console.error('Error loading user stats:', error);
+            } catch (e) { console.error('Stats load error', e); }
+        }
+
+        setInterval(function () {
+            document.getElementById('final-completed').textContent =
+                document.querySelectorAll('.exercise-item.exercise-completed').length;
+        }, 800);
+
+        /* ── Audio player helpers ──────────────────────── */
+        var audioInstances = {};
+
+        function getAudio(id, src) {
+            if (!audioInstances[id]) {
+                var a = document.getElementById('audio-' + id);
+                if (!a) { a = new Audio(src); a.id = 'audio-' + id; }
+                a.addEventListener('timeupdate', function () { updateAudioProgress(id, a); });
+                a.addEventListener('loadedmetadata', function () {
+                    document.getElementById('audioDur-' + id).textContent = formatTime(a.duration);
+                });
+                a.addEventListener('ended', function () {
+                    var btn = document.getElementById('playBtn-' + id);
+                    var ico = document.getElementById('playIcon-' + id);
+                    if (btn) btn.classList.remove('playing');
+                    if (ico) { ico.className = 'fas fa-play'; }
+                    document.getElementById('waveform-' + id)?.classList.remove('playing');
+                });
+                audioInstances[id] = a;
+            }
+            return audioInstances[id];
+        }
+
+        function toggleAudio(id, src) {
+            var a   = getAudio(id, src);
+            var btn = document.getElementById('playBtn-' + id);
+            var ico = document.getElementById('playIcon-' + id);
+            var wf  = document.getElementById('waveform-' + id);
+
+            if (a.paused) {
+                a.play();
+                btn.classList.add('playing');
+                ico.className = 'fas fa-pause';
+                wf?.classList.add('playing');
+            } else {
+                a.pause();
+                btn.classList.remove('playing');
+                ico.className = 'fas fa-play';
+                wf?.classList.remove('playing');
             }
         }
 
-        // Update final stats when exercises are completed
-        setInterval(function() {
-            const completed = document.querySelectorAll('.exercise-item.exercise-completed').length;
-            document.getElementById('final-completed').textContent = completed;
-        }, 1000);
+        function replayAudio(id) {
+            var a = audioInstances[id];
+            if (a) { a.currentTime = 0; a.play(); }
+            var btn = document.getElementById('playBtn-' + id);
+            var ico = document.getElementById('playIcon-' + id);
+            if (btn) btn.classList.add('playing');
+            if (ico) ico.className = 'fas fa-pause';
+            document.getElementById('waveform-' + id)?.classList.add('playing');
+        }
+
+        function seekAudio(event, id) {
+            var a   = audioInstances[id];
+            var bar = document.getElementById('audioBar-' + id);
+            if (!a || !bar) return;
+            var rect  = bar.getBoundingClientRect();
+            var ratio = (event.clientX - rect.left) / rect.width;
+            a.currentTime = ratio * a.duration;
+        }
+
+        function updateAudioProgress(id, a) {
+            var fill = document.getElementById('audioFill-' + id);
+            var time = document.getElementById('audioTime-' + id);
+            if (fill && a.duration) fill.style.width = (a.currentTime / a.duration * 100) + '%';
+            if (time) time.textContent = formatTime(a.currentTime);
+        }
+
+        function formatTime(s) {
+            if (!s || isNaN(s)) return '0:00';
+            var m = Math.floor(s / 60);
+            var sec = Math.floor(s % 60);
+            return m + ':' + (sec < 10 ? '0' : '') + sec;
+        }
+
+        function toggleTranscript(id) {
+            var box = document.getElementById('transcript-' + id);
+            var ico = document.getElementById('transcriptIcon-' + id);
+            var btn = document.getElementById('transcriptBtn-' + id);
+            if (!box) return;
+            var visible = box.classList.toggle('visible');
+            ico.className = visible ? 'fas fa-eye-slash' : 'fas fa-eye';
+            btn.innerHTML = (visible ? '<i class="fas fa-eye-slash"></i> Hide Transcript' : '<i class="fas fa-eye"></i> Show Transcript');
+        }
+
+        /* ── Speaking / Web Speech API helpers ─────────── */
+        var recognizers = {};
+
+        function listenToPhrase(text, lang) {
+            if (!window.speechSynthesis) return;
+            var u = new SpeechSynthesisUtterance(text);
+            u.lang = lang || 'en-US';
+            u.rate = 0.85;
+            window.speechSynthesis.speak(u);
+        }
+
+        function toggleRecording(exerciseId, lang) {
+            if (recognizers[exerciseId]) {
+                recognizers[exerciseId].stop();
+                return;
+            }
+
+            var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                document.getElementById('speechUnsupported-' + exerciseId).style.display = 'block';
+                return;
+            }
+
+            var rec = new SpeechRecognition();
+            rec.lang = lang || 'en-US';
+            rec.interimResults = true;
+            rec.maxAlternatives = 3;
+            recognizers[exerciseId] = rec;
+
+            var micBtn   = document.getElementById('micBtn-' + exerciseId);
+            var micIcon  = document.getElementById('micIcon-' + exerciseId);
+            var recWave  = document.getElementById('recWave-' + exerciseId);
+            var recStat  = document.getElementById('recStatus-' + exerciseId);
+            var recBox   = document.getElementById('recognizedBox-' + exerciseId);
+            var recText  = document.getElementById('recognizedText-' + exerciseId);
+            var hidInp   = document.getElementById('speakingAnswer-' + exerciseId);
+            var fallback = document.getElementById('speakingFallback-' + exerciseId);
+            var exItem   = micBtn.closest('.exercise-item');
+            var checkBtn = exItem.querySelector('.btn-check-answer');
+            var exWrap   = document.getElementById('speakingEx-' + exerciseId);
+            var target   = exWrap ? exWrap.dataset.target : '';
+            var minAcc   = exWrap ? parseFloat(exWrap.dataset.minAccuracy) : 0.7;
+
+            micBtn.classList.add('recording');
+            micIcon.className = 'fas fa-stop';
+            recWave.classList.add('active');
+            recStat.textContent = 'Recording… speak now';
+            recStat.classList.add('recording-active');
+            recText.textContent = '';
+            recText.classList.remove('empty');
+
+            rec.onresult = function (event) {
+                var interim = '';
+                var final   = '';
+                for (var i = event.resultIndex; i < event.results.length; i++) {
+                    if (event.results[i].isFinal) final += event.results[i][0].transcript;
+                    else interim += event.results[i][0].transcript;
+                }
+                recText.textContent = final || interim || '…';
+                if (final) {
+                    if (hidInp)   hidInp.value   = final;
+                    if (fallback) fallback.value  = final;
+                    showAccuracy(exerciseId, final, target, minAcc);
+                    if (checkBtn) checkBtn.disabled = false;
+                }
+            };
+
+            rec.onerror = function (e) {
+                recStat.textContent = 'Mic error: ' + e.error + '. Please try again.';
+                stopRecording(exerciseId);
+            };
+
+            rec.onend = function () { stopRecording(exerciseId); };
+
+            rec.start();
+        }
+
+        function stopRecording(exerciseId) {
+            var micBtn  = document.getElementById('micBtn-' + exerciseId);
+            var micIcon = document.getElementById('micIcon-' + exerciseId);
+            var recWave = document.getElementById('recWave-' + exerciseId);
+            var recStat = document.getElementById('recStatus-' + exerciseId);
+
+            if (micBtn) micBtn.classList.remove('recording');
+            if (micIcon) micIcon.className = 'fas fa-microphone';
+            if (recWave) recWave.classList.remove('active');
+            if (recStat) {
+                recStat.textContent = 'Recording stopped. Try again or submit.';
+                recStat.classList.remove('recording-active');
+            }
+            delete recognizers[exerciseId];
+        }
+
+        function showAccuracy(exerciseId, spoken, target, minAcc) {
+            var meter  = document.getElementById('accuracyMeter-' + exerciseId);
+            var pctEl  = document.getElementById('accuracyPct-' + exerciseId);
+            var fillEl = document.getElementById('accuracyFill-' + exerciseId);
+            var noteEl = document.getElementById('accuracyNote-' + exerciseId);
+            var recBox = document.getElementById('recognizedBox-' + exerciseId);
+
+            if (!meter) return;
+
+            var acc = calcAccuracy(spoken, target);
+            var pct = Math.round(acc * 100);
+
+            var grade = acc >= 0.85 ? 'great' : acc >= 0.6 ? 'okay' : 'poor';
+
+            meter.classList.add('visible');
+            pctEl.textContent = pct + '%';
+            pctEl.className   = 'accuracy-pct ' + grade;
+            fillEl.style.width = pct + '%';
+            fillEl.className   = 'accuracy-bar-fill ' + grade;
+            recBox.classList.add('has-text');
+
+            if (grade === 'great') {
+                noteEl.textContent = '🎉 Excellent pronunciation!';
+            } else if (grade === 'okay') {
+                noteEl.textContent = '👍 Good attempt! Keep practising.';
+            } else {
+                noteEl.textContent = '💡 Try again — aim for ' + Math.round(minAcc * 100) + '% or above.';
+            }
+        }
+
+        function calcAccuracy(spoken, target) {
+            // Word-overlap similarity (Jaccard-like)
+            var norm = function (s) {
+                return s.toLowerCase().trim()
+                    .replace(/[áàä]/g,'a').replace(/[éèë]/g,'e')
+                    .replace(/[íìï]/g,'i').replace(/[óòö]/g,'o').replace(/[úùü]/g,'u')
+                    .replace(/[^a-z0-9\s]/g, '');
+            };
+            var spokenWords = norm(spoken).split(/\s+/).filter(Boolean);
+            var targetWords = norm(target).split(/\s+/).filter(Boolean);
+            if (targetWords.length === 0) return 0;
+
+            var matched = 0;
+            var remaining = targetWords.slice();
+            spokenWords.forEach(function (w) {
+                var idx = remaining.indexOf(w);
+                if (idx !== -1) { matched++; remaining.splice(idx, 1); }
+            });
+            return matched / targetWords.length;
+        }
     </script>
 }

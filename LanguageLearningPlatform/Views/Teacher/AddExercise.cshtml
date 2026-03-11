@@ -1,0 +1,279 @@
+﻿@{
+    ViewData["Title"] = "Add Exercise";
+    var lesson = ViewBag.Lesson as LanguageLearningPlatform.Data.Models.Lesson;
+}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <a asp-action="ManageExercises" asp-route-lessonId="@ViewBag.LessonId" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back
+                </a>
+                <div>
+                    <h2 class="fw-bold mb-0">Add Exercise</h2>
+                    <p class="text-secondary mb-0 small">@ViewBag.CourseName — @lesson?.Title</p>
+                </div>
+            </div>
+
+            <div class="card shadow-sm" style="border-radius:16px;border:none;">
+                <div class="card-body p-4 p-lg-5">
+                    <form asp-action="AddExercise" method="post" id="exerciseForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="lessonId" value="@ViewBag.LessonId" />
+
+                        <!-- Type selector -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Exercise Type *</label>
+                            <div class="row g-2" id="type-selector">
+                                @foreach (var t in new[] {
+                                                                ("MultipleChoice", "fa-list-ul",   "Multiple Choice"),
+                                                                ("FillInBlank",    "fa-keyboard",  "Fill in Blank"),
+                                                                ("Translation",    "fa-language",  "Translation"),
+                                                                ("Matching",       "fa-link",      "Matching"),
+                                                                ("Speaking",       "fa-microphone","Speaking"),
+                                                                ("Listening",      "fa-headphones","Listening")
+                                                                })
+                                {
+                                    <div class="col-6 col-md-4">
+                                        <input type="radio" class="btn-check" name="type" id="type-@t.Item1"
+                                               value="@t.Item1" required @(t.Item1 == "MultipleChoice" ? "checked" : "") />
+                                        <label class="btn btn-outline-primary w-100 text-start py-3 px-3" for="type-@t.Item1">
+                                            <i class="fas @t.Item2 me-2"></i>@t.Item3
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <!-- Common fields -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Exercise Title *</label>
+                            <input type="text" name="title" class="form-control" required maxlength="200"
+                                   placeholder="e.g. How do you say Hello in Spanish?" />
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Question / Prompt * <small class="text-secondary fw-normal">(HTML supported)</small></label>
+                            <textarea name="content" class="form-control" rows="3" required
+                                      placeholder="Write the exercise question here. You can use HTML for bold, etc."></textarea>
+                        </div>
+
+                        <!-- ── Multiple Choice Options ── -->
+                        <div id="section-MultipleChoice">
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Answer Options</label>
+                                <p class="text-secondary small mb-2">Enter up to 4 options. The correct answer must match one of these exactly.</p>
+                                <div class="d-flex flex-column gap-2">
+                                    <input type="text" name="opt1" class="form-control" placeholder="Option 1 (e.g. Hola)" />
+                                    <input type="text" name="opt2" class="form-control" placeholder="Option 2 (e.g. Adiós)" />
+                                    <input type="text" name="opt3" class="form-control" placeholder="Option 3 (e.g. Gracias)" />
+                                    <input type="text" name="opt4" class="form-control" placeholder="Option 4 (e.g. Por favor)" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── Fill in Blank Word Bank ── -->
+                        <div id="section-FillInBlank" style="display:none;">
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Word Bank <small class="text-secondary fw-normal">(optional hints for students)</small></label>
+                                <p class="text-secondary small mb-2">Add up to 4 words to show as a word bank. Include the correct answer here too.</p>
+                                <div class="d-flex flex-column gap-2">
+                                    <input type="text" name="opt1" class="form-control" placeholder="Word 1 (e.g. días)" />
+                                    <input type="text" name="opt2" class="form-control" placeholder="Word 2 (e.g. noches)" />
+                                    <input type="text" name="opt3" class="form-control" placeholder="Word 3 (e.g. tardes)" />
+                                    <input type="text" name="opt4" class="form-control" placeholder="Word 4 (e.g. fines)" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── Matching Pairs ── -->
+                        <div id="section-Matching" style="display:none;">
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Matching Pairs</label>
+                                <p class="text-secondary small mb-2">Enter up to 4 left↔right pairs. Students must match them correctly.</p>
+                                <div class="d-flex flex-column gap-3">
+                                    @foreach (var (left, right, letter) in new[] {
+                                                                        ("leftA","rightA","A"), ("leftB","rightB","B"),
+                                                                        ("leftC","rightC","C"), ("leftD","rightD","D")
+                                                                        })
+                                    {
+                                        <div class="row g-2 align-items-center">
+                                            <div class="col-auto">
+                                                <span class="badge bg-primary">@letter</span>
+                                            </div>
+                                            <div class="col">
+                                                <input type="text" name="@left" class="form-control" placeholder="Left (e.g. Hola)" />
+                                            </div>
+                                            <div class="col-auto text-secondary">↔</div>
+                                            <div class="col">
+                                                <input type="text" name="@right" class="form-control" placeholder="Right (e.g. Hello)" />
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="alert alert-info mt-3 py-2 small mb-0">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    For Matching exercises, the <strong>Correct Answer</strong> field below will be set automatically.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── Speaking ── -->
+                        <div id="section-Speaking" style="display:none;">
+                            <div class="alert alert-info py-2 small mb-4">
+                                <i class="fas fa-microphone me-1"></i>
+                                For <strong>Speaking</strong> exercises, set the <strong>Correct Answer</strong> to the phrase the student should say.
+                                The speech recogniser will compare what the student says to this phrase.
+                            </div>
+                        </div>
+
+                        <!-- ── Listening ── -->
+                        <div id="section-Listening" style="display:none;">
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Audio URL *</label>
+                                <input type="url" name="audioUrl" class="form-control"
+                                       placeholder="https://example.com/audio.mp3" />
+                                <div class="form-text">Direct link to an MP3 or audio file.</div>
+                            </div>
+                            <div class="alert alert-info py-2 small mb-4">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Set the <strong>Correct Answer</strong> to the transcript of what is said in the audio.
+                                Students listen and type what they hear.
+                            </div>
+                        </div>
+
+                        <!-- Correct Answer (shown for all except Matching) -->
+                        <div class="mb-4" id="correctAnswerBlock">
+                            <label class="form-label fw-semibold">Correct Answer *</label>
+                            <input type="text" name="correctAnswer" class="form-control" id="correctAnswerField"
+                                   placeholder="The exact correct answer" />
+                            <div class="form-text" id="correctAnswerHint">
+                                Must match one of your options exactly (case-insensitive).
+                            </div>
+                        </div>
+
+                        <!-- Audio URL for non-Listening types (optional) -->
+                        <div class="mb-4" id="audioUrlBlock" style="display:none;">
+                            <label class="form-label fw-semibold">Audio URL <small class="text-secondary fw-normal">(optional)</small></label>
+                            <input type="url" name="audioUrl" class="form-control"
+                                   placeholder="https://example.com/pronunciation.mp3" />
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <!-- Hint & Explanation -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Hint <small class="text-secondary fw-normal">(optional)</small></label>
+                                <input type="text" name="hint" class="form-control" maxlength="500"
+                                       placeholder="A helpful hint for struggling students" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Explanation <small class="text-secondary fw-normal">(shown after answering)</small></label>
+                                <input type="text" name="explanation" class="form-control" maxlength="1000"
+                                       placeholder="Why is this the correct answer?" />
+                            </div>
+                        </div>
+
+                        <!-- Points & Difficulty -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Points (XP)</label>
+                                <input type="number" name="points" class="form-control" value="10" min="1" max="100" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Difficulty Level</label>
+                                <select name="difficultyLevel" class="form-select">
+                                    <option value="1">1 — Easy</option>
+                                    <option value="2">2 — Medium</option>
+                                    <option value="3">3 — Hard</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Image URL -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Image URL <small class="text-secondary fw-normal">(optional)</small></label>
+                            <input type="url" name="imageUrl" class="form-control"
+                                   placeholder="https://example.com/image.jpg" />
+                        </div>
+
+                        <div class="d-flex gap-3 pt-2">
+                            <button type="submit" class="btn btn-primary px-5">
+                                <i class="fas fa-plus me-2"></i>Add Exercise
+                            </button>
+                            <a asp-action="ManageExercises" asp-route-lessonId="@ViewBag.LessonId"
+                               class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const typeSections = ['MultipleChoice', 'FillInBlank', 'Matching', 'Speaking', 'Listening'];
+        const correctAnswerHints = {
+            MultipleChoice: 'Must match one of your options exactly (case-insensitive).',
+            FillInBlank:    'The word or phrase that completes the blank.',
+            Translation:    'The correct translation the student should type.',
+            Matching:       'Set automatically — no need to fill this in.',
+            Speaking:       'The exact phrase the student should say out loud.',
+            Listening:      'The transcript of what is said in the audio clip.',
+        };
+
+        function updateUI(selectedType) {
+            // Show / hide type-specific sections
+            typeSections.forEach(t => {
+                const el = document.getElementById('section-' + t);
+                if (el) el.style.display = (t === selectedType) ? '' : 'none';
+            });
+
+            // Correct answer block
+            const caBlock = document.getElementById('correctAnswerBlock');
+            const caField = document.getElementById('correctAnswerField');
+            const caHint  = document.getElementById('correctAnswerHint');
+
+            if (selectedType === 'Matching') {
+                caBlock.style.display = 'none';
+                caField.required = false;
+                caField.value = 'matched';
+            } else {
+                caBlock.style.display = '';
+                caField.required = true;
+                caField.value = '';
+            }
+
+            if (caHint) caHint.textContent = correctAnswerHints[selectedType] || '';
+
+            // Audio URL for non-Listening (already shown in Listening section)
+            const audioBlock = document.getElementById('audioUrlBlock');
+            if (audioBlock) audioBlock.style.display = (selectedType === 'Listening') ? 'none' : '';
+
+            // Update points default by type
+            const pointsInput = document.querySelector('[name="points"]');
+            if (pointsInput) {
+                const defaults = { MultipleChoice: 10, FillInBlank: 10, Translation: 15, Matching: 20, Speaking: 25, Listening: 20 };
+                if (pointsInput.value == '' || ['10','15','20','25'].includes(pointsInput.value))
+                    pointsInput.value = defaults[selectedType] || 10;
+            }
+        }
+
+        // Init on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const checked = document.querySelector('[name="type"]:checked');
+            if (checked) updateUI(checked.value);
+
+            document.querySelectorAll('[name="type"]').forEach(radio => {
+                radio.addEventListener('change', e => updateUI(e.target.value));
+            });
+        });
+    </script>
+}

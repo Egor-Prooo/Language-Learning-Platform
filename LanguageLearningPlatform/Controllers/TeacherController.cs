@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using System.Text.Json;
 
 namespace LanguageLearningPlatform.Web.Controllers
 {
@@ -339,6 +340,152 @@ namespace LanguageLearningPlatform.Web.Controllers
                 .ToListAsync();
 
             return createdIds.Union(assignedIds).ToList();
+        }
+
+        // GET: /Teacher/ManageExercises/lessonId
+        public async Task<IActionResult> ManageExercises(Guid lessonId)
+        {
+            var teacherId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+            var lesson = await _context.Lessons
+                .Include(l => l.Course)
+                .Include(l => l.Exercises.OrderBy(e => e.OrderIndex))
+                .FirstOrDefaultAsync(l => l.Id == lessonId);
+
+            if (lesson == null) return NotFound();
+            if (!await IsTeacherOfCourseAsync(teacherId, lesson.CourseId)) return NotFound();
+
+            return View(lesson);
+        }
+
+        // GET: /Teacher/AddExercise/lessonId
+        public async Task<IActionResult> AddExercise(Guid lessonId)
+        {
+            var teacherId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+            var lesson = await _context.Lessons
+                .Include(l => l.Course)
+                .FirstOrDefaultAsync(l => l.Id == lessonId);
+
+            if (lesson == null) return NotFound();
+            if (!await IsTeacherOfCourseAsync(teacherId, lesson.CourseId)) return NotFound();
+
+            ViewBag.Lesson = lesson;
+            ViewBag.LessonId = lessonId;
+            ViewBag.CourseName = lesson.Course.Title;
+            return View();
+        }
+
+        // POST: /Teacher/AddExercise
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddExercise(
+            Guid lessonId, string title, string type, string content,
+            string correctAnswer, string? hint, string? explanation,
+            int points, int difficultyLevel,
+            // Multiple choice options
+            string? opt1, string? opt2, string? opt3, string? opt4,
+            // Matching pairs
+            string? leftA, string? rightA, string? leftB, string? rightB,
+            string? leftC, string? rightC, string? leftD, string? rightD,
+            // Audio / image
+            string? audioUrl, string? imageUrl)
+        {
+            var teacherId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+            var lesson = await _context.Lessons
+                .Include(l => l.Course)
+                .Include(l => l.Exercises)
+                .FirstOrDefaultAsync(l => l.Id == lessonId);
+
+            if (lesson == null) return NotFound();
+            if (!await IsTeacherOfCourseAsync(teacherId, lesson.CourseId)) return NotFound();
+
+            // Build options JSON
+            string? optionsJson = null;
+
+            if (type == "MultipleChoice")
+            {
+                var opts = new[] { opt1, opt2, opt3, opt4 }
+                    .Where(o => !string.IsNullOrWhiteSpace(o))
+                    .ToList();
+                if (opts.Any())
+                    optionsJson = System.Text.Json.JsonSerializer.Serialize(opts);
+            }
+            else if (type == "FillInBlank" || type == "FillInTheBlank")
+            {
+                // Word bank: reuse opt1-opt4 as word bank items
+                var words = new[] { opt1, opt2, opt3, opt4 }
+                    .Where(o => !string.IsNullOrWhiteSpace(o))
+                    .ToList();
+                if (words.Any())
+                    optionsJson = System.Text.Json.JsonSerializer.Serialize(words);
+            }
+            else if (type == "Matching")
+            {
+                var pairs = new List<object>();
+                if (!string.IsNullOrWhiteSpace(leftA) && !string.IsNullOrWhiteSpace(rightA))
+                    pairs.Add(new { Left = leftA, Right = rightA, PairId = Guid.NewGuid() });
+                if (!string.IsNullOrWhiteSpace(leftB) && !string.IsNullOrWhiteSpace(rightB))
+                    pairs.Add(new { Left = leftB, Right = rightB, PairId = Guid.NewGuid() });
+                if (!string.IsNullOrWhiteSpace(leftC) && !string.IsNullOrWhiteSpace(rightC))
+                    pairs.Add(new { Left = leftC, Right = rightC, PairId = Guid.NewGuid() });
+                if (!string.IsNullOrWhiteSpace(leftD) && !string.IsNullOrWhiteSpace(rightD))
+                    pairs.Add(new { Left = leftD, Right = rightD, PairId = Guid.NewGuid() });
+
+                if (pairs.Any())
+                    optionsJson = System.Text.Json.JsonSerializer.Serialize(pairs);
+
+                // Matching exercises always have this placeholder as the correct answer
+                correctAnswer = "matched";
+            }
+
+            var exercise = new Exercise
+            {
+                Id = Guid.NewGuid(),
+                CourseId = lesson.CourseId,
+                LessonId = lessonId,
+                Title = title,
+                Type = type,
+                Content = content,
+                CorrectAnswer = correctAnswer,
+                Options = optionsJson,
+                Hint = string.IsNullOrWhiteSpace(hint) ? null : hint,
+                Explanation = string.IsNullOrWhiteSpace(explanation) ? null : explanation,
+                Points = points,
+                DifficultyLevel = difficultyLevel,
+                AudioUrl = string.IsNullOrWhiteSpace(audioUrl) ? null : audioUrl,
+                ImageUrl = string.IsNullOrWhiteSpace(imageUrl) ? null : imageUrl,
+                OrderIndex = lesson.Exercises.Count + 1,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.Exercises.Add(exercise);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Exercise added successfully!";
+            return RedirectToAction(nameof(ManageExercises), new { lessonId });
+        }
+
+        // POST: /Teacher/DeleteExercise
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteExercise(Guid exerciseId, Guid lessonId)
+        {
+            var teacherId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+            var exercise = await _context.Exercises
+                .Include(e => e.Lesson)
+                .FirstOrDefaultAsync(e => e.Id == exerciseId);
+
+            if (exercise == null) return NotFound();
+            if (!await IsTeacherOfCourseAsync(teacherId, exercise.CourseId)) return NotFound();
+
+            _context.Exercises.Remove(exercise);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Exercise deleted.";
+            return RedirectToAction(nameof(ManageExercises), new { lessonId });
         }
     }
 

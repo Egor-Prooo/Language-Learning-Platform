@@ -1,0 +1,129 @@
+﻿@model LanguageLearningPlatform.Data.Models.Lesson
+
+@{
+    ViewData["Title"] = "Manage Exercises";
+}
+
+<div class="container my-5">
+
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Dashboard">Dashboard</a></li>
+            <li class="breadcrumb-item"><a asp-action="CourseDetails" asp-route-id="@Model.CourseId">@Model.Course.Title</a></li>
+            <li class="breadcrumb-item active">Exercises — @Model.Title</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="fas fa-dumbbell me-2 text-primary"></i>@Model.Title — Exercises</h2>
+            <p class="text-secondary mb-0">@Model.Exercises.Count exercise@(Model.Exercises.Count != 1 ? "s" : "") in this lesson</p>
+        </div>
+        <a asp-action="AddExercise" asp-route-lessonId="@Model.Id" class="btn btn-primary px-4">
+            <i class="fas fa-plus me-2"></i>Add Exercise
+        </a>
+    </div>
+
+    @if (!Model.Exercises.Any())
+    {
+        <div class="text-center py-5 border rounded-4" style="border-style:dashed!important;">
+            <i class="fas fa-dumbbell" style="font-size:4rem;color:#D1D5DB;"></i>
+            <h4 class="mt-3 text-secondary">No exercises yet</h4>
+            <p class="text-secondary">Add your first exercise to make this lesson interactive.</p>
+            <a asp-action="AddExercise" asp-route-lessonId="@Model.Id" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Add First Exercise
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="d-flex flex-column gap-3">
+            @foreach (var exercise in Model.Exercises)
+            {
+                <div class="card shadow-sm" style="border-radius:14px;border:2px solid #E5E7EB;">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-start gap-3">
+
+                            <!-- Order badge -->
+                            <div class="d-flex align-items-center justify-content-center rounded-circle fw-bold text-white flex-shrink-0"
+                                 style="width:40px;height:40px;background:var(--primary-color,#4F46E5);font-size:0.9rem;">
+                                @exercise.OrderIndex
+                            </div>
+
+                            <!-- Info -->
+                            <div class="flex-grow-1 min-w-0">
+                                <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                                    <span class="fw-bold">@exercise.Title</span>
+                                    <span class="badge bg-light text-dark" style="font-size:0.75rem;">
+                                        @switch (exercise.Type)
+                                        {
+                                            case "MultipleChoice":
+                                                <text><i class="fas fa-list-ul me-1"></i>Multiple Choice</text>
+                                                break;
+                                            case "FillInBlank":
+                                            case "FillInTheBlank":
+
+                                                <text><i class="fas fa-keyboard me-1"></i>Fill in Blank</text>
+                                                break;
+                                            case "Translation":
+
+                                                <text><i class="fas fa-language me-1"></i>Translation</text>
+                                                break;
+                                            case "Matching":
+
+                                                <text><i class="fas fa-link me-1"></i>Matching</text>
+                                                break;
+                                            case "Speaking":
+
+                                                <text><i class="fas fa-microphone me-1"></i>Speaking</text>
+                                                break;
+                                            case "Listening":
+
+                                                <text><i class="fas fa-headphones me-1"></i>Listening</text>
+                                                break;
+                                            default:
+
+                                                @exercise.Type
+                                                break;
+                                        }
+                                    </span>
+                                    <span class="badge" style="background:rgba(245,158,11,0.15);color:#92400E;font-size:0.75rem;">
+                                        <i class="fas fa-star me-1"></i>@exercise.Points XP
+                                    </span>
+                                    @if (exercise.DifficultyLevel > 0)
+                                    {
+                                        var diffColor = exercise.DifficultyLevel == 1 ? "#059669" : exercise.DifficultyLevel == 2 ? "#D97706" : "#DC2626";
+                                        <span class="badge" style="background:rgba(0,0,0,0.06);color:@diffColor;font-size:0.75rem;">
+                                            Level @exercise.DifficultyLevel
+                                        </span>
+                                    }
+                                </div>
+
+                                <div class="text-secondary small mb-2">@Html.Raw(exercise.Content)</div>
+
+                                @if (!string.IsNullOrEmpty(exercise.Hint))
+                                {
+                                    <div class="small text-muted">
+                                        <i class="fas fa-lightbulb text-warning me-1"></i>
+                                        <strong>Hint:</strong> @exercise.Hint
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Delete -->
+                            <form asp-action="DeleteExercise" method="post" class="flex-shrink-0"
+                                  onsubmit="return confirm('Delete this exercise?')">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="exerciseId" value="@exercise.Id" />
+                                <input type="hidden" name="lessonId" value="@Model.Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

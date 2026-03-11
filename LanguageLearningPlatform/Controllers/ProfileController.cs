@@ -40,12 +40,8 @@ namespace LanguageLearningPlatform.Web.Controllers
                 .Include(u => u.ExerciseResults)
                 .FirstOrDefaultAsync(u => u.Id == userId);
 
-            if (user == null)
-            {
-                return NotFound();
-            }
+            if (user == null) return NotFound();
 
-            // Get statistics
             var totalPoints = await _progressService.GetUserTotalPointsAsync(userId!);
             var enrolledCoursesCount = await _context.CourseEnrollments
                 .CountAsync(e => e.UserId == userId && e.IsActive);
@@ -62,13 +58,11 @@ namespace LanguageLearningPlatform.Web.Controllers
             ViewBag.TotalExercises = totalExercises;
             ViewBag.AccuracyRate = accuracyRate;
 
-            // Get recent achievements (last 5)
             ViewBag.RecentAchievements = user.UserAchievements
                 .OrderByDescending(ua => ua.UnlockedAt)
                 .Take(5)
                 .ToList();
 
-            // Get learning streak (simplified - days with activity in last 7 days)
             var weekAgo = DateTime.UtcNow.AddDays(-7);
             var recentActivity = await _context.Progresses
                 .Where(p => p.UserId == userId && p.LastAccessedAt >= weekAgo)
@@ -78,7 +72,91 @@ namespace LanguageLearningPlatform.Web.Controllers
 
             ViewBag.LearningStreak = recentActivity;
 
-            return View(user);
+            // Role-based routing
+            if (User.IsInRole("Admin"))
+            {
+                return await AdminProfile(user, userId!);
+            }
+            else if (User.IsInRole("Teacher"))
+            {
+                return await TeacherProfile(user, userId!);
+            }
+            else
+            {
+                return View("StudentProfile", user);
+            }
+        }
+
+        private async Task<IActionResult> AdminProfile(User user, string userId)
+        {
+            // Platform-wide stats for admin
+            ViewBag.TotalPlatformUsers = await _context.Users.CountAsync(u => u.IsActive);
+            ViewBag.TotalPlatformCourses = await _context.Courses.CountAsync();
+            ViewBag.PublishedCourses = await _context.Courses.CountAsync(c => c.IsPublished);
+            ViewBag.TotalEnrollments = await _context.CourseEnrollments.CountAsync(e => e.IsActive);
+            ViewBag.TotalExercisesAttempted = await _context.UserExerciseResults.CountAsync();
+            ViewBag.TotalForumPosts = await _context.ForumPosts.CountAsync();
+            ViewBag.UnreadMessages = await _context.TeacherMessages.CountAsync(m => !m.IsRead);
+
+            // Recent registrations
+            ViewBag.RecentUsers = await _context.Users
+                .OrderByDescending(u => u.RegistrationDate)
+                .Take(5)
+                .ToListAsync();
+
+            // Most popular courses
+            ViewBag.PopularCourses = await _context.Courses
+                .Where(c => c.IsPublished)
+                .Include(c => c.Enrollments)
+                .OrderByDescending(c => c.Enrollments.Count)
+                .Take(5)
+                .ToListAsync();
+
+            return View("AdminProfile", user);
+        }
+
+        private async Task<IActionResult> TeacherProfile(User user, string userId)
+        {
+            // Teacher-specific stats
+            var createdCourseIds = await _context.Courses
+                .Where(c => c.CreatorId == userId)
+                .Select(c => c.Id)
+                .ToListAsync();
+
+            var assignedCourseIds = await _context.CourseTeachers
+                .Where(ct => ct.TeacherId == userId)
+                .Select(ct => ct.CourseId)
+                .ToListAsync();
+
+            var allCourseIds = createdCourseIds.Union(assignedCourseIds).ToList();
+
+            var teacherCourses = await _context.Courses
+                .Where(c => allCourseIds.Contains(c.Id))
+                .Include(c => c.Enrollments)
+                .Include(c => c.Lessons)
+                .ToListAsync();
+
+            ViewBag.TeacherCourses = teacherCourses;
+            ViewBag.TotalStudents = teacherCourses
+                .SelectMany(c => c.Enrollments)
+                .Select(e => e.UserId)
+                .Distinct()
+                .Count();
+            ViewBag.TotalLessonsCreated = teacherCourses.Sum(c => c.Lessons.Count);
+            ViewBag.PublishedCourses = teacherCourses.Count(c => c.IsPublished);
+
+            ViewBag.UnreadMessages = await _context.TeacherMessages
+                .CountAsync(m => m.TeacherId == userId && !m.IsRead);
+
+            ViewBag.RecentMessages = await _context.TeacherMessages
+                .Where(m => m.TeacherId == userId)
+                .Include(m => m.Student)
+                .Include(m => m.Course)
+                .OrderByDescending(m => m.SentAt)
+                .Take(5)
+                .ToListAsync();
+
+            return View("TeacherProfile", user);
         }
 
         // GET: Profile/Achievements
@@ -118,7 +196,6 @@ namespace LanguageLearningPlatform.Web.Controllers
             ViewBag.Progresses = progresses;
             ViewBag.RecentExercises = exerciseResults;
 
-            // Calculate stats by course
             var statsByCourse = progresses.Select(p => new
             {
                 CourseName = p.Course.Title,

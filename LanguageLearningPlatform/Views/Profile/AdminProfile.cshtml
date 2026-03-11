@@ -1,0 +1,887 @@
+﻿@model LanguageLearningPlatform.Data.Models.User
+
+@{
+    ViewData["Title"] = "Admin Control Panel";
+    int totalPoints = ViewBag.TotalPoints ?? 0;
+    double accuracy = ViewBag.AccuracyRate ?? 0.0;
+    int learningStreak = ViewBag.LearningStreak ?? 0;
+    int totalPlatformUsers = ViewBag.TotalPlatformUsers ?? 0;
+    int totalPlatformCourses = ViewBag.TotalPlatformCourses ?? 0;
+    int publishedCourses = ViewBag.PublishedCourses ?? 0;
+    int totalEnrollments = ViewBag.TotalEnrollments ?? 0;
+    int totalExercisesAttempted = ViewBag.TotalExercisesAttempted ?? 0;
+    int totalForumPosts = ViewBag.TotalForumPosts ?? 0;
+    int unreadMessages = ViewBag.UnreadMessages ?? 0;
+    var recentUsers = ViewBag.RecentUsers as List<LanguageLearningPlatform.Data.Models.User> ?? new();
+    var popularCourses = ViewBag.PopularCourses as List<LanguageLearningPlatform.Data.Models.Course> ?? new();
+    var recentAchievements = ViewBag.RecentAchievements as List<LanguageLearningPlatform.Data.Models.UserAchievement>;
+}
+
+@section Styles {
+    <style>
+        @@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@400;500;600;700&family=Bebas+Neue&display=swap');
+
+        .ap-root {
+            font-family: 'Space Grotesk', sans-serif;
+            background: #0A0E1A;
+            min-height: 100vh;
+            padding-bottom: 4rem;
+            color: #E2E8F0;
+        }
+
+        /* Hero */
+        .ap-hero {
+            background: linear-gradient(135deg, #050811 0%, #0F172A 50%, #0A1628 100%);
+            padding: 3rem 0 0;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 1px solid rgba(99,102,241,.3);
+        }
+
+            .ap-hero::after {
+                content: '';
+                display: block;
+                height: 56px;
+                background: #0A0E1A;
+                clip-path: ellipse(56% 100% at 50% 100%);
+            }
+
+            /* Grid scan-lines effect */
+            .ap-hero::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background-image: repeating-linear-gradient(0deg, rgba(99,102,241,.03) 0px, transparent 1px, transparent 40px);
+                pointer-events: none;
+            }
+
+        .ap-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: .15;
+            pointer-events: none;
+        }
+
+        .ap-orb-1 {
+            width: 400px;
+            height: 400px;
+            background: #6366F1;
+            top: -150px;
+            right: -100px;
+        }
+
+        .ap-orb-2 {
+            width: 250px;
+            height: 250px;
+            background: #EF4444;
+            bottom: 30px;
+            left: -80px;
+            opacity: .1;
+        }
+
+        /* Shield badge */
+        .ap-shield {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            background: rgba(239,68,68,.12);
+            border: 1px solid rgba(239,68,68,.3);
+            color: #FCA5A5;
+            font-size: .72rem;
+            font-weight: 700;
+            padding: .3rem .85rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            font-family: 'JetBrains Mono',monospace;
+        }
+
+        .ap-avatar {
+            width: 90px;
+            height: 90px;
+            border-radius: 12px;
+            background: linear-gradient(135deg,#312E81,#6366F1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Bebas Neue',sans-serif;
+            font-size: 2.4rem;
+            color: white;
+            border: 2px solid rgba(99,102,241,.4);
+            box-shadow: 0 0 30px rgba(99,102,241,.3), 0 8px 32px rgba(0,0,0,.5);
+            flex-shrink: 0;
+            letter-spacing: 2px;
+        }
+
+        .ap-name {
+            font-family: 'Bebas Neue',sans-serif;
+            font-size: 2.2rem;
+            letter-spacing: 2px;
+            color: #F1F5F9;
+            line-height: 1.1;
+        }
+
+        .ap-email {
+            color: rgba(255,255,255,.4);
+            font-size: .82rem;
+            font-family: 'JetBrains Mono',monospace;
+        }
+
+        .ap-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            background: rgba(255,255,255,.07);
+            border: 1px solid rgba(255,255,255,.12);
+            color: rgba(255,255,255,.7);
+            font-size: .72rem;
+            font-weight: 600;
+            padding: .28rem .7rem;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono',monospace;
+        }
+
+        .ap-pill-red {
+            background: rgba(239,68,68,.12);
+            border-color: rgba(239,68,68,.3);
+            color: #FCA5A5;
+        }
+
+        .ap-pill-green {
+            background: rgba(34,197,94,.1);
+            border-color: rgba(34,197,94,.25);
+            color: #86EFAC;
+        }
+
+        .ap-kpi {
+            text-align: right;
+        }
+
+        .ap-kpi-lbl {
+            color: rgba(255,255,255,.4);
+            font-size: .68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .12em;
+            font-family: 'JetBrains Mono',monospace;
+        }
+
+        .ap-kpi-val {
+            font-family: 'Bebas Neue',sans-serif;
+            font-size: 3.2rem;
+            letter-spacing: 3px;
+            color: #6366F1;
+            line-height: 1;
+            text-shadow: 0 0 20px rgba(99,102,241,.5);
+        }
+
+        .ap-kpi-sub {
+            color: #86EFAC;
+            font-size: .72rem;
+            font-weight: 600;
+            font-family: 'JetBrains Mono',monospace;
+        }
+
+        .ap-tabs {
+            display: flex;
+            margin-top: 2.5rem;
+            position: relative;
+            z-index: 2;
+            border-top: 1px solid rgba(99,102,241,.2);
+        }
+
+        .ap-tab {
+            flex: 1;
+            text-align: center;
+            padding: .78rem 1rem;
+            color: rgba(255,255,255,.4);
+            font-size: .72rem;
+            font-weight: 700;
+            text-decoration: none;
+            border-bottom: 2px solid transparent;
+            transition: all .2s;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            font-family: 'JetBrains Mono',monospace;
+        }
+
+            .ap-tab:hover, .ap-tab.active {
+                color: #6366F1;
+                border-bottom-color: #6366F1;
+                background: rgba(99,102,241,.05);
+            }
+
+        /* Body */
+        .ap-body {
+            padding-top: 2rem;
+        }
+
+        /* KPI Grid */
+        .ap-kpis {
+            display: grid;
+            grid-template-columns: repeat(4,1fr);
+            gap: 1rem;
+            margin-bottom: 1.75rem;
+        }
+
+        @@media(max-width:768px) {
+            .ap-kpis {
+                grid-template-columns: repeat(2,1fr);
+            }
+        }
+
+        .ap-kpi-card {
+            background: #0F172A;
+            border-radius: 10px;
+            padding: 1.2rem 1rem;
+            text-align: center;
+            border: 1px solid rgba(99,102,241,.15);
+            position: relative;
+            overflow: hidden;
+            transition: transform .2s,box-shadow .2s;
+        }
+
+            .ap-kpi-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 0 20px rgba(99,102,241,.2),0 8px 24px rgba(0,0,0,.4);
+            }
+
+            .ap-kpi-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 2px;
+            }
+
+            .ap-kpi-card.c-indigo::before {
+                background: linear-gradient(90deg,#6366F1,#A5B4FC);
+            }
+
+            .ap-kpi-card.c-green::before {
+                background: linear-gradient(90deg,#22C55E,#86EFAC);
+            }
+
+            .ap-kpi-card.c-amber::before {
+                background: linear-gradient(90deg,#F59E0B,#FCD34D);
+            }
+
+            .ap-kpi-card.c-red::before {
+                background: linear-gradient(90deg,#EF4444,#FCA5A5);
+            }
+
+            .ap-kpi-card.c-cyan::before {
+                background: linear-gradient(90deg,#06B6D4,#67E8F9);
+            }
+
+            .ap-kpi-card.c-violet::before {
+                background: linear-gradient(90deg,#8B5CF6,#C4B5FD);
+            }
+
+            .ap-kpi-card.c-rose::before {
+                background: linear-gradient(90deg,#F43F5E,#FDA4AF);
+            }
+
+            .ap-kpi-card.c-teal::before {
+                background: linear-gradient(90deg,#14B8A6,#5EEAD4);
+            }
+
+        .ap-kpi-ico {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .85rem;
+            margin: 0 auto .5rem;
+        }
+
+        .c-indigo .ap-kpi-ico {
+            background: rgba(99,102,241,.15);
+            color: #A5B4FC;
+        }
+
+        .c-green .ap-kpi-ico {
+            background: rgba(34,197,94,.12);
+            color: #86EFAC;
+        }
+
+        .c-amber .ap-kpi-ico {
+            background: rgba(245,158,11,.12);
+            color: #FCD34D;
+        }
+
+        .c-red .ap-kpi-ico {
+            background: rgba(239,68,68,.12);
+            color: #FCA5A5;
+        }
+
+        .c-cyan .ap-kpi-ico {
+            background: rgba(6,182,212,.12);
+            color: #67E8F9;
+        }
+
+        .c-violet .ap-kpi-ico {
+            background: rgba(139,92,246,.15);
+            color: #C4B5FD;
+        }
+
+        .c-rose .ap-kpi-ico {
+            background: rgba(244,63,94,.12);
+            color: #FDA4AF;
+        }
+
+        .c-teal .ap-kpi-ico {
+            background: rgba(20,184,166,.12);
+            color: #5EEAD4;
+        }
+
+        .ap-kpi-val-sm {
+            font-family: 'Bebas Neue',sans-serif;
+            font-size: 1.7rem;
+            letter-spacing: 1px;
+            color: #F1F5F9;
+            line-height: 1;
+        }
+
+        .ap-kpi-lbl-sm {
+            font-size: .63rem;
+            color: #475569;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            margin-top: .2rem;
+            font-family: 'JetBrains Mono',monospace;
+        }
+
+        /* Cards */
+        .ap-card {
+            background: #0F172A;
+            border-radius: 12px;
+            border: 1px solid rgba(99,102,241,.15);
+            margin-bottom: 1.25rem;
+            overflow: hidden;
+        }
+
+        .ap-card-hdr {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.3rem;
+            border-bottom: 1px solid rgba(99,102,241,.12);
+        }
+
+        .ap-card-title {
+            font-family: 'JetBrains Mono',monospace;
+            font-size: .82rem;
+            font-weight: 700;
+            color: #E2E8F0;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+
+            .ap-card-title i {
+                width: 24px;
+                height: 24px;
+                border-radius: 6px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-size: .7rem;
+            }
+
+        .ico-ai {
+            background: rgba(99,102,241,.15);
+            color: #A5B4FC;
+        }
+
+        .ico-ag {
+            background: rgba(34,197,94,.12);
+            color: #86EFAC;
+        }
+
+        .ico-ar {
+            background: rgba(239,68,68,.12);
+            color: #FCA5A5;
+        }
+
+        .ico-aa {
+            background: rgba(245,158,11,.12);
+            color: #FCD34D;
+        }
+
+        .ap-card-bod {
+            padding: 1.2rem;
+        }
+
+        /* User rows */
+        .au-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: .75rem 0;
+            border-bottom: 1px solid rgba(99,102,241,.08);
+        }
+
+            .au-row:last-child {
+                border-bottom: none;
+            }
+
+        .au-av {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: linear-gradient(135deg,#312E81,#6366F1);
+            color: #A5B4FC;
+            font-weight: 700;
+            font-size: .8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-family: 'JetBrains Mono',monospace;
+        }
+
+        .au-name {
+            font-weight: 600;
+            font-size: .85rem;
+            color: #E2E8F0;
+        }
+
+        .au-email {
+            font-size: .72rem;
+            color: #475569;
+            font-family: 'JetBrains Mono',monospace;
+        }
+
+        .au-date {
+            font-size: .68rem;
+            color: #334155;
+            font-family: 'JetBrains Mono',monospace;
+            flex-shrink: 0;
+        }
+
+        /* Course rows */
+        .ac-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: .75rem 0;
+            border-bottom: 1px solid rgba(99,102,241,.08);
+        }
+
+            .ac-row:last-child {
+                border-bottom: none;
+            }
+
+        .ac-dot {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: rgba(20,184,166,.15);
+            color: #5EEAD4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .85rem;
+            flex-shrink: 0;
+        }
+
+        .ac-name {
+            font-weight: 600;
+            font-size: .85rem;
+            color: #E2E8F0;
+        }
+
+        .ac-meta {
+            font-size: .72rem;
+            color: #475569;
+            font-family: 'JetBrains Mono',monospace;
+        }
+
+        .ac-badge {
+            font-size: .63rem;
+            font-weight: 700;
+            padding: .12rem .45rem;
+            border-radius: 4px;
+            background: rgba(34,197,94,.12);
+            color: #86EFAC;
+            font-family: 'JetBrains Mono',monospace;
+        }
+
+        .ac-enroll {
+            font-size: .78rem;
+            font-weight: 700;
+            color: #5EEAD4;
+            font-family: 'JetBrains Mono',monospace;
+            flex-shrink: 0;
+        }
+
+        /* Sidebar action buttons */
+        .aa-btn {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            padding: .78rem 1rem;
+            border-radius: 8px;
+            background: rgba(255,255,255,.03);
+            border: 1px solid rgba(99,102,241,.15);
+            color: #94A3B8;
+            text-decoration: none;
+            font-size: .82rem;
+            font-weight: 600;
+            transition: all .15s;
+            margin-bottom: .4rem;
+            font-family: 'Space Grotesk',sans-serif;
+        }
+
+            .aa-btn:hover {
+                background: rgba(99,102,241,.1);
+                border-color: rgba(99,102,241,.35);
+                color: #A5B4FC;
+                transform: translateX(4px);
+            }
+
+            .aa-btn i {
+                width: 28px;
+                height: 28px;
+                border-radius: 7px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: .78rem;
+                flex-shrink: 0;
+            }
+
+        .ico-aa-i {
+            background: rgba(99,102,241,.15);
+            color: #A5B4FC;
+        }
+
+        .ico-aa-g {
+            background: rgba(34,197,94,.12);
+            color: #86EFAC;
+        }
+
+        .ico-aa-r {
+            background: rgba(239,68,68,.12);
+            color: #FCA5A5;
+        }
+
+        .ico-aa-a {
+            background: rgba(245,158,11,.12);
+            color: #FCD34D;
+        }
+
+        .ico-aa-c {
+            background: rgba(6,182,212,.12);
+            color: #67E8F9;
+        }
+
+        .ico-aa-s {
+            background: rgba(148,163,184,.1);
+            color: #94A3B8;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: #334155;
+        }
+
+            .empty-state i {
+                font-size: 2rem;
+                display: block;
+                margin-bottom: .6rem;
+                opacity: .3;
+            }
+    </style>
+}
+
+<div class="ap-root">
+
+    <!-- HERO -->
+    <div class="ap-hero">
+        <div class="ap-orb ap-orb-1"></div>
+        <div class="ap-orb ap-orb-2"></div>
+        <div class="container">
+            <div class="row align-items-end g-4">
+                <div class="col-lg-7">
+                    <div class="d-flex align-items-center gap-4">
+                        <div class="ap-avatar">@Model.FirstName.Substring(0, 1)@Model.LastName.Substring(0, 1)</div>
+                        <div>
+                            <div class="ap-shield mb-2"><i class="fas fa-shield-alt"></i>System Administrator</div>
+                            <div class="ap-name">@Model.FirstName @Model.LastName</div>
+                            <div class="ap-email mb-2">@Model.Email</div>
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="ap-pill"><i class="fas fa-calendar-alt"></i>@Model.RegistrationDate.ToString("MMM yyyy")</span>
+                                <span class="ap-pill ap-pill-green"><i class="fas fa-circle" style="font-size:.5rem;"></i>System Online</span>
+                                @if (unreadMessages > 0)
+                                {
+                                    <span class="ap-pill ap-pill-red"><i class="fas fa-bell"></i>@unreadMessages alerts</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="ap-kpi">
+                        <div class="ap-kpi-lbl">// total_active_users</div>
+                        <div class="ap-kpi-val">@totalPlatformUsers.ToString("N0")</div>
+                        <div class="ap-kpi-sub"><i class="fas fa-check-circle me-1"></i>@totalEnrollments active enrollments</div>
+                    </div>
+                </div>
+            </div>
+            <div class="ap-tabs">
+                <a href="#" class="ap-tab active">[ OVERVIEW ]</a>
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="ap-tab">[ ADMIN PANEL ]</a>
+                <a asp-controller="Courses" asp-action="Index" class="ap-tab">[ COURSES ]</a>
+                <a asp-controller="Forum" asp-action="Index" class="ap-tab">[ FORUM ]</a>
+                <a asp-area="Identity" asp-page="/Account/Manage/Index" class="ap-tab">[ SETTINGS ]</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- BODY -->
+    <div class="container ap-body">
+        <div class="row g-4">
+
+            <!-- LEFT -->
+            <div class="col-lg-8">
+
+                <!-- 8-KPI Grid -->
+                <div class="ap-kpis" style="grid-template-columns:repeat(4,1fr);">
+                    <div class="ap-kpi-card c-indigo">
+                        <div class="ap-kpi-ico"><i class="fas fa-users"></i></div>
+                        <div class="ap-kpi-val-sm">@totalPlatformUsers</div>
+                        <div class="ap-kpi-lbl-sm">Users</div>
+                    </div>
+                    <div class="ap-kpi-card c-green">
+                        <div class="ap-kpi-ico"><i class="fas fa-book"></i></div>
+                        <div class="ap-kpi-val-sm">@publishedCourses</div>
+                        <div class="ap-kpi-lbl-sm">Published</div>
+                    </div>
+                    <div class="ap-kpi-card c-amber">
+                        <div class="ap-kpi-ico"><i class="fas fa-user-graduate"></i></div>
+                        <div class="ap-kpi-val-sm">@totalEnrollments</div>
+                        <div class="ap-kpi-lbl-sm">Enrollments</div>
+                    </div>
+                    <div class="ap-kpi-card c-red">
+                        <div class="ap-kpi-ico"><i class="fas fa-envelope"></i></div>
+                        <div class="ap-kpi-val-sm">@unreadMessages</div>
+                        <div class="ap-kpi-lbl-sm">Unread Msgs</div>
+                    </div>
+                    <div class="ap-kpi-card c-cyan">
+                        <div class="ap-kpi-ico"><i class="fas fa-dumbbell"></i></div>
+                        <div class="ap-kpi-val-sm">@totalExercisesAttempted</div>
+                        <div class="ap-kpi-lbl-sm">Exercises Done</div>
+                    </div>
+                    <div class="ap-kpi-card c-violet">
+                        <div class="ap-kpi-ico"><i class="fas fa-comments"></i></div>
+                        <div class="ap-kpi-val-sm">@totalForumPosts</div>
+                        <div class="ap-kpi-lbl-sm">Forum Posts</div>
+                    </div>
+                    <div class="ap-kpi-card c-teal">
+                        <div class="ap-kpi-ico"><i class="fas fa-book-open"></i></div>
+                        <div class="ap-kpi-val-sm">@totalPlatformCourses</div>
+                        <div class="ap-kpi-lbl-sm">Total Courses</div>
+                    </div>
+                    <div class="ap-kpi-card c-rose">
+                        <div class="ap-kpi-ico"><i class="fas fa-percentage"></i></div>
+                        <div class="ap-kpi-val-sm">@(totalPlatformCourses > 0 ? (int)Math.Round((double)publishedCourses / totalPlatformCourses * 100) : 0)%</div>
+                        <div class="ap-kpi-lbl-sm">Published Rate</div>
+                    </div>
+                </div>
+
+                <!-- Recent Users -->
+                <div class="ap-card">
+                    <div class="ap-card-hdr">
+                        <h5 class="ap-card-title"><i class="fas fa-user-plus ico-ai"></i>// recent_registrations</h5>
+                        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="btn btn-sm" style="border-radius:6px;background:rgba(99,102,241,.12);color:#A5B4FC;font-size:.72rem;font-weight:700;border:1px solid rgba(99,102,241,.25);font-family:'JetBrains Mono',monospace;">VIEW ALL</a>
+                    </div>
+                    <div class="ap-card-bod" style="padding-top:.3rem;padding-bottom:.3rem;">
+                        @if (recentUsers.Any())
+                        {
+                            @foreach (var u in recentUsers)
+                            {
+                                <div class="au-row">
+                                    <div class="au-av">@(u.FirstName?.Substring(0, 1))@(u.LastName?.Substring(0, 1))</div>
+                                    <div style="flex:1;min-width:0;">
+                                        <div class="au-name">@u.FirstName @u.LastName</div>
+                                        <div class="au-email">@u.Email</div>
+                                    </div>
+                                    <div class="au-date">@u.RegistrationDate.ToString("MMM dd")</div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="empty-state"><i class="fas fa-users"></i><p>No recent registrations</p></div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Popular Courses -->
+                <div class="ap-card">
+                    <div class="ap-card-hdr">
+                        <h5 class="ap-card-title"><i class="fas fa-fire ico-ar"></i>// top_courses_by_enrollment</h5>
+                        <a asp-controller="Courses" asp-action="Index" class="btn btn-sm" style="border-radius:6px;background:rgba(20,184,166,.1);color:#5EEAD4;font-size:.72rem;font-weight:700;border:1px solid rgba(20,184,166,.25);font-family:'JetBrains Mono',monospace;">VIEW ALL</a>
+                    </div>
+                    <div class="ap-card-bod" style="padding-top:.3rem;padding-bottom:.3rem;">
+                        @if (popularCourses.Any())
+                        {
+                            @foreach (var c in popularCourses)
+                            {
+                                <div class="ac-row">
+                                    <div class="ac-dot">
+                                        @switch (c.Language.ToLower())
+                                        {
+                                            case "spanish":
+                                                <i class="fas fa-language"></i>
+                                                break;
+                                            case "french":
+
+                                                <i class="fas fa-flag"></i>
+                                                break;
+                                            case "german":
+
+                                                <i class="fas fa-book"></i>
+                                                break;
+                                            case "japanese":
+
+                                                <i class="fas fa-yen-sign"></i>
+                                                break;
+                                            default:
+
+                                                <i class="fas fa-globe"></i>
+                                                break;
+                                        }
+                                    </div>
+                                    <div style="flex:1;min-width:0;">
+                                        <div class="ac-name">@c.Title</div>
+                                        <div class="ac-meta d-flex gap-2 flex-wrap mt-1">
+                                            <span class="ac-badge">@c.Level</span>
+                                            <span style="font-size:.72rem;color:#334155;font-family:'JetBrains Mono',monospace;">@c.Language · @c.Lessons.Count lessons</span>
+                                        </div>
+                                    </div>
+                                    <div class="ac-enroll"><i class="fas fa-users me-1"></i>@c.Enrollments.Count</div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="empty-state"><i class="fas fa-book"></i><p>No courses yet</p></div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Personal achievements -->
+                @if (recentAchievements != null && recentAchievements.Any())
+                {
+                    <div class="ap-card">
+                        <div class="ap-card-hdr">
+                            <h5 class="ap-card-title"><i class="fas fa-trophy ico-aa"></i>// my_achievements</h5>
+                            <a asp-action="Achievements" class="btn btn-sm" style="border-radius:6px;background:rgba(245,158,11,.1);color:#FCD34D;font-size:.72rem;font-weight:700;border:1px solid rgba(245,158,11,.2);font-family:'JetBrains Mono',monospace;">VIEW ALL</a>
+                        </div>
+                        <div class="ap-card-bod">
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (var ua in recentAchievements)
+                                {
+                                    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(99,102,241,.2);border-radius:8px;padding:.7rem 1rem;display:flex;align-items:center;gap:.6rem;">
+                                        <i class="fas fa-@(ua.Achievement.IsRare ? "medal" : "award")" style="color:@(ua.Achievement.IsRare ? "#FCD34D" : "#A5B4FC");font-size:1rem;"></i>
+                                        <div>
+                                            <div style="font-weight:700;font-size:.8rem;color:#E2E8F0;">@ua.Achievement.Title</div>
+                                            <div style="font-size:.65rem;color:#475569;font-family:'JetBrains Mono',monospace;">+@ua.Achievement.PointsReward pts</div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+
+            </div>
+
+            <!-- RIGHT SIDEBAR -->
+            <div class="col-lg-4">
+                <div style="position:sticky;top:1.5rem;">
+
+                    <div class="ap-card">
+                        <div class="ap-card-hdr"><h5 class="ap-card-title"><i class="fas fa-terminal ico-ai"></i>// admin_actions</h5></div>
+                        <div class="ap-card-bod">
+                            <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="aa-btn"><i class="fas fa-shield-alt ico-aa-i"></i>Admin Control Panel</a>
+                            <a asp-controller="Courses" asp-action="Index" class="aa-btn"><i class="fas fa-book ico-aa-g"></i>Browse All Courses</a>
+                            <a asp-controller="Forum" asp-action="Index" class="aa-btn"><i class="fas fa-comments ico-aa-c"></i>Manage Forum</a>
+                            <a asp-controller="Teacher" asp-action="Dashboard" class="aa-btn"><i class="fas fa-chalkboard-teacher ico-aa-a"></i>Teacher Dashboard</a>
+                            <a asp-action="Achievements" class="aa-btn"><i class="fas fa-trophy ico-aa-a"></i>My Achievements</a>
+                            <a asp-action="Stats" class="aa-btn"><i class="fas fa-chart-bar ico-aa-g"></i>Personal Stats</a>
+                            <a asp-area="Identity" asp-page="/Account/Manage/Index" class="aa-btn"><i class="fas fa-cog ico-aa-s"></i>Account Settings</a>
+                        </div>
+                    </div>
+
+                    <!-- System status panel -->
+                    <div class="ap-card">
+                        <div class="ap-card-hdr"><h5 class="ap-card-title"><i class="fas fa-server ico-ag"></i>// system_status</h5></div>
+                        <div class="ap-card-bod">
+                            <div style="font-family:'JetBrains Mono',monospace;font-size:.75rem;">
+                                <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid rgba(99,102,241,.08);">
+                                    <span style="color:#475569;">platform.status</span>
+                                    <span style="color:#86EFAC;">● ONLINE</span>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid rgba(99,102,241,.08);">
+                                    <span style="color:#475569;">total.users</span>
+                                    <span style="color:#A5B4FC;">@totalPlatformUsers</span>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid rgba(99,102,241,.08);">
+                                    <span style="color:#475569;">courses.published</span>
+                                    <span style="color:#5EEAD4;">@publishedCourses</span>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid rgba(99,102,241,.08);">
+                                    <span style="color:#475569;">exercises.total</span>
+                                    <span style="color:#FCD34D;">@totalExercisesAttempted</span>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;padding:.5rem 0;">
+                                    <span style="color:#475569;">messages.unread</span>
+                                    <span style="color:@(unreadMessages > 0 ? "#FCA5A5" : "#86EFAC");">@unreadMessages</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Personal mini stats -->
+                    <div class="ap-card">
+                        <div class="ap-card-hdr"><h5 class="ap-card-title"><i class="fas fa-user ico-ai"></i>// my_stats</h5></div>
+                        <div class="ap-card-bod">
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem;">
+                                <div style="text-align:center;background:rgba(99,102,241,.07);border-radius:8px;padding:.85rem .5rem;border:1px solid rgba(99,102,241,.15);">
+                                    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:1px;color:#A5B4FC;">@totalPoints</div>
+                                    <div style="font-size:.62rem;color:#334155;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.05em;">XP</div>
+                                </div>
+                                <div style="text-align:center;background:rgba(245,158,11,.07);border-radius:8px;padding:.85rem .5rem;border:1px solid rgba(245,158,11,.15);">
+                                    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:1px;color:#FCD34D;">@accuracy.ToString("F0")%</div>
+                                    <div style="font-size:.62rem;color:#334155;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.05em;">Accuracy</div>
+                                </div>
+                                <div style="text-align:center;background:rgba(239,68,68,.07);border-radius:8px;padding:.85rem .5rem;border:1px solid rgba(239,68,68,.15);">
+                                    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:1px;color:#FCA5A5;">@learningStreak</div>
+                                    <div style="font-size:.62rem;color:#334155;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.05em;">Streak</div>
+                                </div>
+                                <div style="text-align:center;background:rgba(34,197,94,.07);border-radius:8px;padding:.85rem .5rem;border:1px solid rgba(34,197,94,.12);">
+                                    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:1px;color:#86EFAC;">@ViewBag.TotalExercises</div>
+                                    <div style="font-size:.62rem;color:#334155;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.05em;">Exercises</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

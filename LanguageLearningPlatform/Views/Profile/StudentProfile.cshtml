@@ -1,0 +1,430 @@
+﻿@model LanguageLearningPlatform.Data.Models.User
+
+@{
+    ViewData["Title"] = "My Profile";
+    double accuracy = ViewBag.AccuracyRate ?? 0.0;
+    int totalPoints = ViewBag.TotalPoints ?? 0;
+    int enrolledCourses = ViewBag.EnrolledCourses ?? 0;
+    int completedLessons = ViewBag.CompletedLessons ?? 0;
+    int totalExercises = ViewBag.TotalExercises ?? 0;
+    int learningStreak = ViewBag.LearningStreak ?? 0;
+    var recentAchievements = ViewBag.RecentAchievements as List<LanguageLearningPlatform.Data.Models.UserAchievement>;
+}
+
+@section Styles {
+<style>
+@@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Syne:wght@700;800&display=swap');
+
+.sp-root {
+    font-family: 'Nunito', sans-serif;
+    background: #F0EFF8;
+    min-height: 100vh;
+    padding-bottom: 4rem;
+}
+
+/* Hero */
+.sp-hero {
+    background: linear-gradient(135deg, #2D1B69 0%, #4C3BAE 50%, #6D5CE8 100%);
+    padding: 3rem 0 0;
+    position: relative;
+    overflow: hidden;
+}
+.sp-hero::after {
+    content: '';
+    display: block;
+    height: 56px;
+    background: #F0EFF8;
+    clip-path: ellipse(56% 100% at 50% 100%);
+}
+.sp-hero-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(70px);
+    opacity: 0.25;
+    pointer-events: none;
+}
+.sp-hero-orb-1 { width:300px;height:300px;background:#A78BFA;top:-80px;right:-60px; }
+.sp-hero-orb-2 { width:200px;height:200px;background:#FCD34D;bottom:40px;left:-60px; }
+
+.sp-avatar {
+    width: 92px; height: 92px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #A78BFA, #6D28D9);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800;
+    color: white; border: 4px solid rgba(255,255,255,0.3);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    flex-shrink: 0;
+}
+
+.sp-name { font-family:'Syne',sans-serif; font-size:1.9rem; font-weight:800; color:white; line-height:1.1; }
+.sp-email { color:rgba(255,255,255,0.6); font-size:0.88rem; }
+
+.sp-pill {
+    display:inline-flex; align-items:center; gap:0.4rem;
+    background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2);
+    color:rgba(255,255,255,0.85); font-size:0.75rem; font-weight:700;
+    padding:0.3rem 0.75rem; border-radius:20px; backdrop-filter:blur(4px);
+}
+.sp-pill-gold { background:rgba(252,211,77,0.2); border-color:rgba(252,211,77,0.4); color:#FCD34D; }
+.sp-pill-fire { background:rgba(239,68,68,0.2); border-color:rgba(239,68,68,0.4); color:#FCA5A5; }
+
+.sp-xp-block { text-align:right; }
+.sp-xp-label { color:rgba(255,255,255,0.55); font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
+.sp-xp-val { font-family:'Syne',sans-serif; font-size:3rem; font-weight:800; color:white; line-height:1; text-shadow:0 4px 20px rgba(0,0,0,0.25); }
+.sp-xp-sub { color:#FCD34D; font-size:0.78rem; font-weight:700; }
+
+/* Nav tabs */
+.sp-tabs { display:flex; margin-top:2.5rem; position:relative; z-index:2; }
+.sp-tab { flex:1; text-align:center; padding:.8rem 1rem; color:rgba(255,255,255,0.5); font-size:.78rem; font-weight:700; text-decoration:none; border-bottom:3px solid transparent; transition:all .2s; text-transform:uppercase; letter-spacing:.04em; }
+.sp-tab:hover, .sp-tab.active { color:white; border-bottom-color:#FCD34D; background:rgba(255,255,255,0.05); }
+
+/* Body */
+.sp-body { padding-top:2rem; }
+
+/* Stat chips */
+.sp-chips { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:1.75rem; }
+@@media(max-width:576px){ .sp-chips { grid-template-columns:repeat(2,1fr); } }
+
+.sp-chip {
+    background:white; border-radius:18px; padding:1.25rem 1rem; text-align:center;
+    box-shadow:0 2px 12px rgba(0,0,0,0.06); border:1px solid rgba(0,0,0,0.04);
+    position:relative; overflow:hidden; transition:transform .2s,box-shadow .2s;
+}
+.sp-chip:hover { transform:translateY(-3px); box-shadow:0 8px 24px rgba(0,0,0,0.1); }
+.sp-chip::before { content:''; position:absolute; top:0;left:0;right:0; height:4px; border-radius:18px 18px 0 0; }
+.sp-chip.c-gold::before { background:linear-gradient(90deg,#F59E0B,#FCD34D); }
+.sp-chip.c-indigo::before { background:linear-gradient(90deg,#6D5CE8,#A78BFA); }
+.sp-chip.c-emerald::before { background:linear-gradient(90deg,#10B981,#34D399); }
+.sp-chip.c-rose::before { background:linear-gradient(90deg,#EF4444,#F87171); }
+.sp-chip.c-sky::before { background:linear-gradient(90deg,#06B6D4,#67E8F9); }
+.sp-chip.c-violet::before { background:linear-gradient(90deg,#8B5CF6,#C4B5FD); }
+
+.sp-chip-ico { width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1rem;margin:0 auto .5rem; }
+.c-gold .sp-chip-ico { background:#FEF3C7;color:#D97706; }
+.c-indigo .sp-chip-ico { background:#EDE9FE;color:#6D28D9; }
+.c-emerald .sp-chip-ico { background:#D1FAE5;color:#059669; }
+.c-rose .sp-chip-ico { background:#FEE2E2;color:#DC2626; }
+.c-sky .sp-chip-ico { background:#CFFAFE;color:#0891B2; }
+.c-violet .sp-chip-ico { background:#EDE9FE;color:#7C3AED; }
+
+.sp-chip-val { font-family:'Syne',sans-serif; font-size:1.55rem; font-weight:800; color:#1a1a2e; line-height:1; }
+.sp-chip-lbl { font-size:0.7rem; color:#9CA3AF; font-weight:700; text-transform:uppercase; letter-spacing:.05em; margin-top:.2rem; }
+
+/* Cards */
+.sp-card { background:white; border-radius:20px; box-shadow:0 2px 12px rgba(0,0,0,0.06); border:1px solid rgba(0,0,0,0.04); margin-bottom:1.25rem; overflow:hidden; }
+.sp-card-hdr { display:flex; justify-content:space-between; align-items:center; padding:1.1rem 1.5rem; border-bottom:1px solid #F3F4F6; }
+.sp-card-title { font-family:'Syne',sans-serif; font-size:.92rem; font-weight:700; color:#1a1a2e; display:flex;align-items:center;gap:.5rem; margin:0; }
+.sp-card-title i { width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:.75rem; }
+.ico-blue { background:#EDE9FE;color:#6D28D9; }
+.ico-gold { background:#FEF3C7;color:#D97706; }
+.ico-green { background:#D1FAE5;color:#059669; }
+.sp-card-bod { padding:1.4rem; }
+
+/* Gauge */
+.sp-gauge-wrap { position:relative;width:110px;height:110px;flex-shrink:0; }
+.sp-gauge-svg { width:110px;height:110px;transform:rotate(-90deg); }
+.sp-gauge-track { fill:none;stroke:#F3F4F6;stroke-width:10; }
+.sp-gauge-fill { fill:none;stroke-width:10;stroke-linecap:round;stroke:url(#spGrad); }
+.sp-gauge-lbl { position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center; }
+.sp-gauge-pct { font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:#1a1a2e;line-height:1; }
+.sp-gauge-sub { font-size:.6rem;color:#9CA3AF;font-weight:700;text-transform:uppercase;letter-spacing:.05em; }
+
+.perf-row { display:flex;justify-content:space-between;padding:.55rem 0;border-bottom:1px solid #F9FAFB;font-size:.85rem; }
+.perf-row:last-child { border-bottom:none; }
+.perf-lbl { color:#6B7280; }
+.perf-val { font-weight:700;color:#1a1a2e; }
+
+/* Course progress rows */
+.cp-row { display:flex;align-items:center;gap:1rem;padding:.9rem 0;border-bottom:1px solid #F3F4F6; }
+.cp-row:last-child { border-bottom:none; }
+.cp-dot { width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0;background:linear-gradient(135deg,#6D5CE8,#A78BFA);color:white; }
+.cp-name { font-weight:700;font-size:.87rem;color:#1a1a2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:.3rem; }
+.cp-meta { font-size:.72rem;color:#9CA3AF;margin-bottom:.4rem; }
+.cp-bar { height:6px;border-radius:10px;background:#F3F4F6;overflow:hidden; }
+.cp-bar-fill { height:100%;border-radius:10px;background:linear-gradient(90deg,#6D5CE8,#A78BFA);transition:width .8s; }
+.cp-pct { font-family:'Syne',sans-serif;font-size:.88rem;font-weight:800;color:#6D5CE8;flex-shrink:0;min-width:34px;text-align:right; }
+
+/* Achievement cards */
+.ach-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem; }
+.ach-card { display:flex;align-items:flex-start;gap:.8rem;padding:1rem;border-radius:14px;border:1.5px solid #F3F4F6;background:#FAFAFA;transition:all .2s; }
+.ach-card:hover { border-color:#D1D5DB;background:white;transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.08); }
+.ach-card.rare { border-color:#FDE68A;background:linear-gradient(135deg,#FFFBEB,#FEF3C7 60%,#FFFBEB); }
+.ach-ico { width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0; }
+.ach-card.rare .ach-ico { background:#FEF3C7;color:#D97706; }
+.ach-card:not(.rare) .ach-ico { background:#EDE9FE;color:#6D28D9; }
+.ach-name { font-weight:700;font-size:.85rem;color:#1a1a2e;margin-bottom:.15rem; }
+.ach-desc { font-size:.73rem;color:#9CA3AF;line-height:1.4; }
+.ach-pts { display:inline-flex;align-items:center;gap:.25rem;margin-top:.35rem;font-size:.7rem;font-weight:700;color:#059669;background:#D1FAE5;padding:.15rem .5rem;border-radius:20px; }
+
+/* Sidebar actions */
+.sa-btn { display:flex;align-items:center;gap:.75rem;padding:.8rem 1rem;border-radius:14px;background:#FAFAFA;border:1.5px solid #F3F4F6;color:#374151;text-decoration:none;font-size:.85rem;font-weight:700;transition:all .15s;margin-bottom:.4rem; }
+.sa-btn:hover { background:#EDE9FE;border-color:#C4B5FD;color:#6D28D9;transform:translateX(4px); }
+.sa-btn i { width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.82rem;flex-shrink:0; }
+.ico-sa-indigo { background:#EDE9FE;color:#6D28D9; }
+.ico-sa-gold { background:#FEF3C7;color:#D97706; }
+.ico-sa-green { background:#D1FAE5;color:#059669; }
+.ico-sa-slate { background:#F1F5F9;color:#475569; }
+.ico-sa-red { background:#FEE2E2;color:#DC2626; }
+
+/* Level card */
+.lv-num { font-family:'Syne',sans-serif;font-size:2.4rem;font-weight:800;color:#6D5CE8;line-height:1; }
+.lv-bar { height:10px;border-radius:10px;background:#F3F4F6;overflow:hidden;margin:.75rem 0 .3rem; }
+.lv-bar-fill { height:100%;border-radius:10px;background:linear-gradient(90deg,#FCD34D,#EF4444);transition:width .8s; }
+
+.empty-state { text-align:center;padding:2rem 1rem;color:#9CA3AF; }
+.empty-state i { font-size:2.2rem;opacity:.3;display:block;margin-bottom:.6rem; }
+.empty-state p { font-size:.85rem;margin:0; }
+</style>
+}
+
+<div class="sp-root">
+
+<!-- HERO -->
+<div class="sp-hero">
+    <div class="sp-hero-orb sp-hero-orb-1"></div>
+    <div class="sp-hero-orb sp-hero-orb-2"></div>
+    <div class="container">
+        <div class="row align-items-end g-4">
+            <div class="col-lg-7">
+                <div class="d-flex align-items-center gap-4">
+                    <div class="sp-avatar">@Model.FirstName.Substring(0,1)@Model.LastName.Substring(0,1)</div>
+                    <div>
+                        <div class="sp-name">@Model.FirstName @Model.LastName</div>
+                        <div class="sp-email mb-2">@Model.Email</div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="sp-pill"><i class="fas fa-calendar-alt"></i>Since @Model.RegistrationDate.ToString("MMM yyyy")</span>
+                            @if (learningStreak > 0) {
+                                <span class="sp-pill sp-pill-fire"><i class="fas fa-fire"></i>@learningStreak-day streak</span>
+                            }
+                            @if (Model.UserLevel != null) {
+                                <span class="sp-pill sp-pill-gold"><i class="fas fa-star"></i>@Model.UserLevel.Name</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="sp-xp-block">
+                    <div class="sp-xp-label">Total XP Earned</div>
+                    <div class="sp-xp-val">@totalPoints.ToString("N0")</div>
+                    <div class="sp-xp-sub"><i class="fas fa-star me-1"></i>Experience Points</div>
+                </div>
+            </div>
+        </div>
+        <div class="sp-tabs">
+            <a href="#" class="sp-tab active"><i class="fas fa-user me-1"></i>Overview</a>
+            <a asp-action="Achievements" class="sp-tab"><i class="fas fa-trophy me-1"></i>Achievements</a>
+            <a asp-action="Stats" class="sp-tab"><i class="fas fa-chart-bar me-1"></i>Stats</a>
+            <a asp-area="Identity" asp-page="/Account/Manage/Index" class="sp-tab"><i class="fas fa-cog me-1"></i>Settings</a>
+        </div>
+    </div>
+</div>
+
+<!-- BODY -->
+<div class="container sp-body">
+    <div class="row g-4">
+
+        <!-- LEFT -->
+        <div class="col-lg-8">
+
+            <!-- Stat Chips -->
+            <div class="sp-chips">
+                <div class="sp-chip c-gold">
+                    <div class="sp-chip-ico"><i class="fas fa-trophy"></i></div>
+                    <div class="sp-chip-val">@totalPoints.ToString("N0")</div>
+                    <div class="sp-chip-lbl">Points</div>
+                </div>
+                <div class="sp-chip c-indigo">
+                    <div class="sp-chip-ico"><i class="fas fa-book-open"></i></div>
+                    <div class="sp-chip-val">@enrolledCourses</div>
+                    <div class="sp-chip-lbl">Courses</div>
+                </div>
+                <div class="sp-chip c-emerald">
+                    <div class="sp-chip-ico"><i class="fas fa-check-circle"></i></div>
+                    <div class="sp-chip-val">@completedLessons</div>
+                    <div class="sp-chip-lbl">Lessons Done</div>
+                </div>
+                <div class="sp-chip c-rose">
+                    <div class="sp-chip-ico"><i class="fas fa-fire"></i></div>
+                    <div class="sp-chip-val">@learningStreak</div>
+                    <div class="sp-chip-lbl">Day Streak</div>
+                </div>
+                <div class="sp-chip c-sky">
+                    <div class="sp-chip-ico"><i class="fas fa-dumbbell"></i></div>
+                    <div class="sp-chip-val">@totalExercises</div>
+                    <div class="sp-chip-lbl">Exercises</div>
+                </div>
+                <div class="sp-chip c-violet">
+                    <div class="sp-chip-ico"><i class="fas fa-bullseye"></i></div>
+                    <div class="sp-chip-val">@accuracy.ToString("F0")%</div>
+                    <div class="sp-chip-lbl">Accuracy</div>
+                </div>
+            </div>
+
+            <!-- Performance -->
+            <div class="sp-card">
+                <div class="sp-card-hdr">
+                    <h5 class="sp-card-title"><i class="fas fa-chart-pie ico-blue"></i>Performance</h5>
+                </div>
+                <div class="sp-card-bod">
+                    <div class="d-flex align-items-center gap-4 flex-wrap">
+                        @{
+                            double r2 = 46;
+                            double circ2 = 2 * Math.PI * r2;
+                            double offset2 = circ2 * (1.0 - accuracy / 100.0);
+                        }
+                        <div class="sp-gauge-wrap">
+                            <svg class="sp-gauge-svg" viewBox="0 0 110 110">
+                                <defs>
+                                    <linearGradient id="spGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#6D5CE8"/>
+                                        <stop offset="100%" stop-color="#10B981"/>
+                                    </linearGradient>
+                                </defs>
+                                <circle class="sp-gauge-track" cx="55" cy="55" r="@r2"/>
+                                <circle class="sp-gauge-fill" cx="55" cy="55" r="@r2"
+                                        stroke-dasharray="@circ2.ToString("F2")"
+                                        stroke-dashoffset="@offset2.ToString("F2")"
+                                        id="sp-gauge-circle"/>
+                            </svg>
+                            <div class="sp-gauge-lbl">
+                                <span class="sp-gauge-pct">@accuracy.ToString("F0")%</span>
+                                <span class="sp-gauge-sub">Accuracy</span>
+                            </div>
+                        </div>
+                        <div class="flex-1" style="flex:1;min-width:150px;">
+                            @{ int cCount = (int)Math.Round(totalExercises * accuracy / 100.0); }
+                            <div class="perf-row"><span class="perf-lbl"><i class="fas fa-check text-success me-2"></i>Correct</span><span class="perf-val" style="color:#059669;">@cCount</span></div>
+                            <div class="perf-row"><span class="perf-lbl"><i class="fas fa-times text-danger me-2"></i>Incorrect</span><span class="perf-val" style="color:#DC2626;">@(totalExercises - cCount)</span></div>
+                            <div class="perf-row"><span class="perf-lbl"><i class="fas fa-list-alt text-secondary me-2"></i>Total</span><span class="perf-val">@totalExercises</span></div>
+                            <div class="perf-row"><span class="perf-lbl"><i class="fas fa-fire text-warning me-2"></i>Active Days</span><span class="perf-val" style="color:#D97706;">@learningStreak / 7</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Courses -->
+            <div class="sp-card">
+                <div class="sp-card-hdr">
+                    <h5 class="sp-card-title"><i class="fas fa-graduation-cap ico-blue"></i>Active Courses</h5>
+                    <a asp-controller="Courses" asp-action="MyCourses" class="btn btn-sm btn-outline-primary" style="border-radius:10px;font-size:.77rem;">View All</a>
+                </div>
+                <div class="sp-card-bod" style="padding-top:.5rem;padding-bottom:.5rem;">
+                    @if (Model.Progresses.Any()) {
+                        @foreach (var p in Model.Progresses.OrderByDescending(p => p.LastAccessedAt).Take(5)) {
+                            <div class="cp-row">
+                                <div class="cp-dot">
+                                    @switch (p.Course?.Language?.ToLower()) {
+                                        case "spanish": <i class="fas fa-language"></i> break;
+                                        case "french": <i class="fas fa-flag"></i> break;
+                                        case "german": <i class="fas fa-book"></i> break;
+                                        case "japanese": <i class="fas fa-yen-sign"></i> break;
+                                        default: <i class="fas fa-globe"></i> break;
+                                    }
+                                </div>
+                                <div style="flex:1;min-width:0;">
+                                    <div class="cp-name">@p.Course?.Title</div>
+                                    <div class="cp-meta">@p.CompletedLessons lessons · @p.PointsEarned pts · @p.LastAccessedAt.ToString("MMM dd")</div>
+                                    <div class="cp-bar"><div class="cp-bar-fill" style="width:@p.CompletionPercentage%"></div></div>
+                                </div>
+                                <div class="cp-pct">@p.CompletionPercentage.ToString("F0")%</div>
+                            </div>
+                        }
+                    } else {
+                        <div class="empty-state"><i class="fas fa-book-open"></i><p><a asp-controller="Courses" asp-action="Index" class="fw-bold" style="color:#6D5CE8;">Explore courses →</a></p></div>
+                    }
+                </div>
+            </div>
+
+            <!-- Achievements -->
+            <div class="sp-card">
+                <div class="sp-card-hdr">
+                    <h5 class="sp-card-title"><i class="fas fa-trophy ico-gold"></i>Recent Achievements</h5>
+                    <a asp-action="Achievements" class="btn btn-sm btn-outline-primary" style="border-radius:10px;font-size:.77rem;">View All</a>
+                </div>
+                <div class="sp-card-bod">
+                    @if (recentAchievements != null && recentAchievements.Any()) {
+                        <div class="ach-grid">
+                            @foreach (var ua in recentAchievements) {
+                                <div class="ach-card @(ua.Achievement.IsRare ? "rare" : "")">
+                                    <div class="ach-ico"><i class="fas fa-@(ua.Achievement.IsRare ? "medal" : "award")"></i></div>
+                                    <div>
+                                        <div class="ach-name">@ua.Achievement.Title</div>
+                                        <div class="ach-desc">@ua.Achievement.Description</div>
+                                        <div class="ach-pts"><i class="fas fa-star"></i>+@ua.Achievement.PointsReward pts</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    } else {
+                        <div class="empty-state"><i class="fas fa-trophy"></i><p>Keep learning to unlock achievements!</p></div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDEBAR -->
+        <div class="col-lg-4">
+            <div style="position:sticky;top:1.5rem;">
+
+                <div class="sp-card">
+                    <div class="sp-card-hdr"><h5 class="sp-card-title"><i class="fas fa-bolt ico-blue"></i>Quick Actions</h5></div>
+                    <div class="sp-card-bod">
+                        <a asp-controller="Courses" asp-action="MyCourses" class="sa-btn"><i class="fas fa-bookmark ico-sa-indigo"></i>My Courses</a>
+                        <a asp-controller="Courses" asp-action="Index" class="sa-btn"><i class="fas fa-compass ico-sa-green"></i>Browse Courses</a>
+                        <a asp-action="Achievements" class="sa-btn"><i class="fas fa-trophy ico-sa-gold"></i>Achievements</a>
+                        <a asp-action="Stats" class="sa-btn"><i class="fas fa-chart-bar ico-sa-green"></i>Detailed Stats</a>
+                        <a asp-controller="Forum" asp-action="Index" class="sa-btn"><i class="fas fa-comments ico-sa-indigo"></i>Community Forum</a>
+                        <a asp-controller="Messaging" asp-action="MyMessages" class="sa-btn"><i class="fas fa-inbox ico-sa-slate"></i>My Messages</a>
+                        <a asp-area="Identity" asp-page="/Account/Manage/Index" class="sa-btn"><i class="fas fa-cog ico-sa-slate"></i>Account Settings</a>
+                    </div>
+                </div>
+
+                @if (Model.UserLevel != null) {
+                    {
+                        double lvProg = Model.UserLevel.MaxPoints > Model.UserLevel.MinPoints
+                            ? Math.Min(100,(double)(totalPoints - Model.UserLevel.MinPoints) / (Model.UserLevel.MaxPoints - Model.UserLevel.MinPoints) * 100)
+                            : 100;
+                        int ptsToNext = Math.Max(0, Model.UserLevel.MaxPoints - totalPoints);
+                    }
+                    <div class="sp-card">
+                        <div class="sp-card-hdr"><h5 class="sp-card-title"><i class="fas fa-star ico-gold"></i>Level Progress</h5></div>
+                        <div class="sp-card-bod text-center">
+                            <div class="lv-num">@Model.UserLevel.Level</div>
+                            <div style="font-weight:700;color:#374151;">@Model.UserLevel.Name</div>
+                            <div style="font-size:.78rem;color:#9CA3AF;margin-bottom:.25rem;">@Model.UserLevel.MinPoints – @Model.UserLevel.MaxPoints XP</div>
+                            <div class="lv-bar"><div class="lv-bar-fill" style="width:@@lvProg.ToString("F0")%"></div></div>
+                            <div class="d-flex justify-content-between" style="font-size:.7rem;color:#9CA3AF;">
+                                <span>@totalPoints XP</span><span>@@ptsToNext to next</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+@section Scripts {
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const circle = document.getElementById('sp-gauge-circle');
+    if (circle) {
+        const target = parseFloat(circle.getAttribute('stroke-dashoffset'));
+        const full = parseFloat(circle.getAttribute('stroke-dasharray'));
+        circle.setAttribute('stroke-dashoffset', full);
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            circle.style.transition = 'stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1)';
+            circle.setAttribute('stroke-dashoffset', target);
+        }));
+    }
+    document.querySelectorAll('.cp-bar-fill, .lv-bar-fill').forEach(bar => {
+        const w = bar.style.width; bar.style.width = '0';
+        setTimeout(() => { bar.style.width = w; }, 200);
+    });
+});
+</script>
+}

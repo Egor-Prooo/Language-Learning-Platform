@@ -1,0 +1,799 @@
+﻿@model LanguageLearningPlatform.Data.Models.User
+
+@{
+    ViewData["Title"] = "Teacher Profile";
+    int totalPoints = ViewBag.TotalPoints ?? 0;
+    int totalExercises = ViewBag.TotalExercises ?? 0;
+    double accuracy = ViewBag.AccuracyRate ?? 0.0;
+    int learningStreak = ViewBag.LearningStreak ?? 0;
+    var teacherCourses = ViewBag.TeacherCourses as List<LanguageLearningPlatform.Data.Models.Course> ?? new();
+    int totalStudents = ViewBag.TotalStudents ?? 0;
+    int totalLessonsCreated = ViewBag.TotalLessonsCreated ?? 0;
+    int publishedCourses = ViewBag.PublishedCourses ?? 0;
+    int unreadMessages = ViewBag.UnreadMessages ?? 0;
+    var recentMessages = ViewBag.RecentMessages as List<LanguageLearningPlatform.Data.Models.TeacherMessage> ?? new();
+    var recentAchievements = ViewBag.RecentAchievements as List<LanguageLearningPlatform.Data.Models.UserAchievement>;
+}
+
+@section Styles {
+    <style>
+        @@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:ital,wght@0,700;0,800;1,700&display=swap');
+
+        .tp-root {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #F8F7F2;
+            min-height: 100vh;
+            padding-bottom: 4rem;
+        }
+
+        /* Hero */
+        .tp-hero {
+            background: linear-gradient(135deg, #0F2027 0%, #1A3A4A 40%, #2C7A6E 100%);
+            padding: 3rem 0 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .tp-hero::after {
+                content: '';
+                display: block;
+                height: 56px;
+                background: #F8F7F2;
+                clip-path: ellipse(56% 100% at 50% 100%);
+            }
+
+        .tp-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: .2;
+            pointer-events: none;
+        }
+
+        .tp-orb-1 {
+            width: 350px;
+            height: 350px;
+            background: #2DD4BF;
+            top: -100px;
+            right: -80px;
+        }
+
+        .tp-orb-2 {
+            width: 200px;
+            height: 200px;
+            background: #F59E0B;
+            bottom: 40px;
+            left: -60px;
+        }
+
+        /* Teacher badge banner */
+        .tp-role-banner {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            background: rgba(45,212,191,.15);
+            border: 1px solid rgba(45,212,191,.3);
+            color: #5EEAD4;
+            font-size: .72rem;
+            font-weight: 700;
+            padding: .3rem .85rem;
+            border-radius: 20px;
+            backdrop-filter: blur(4px);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+        }
+
+            .tp-role-banner i {
+                font-size: .9rem;
+            }
+
+        .tp-avatar {
+            width: 90px;
+            height: 90px;
+            border-radius: 16px;
+            background: linear-gradient(135deg,#2C7A6E,#0F766E);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Fraunces',serif;
+            font-size: 2rem;
+            font-weight: 800;
+            color: white;
+            border: 3px solid rgba(255,255,255,.2);
+            box-shadow: 0 8px 32px rgba(0,0,0,.3);
+            flex-shrink: 0;
+        }
+
+        .tp-name {
+            font-family: 'Fraunces',serif;
+            font-size: 1.9rem;
+            font-weight: 800;
+            color: white;
+            line-height: 1.1;
+        }
+
+        .tp-email {
+            color: rgba(255,255,255,.55);
+            font-size: .87rem;
+        }
+
+        .tp-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            background: rgba(255,255,255,.1);
+            border: 1px solid rgba(255,255,255,.15);
+            color: rgba(255,255,255,.8);
+            font-size: .73rem;
+            font-weight: 600;
+            padding: .28rem .7rem;
+            border-radius: 20px;
+        }
+
+        .tp-pill-teal {
+            background: rgba(45,212,191,.15);
+            border-color: rgba(45,212,191,.3);
+            color: #5EEAD4;
+        }
+
+        .tp-pill-amber {
+            background: rgba(245,158,11,.15);
+            border-color: rgba(245,158,11,.3);
+            color: #FCD34D;
+        }
+
+        .tp-kpi {
+            text-align: right;
+        }
+
+        .tp-kpi-lbl {
+            color: rgba(255,255,255,.5);
+            font-size: .7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+        }
+
+        .tp-kpi-val {
+            font-family: 'Fraunces',serif;
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: white;
+            line-height: 1;
+            text-shadow: 0 4px 20px rgba(0,0,0,.25);
+        }
+
+        .tp-kpi-sub {
+            color: #5EEAD4;
+            font-size: .77rem;
+            font-weight: 600;
+        }
+
+        .tp-tabs {
+            display: flex;
+            margin-top: 2.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .tp-tab {
+            flex: 1;
+            text-align: center;
+            padding: .78rem 1rem;
+            color: rgba(255,255,255,.5);
+            font-size: .77rem;
+            font-weight: 700;
+            text-decoration: none;
+            border-bottom: 3px solid transparent;
+            transition: all .2s;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+
+            .tp-tab:hover, .tp-tab.active {
+                color: white;
+                border-bottom-color: #2DD4BF;
+                background: rgba(255,255,255,.05);
+            }
+
+        /* Body */
+        .tp-body {
+            padding-top: 2rem;
+        }
+
+        /* Stat chips */
+        .tp-chips {
+            display: grid;
+            grid-template-columns: repeat(4,1fr);
+            gap: 1rem;
+            margin-bottom: 1.75rem;
+        }
+
+        @@media(max-width:768px) {
+            .tp-chips {
+                grid-template-columns: repeat(2,1fr);
+            }
+        }
+
+        .tp-chip {
+            background: white;
+            border-radius: 16px;
+            padding: 1.2rem 1rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,.06);
+            border: 1px solid rgba(0,0,0,.04);
+            position: relative;
+            overflow: hidden;
+            transition: transform .2s,box-shadow .2s;
+        }
+
+            .tp-chip:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 24px rgba(0,0,0,.1);
+            }
+
+            .tp-chip::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 4px;
+                border-radius: 16px 16px 0 0;
+            }
+
+            .tp-chip.c-teal::before {
+                background: linear-gradient(90deg,#2C7A6E,#2DD4BF);
+            }
+
+            .tp-chip.c-amber::before {
+                background: linear-gradient(90deg,#D97706,#FCD34D);
+            }
+
+            .tp-chip.c-blue::before {
+                background: linear-gradient(90deg,#1D4ED8,#60A5FA);
+            }
+
+            .tp-chip.c-rose::before {
+                background: linear-gradient(90deg,#BE185D,#F472B6);
+            }
+
+        .tp-chip-ico {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .9rem;
+            margin: 0 auto .5rem;
+        }
+
+        .c-teal .tp-chip-ico {
+            background: #CCFBF1;
+            color: #0F766E;
+        }
+
+        .c-amber .tp-chip-ico {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+
+        .c-blue .tp-chip-ico {
+            background: #DBEAFE;
+            color: #1D4ED8;
+        }
+
+        .c-rose .tp-chip-ico {
+            background: #FCE7F3;
+            color: #BE185D;
+        }
+
+        .tp-chip-val {
+            font-family: 'Fraunces',serif;
+            font-size: 1.55rem;
+            font-weight: 800;
+            color: #0F172A;
+            line-height: 1;
+        }
+
+        .tp-chip-lbl {
+            font-size: .68rem;
+            color: #94A3B8;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            margin-top: .2rem;
+        }
+
+        /* Cards */
+        .tp-card {
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.06);
+            border: 1px solid rgba(0,0,0,.04);
+            margin-bottom: 1.25rem;
+            overflow: hidden;
+        }
+
+        .tp-card-hdr {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.4rem;
+            border-bottom: 1px solid #F1F5F9;
+        }
+
+        .tp-card-title {
+            font-family: 'Fraunces',serif;
+            font-size: .92rem;
+            font-weight: 700;
+            color: #0F172A;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            margin: 0;
+        }
+
+            .tp-card-title i {
+                width: 26px;
+                height: 26px;
+                border-radius: 8px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-size: .75rem;
+            }
+
+        .ico-t {
+            background: #CCFBF1;
+            color: #0F766E;
+        }
+
+        .ico-a {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+
+        .ico-b {
+            background: #DBEAFE;
+            color: #1D4ED8;
+        }
+
+        .tp-card-bod {
+            padding: 1.3rem;
+        }
+
+        /* Course rows */
+        .tc-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: .85rem 0;
+            border-bottom: 1px solid #F1F5F9;
+        }
+
+            .tc-row:last-child {
+                border-bottom: none;
+            }
+
+        .tc-dot {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .9rem;
+            flex-shrink: 0;
+            background: linear-gradient(135deg,#0F766E,#2DD4BF);
+            color: white;
+        }
+
+        .tc-name {
+            font-weight: 700;
+            font-size: .88rem;
+            color: #0F172A;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tc-meta {
+            font-size: .72rem;
+            color: #94A3B8;
+            margin: .2rem 0;
+        }
+
+        .tc-badges {
+            display: flex;
+            gap: .4rem;
+            flex-wrap: wrap;
+        }
+
+        .tc-badge {
+            font-size: .68rem;
+            font-weight: 700;
+            padding: .15rem .5rem;
+            border-radius: 6px;
+        }
+
+        .tc-badge-pub {
+            background: #CCFBF1;
+            color: #0F766E;
+        }
+
+        .tc-badge-dft {
+            background: #F1F5F9;
+            color: #64748B;
+        }
+
+        .tc-badge-lvl {
+            background: #DBEAFE;
+            color: #1D4ED8;
+        }
+
+        /* Message rows */
+        .tm-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: .85rem 0;
+            border-bottom: 1px solid #F1F5F9;
+        }
+
+            .tm-row:last-child {
+                border-bottom: none;
+            }
+
+        .tm-av {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg,#1D4ED8,#60A5FA);
+            color: white;
+            font-weight: 700;
+            font-size: .85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .tm-name {
+            font-weight: 700;
+            font-size: .87rem;
+            color: #0F172A;
+        }
+
+        .tm-msg {
+            font-size: .76rem;
+            color: #64748B;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 300px;
+        }
+
+        .tm-time {
+            font-size: .72rem;
+            color: #94A3B8;
+            flex-shrink: 0;
+        }
+
+        /* Sidebar action buttons */
+        .ta-btn {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            padding: .8rem 1rem;
+            border-radius: 12px;
+            background: #F8FAFC;
+            border: 1.5px solid #E2E8F0;
+            color: #334155;
+            text-decoration: none;
+            font-size: .84rem;
+            font-weight: 700;
+            transition: all .15s;
+            margin-bottom: .4rem;
+        }
+
+            .ta-btn:hover {
+                background: #CCFBF1;
+                border-color: #99F6E4;
+                color: #0F766E;
+                transform: translateX(4px);
+            }
+
+            .ta-btn i {
+                width: 30px;
+                height: 30px;
+                border-radius: 9px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: .8rem;
+                flex-shrink: 0;
+            }
+
+        .ico-ta-t {
+            background: #CCFBF1;
+            color: #0F766E;
+        }
+
+        .ico-ta-a {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+
+        .ico-ta-b {
+            background: #DBEAFE;
+            color: #1D4ED8;
+        }
+
+        .ico-ta-s {
+            background: #F1F5F9;
+            color: #475569;
+        }
+
+        .ico-ta-r {
+            background: #FCE7F3;
+            color: #BE185D;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: #94A3B8;
+        }
+
+            .empty-state i {
+                font-size: 2.2rem;
+                opacity: .3;
+                display: block;
+                margin-bottom: .6rem;
+            }
+    </style>
+}
+
+<div class="tp-root">
+
+    <!-- HERO -->
+    <div class="tp-hero">
+        <div class="tp-orb tp-orb-1"></div>
+        <div class="tp-orb tp-orb-2"></div>
+        <div class="container">
+            <div class="row align-items-end g-4">
+                <div class="col-lg-7">
+                    <div class="d-flex align-items-center gap-4">
+                        <div class="tp-avatar">@Model.FirstName.Substring(0, 1)@Model.LastName.Substring(0, 1)</div>
+                        <div>
+                            <div class="tp-role-banner mb-2"><i class="fas fa-chalkboard-teacher"></i>Educator</div>
+                            <div class="tp-name">@Model.FirstName @Model.LastName</div>
+                            <div class="tp-email mb-2">@Model.Email</div>
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="tp-pill"><i class="fas fa-calendar-alt"></i>Since @Model.RegistrationDate.ToString("MMM yyyy")</span>
+                                <span class="tp-pill tp-pill-teal"><i class="fas fa-book"></i>@publishedCourses published courses</span>
+                                @if (unreadMessages > 0)
+                                {
+                                    <span class="tp-pill tp-pill-amber"><i class="fas fa-envelope"></i>@unreadMessages new messages</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="tp-kpi">
+                        <div class="tp-kpi-lbl">Total Students Teaching</div>
+                        <div class="tp-kpi-val">@totalStudents</div>
+                        <div class="tp-kpi-sub"><i class="fas fa-users me-1"></i>Enrolled Learners</div>
+                    </div>
+                </div>
+            </div>
+            <div class="tp-tabs">
+                <a href="#" class="tp-tab active"><i class="fas fa-tachometer-alt me-1"></i>Overview</a>
+                <a asp-controller="Teacher" asp-action="Dashboard" class="tp-tab"><i class="fas fa-chalkboard me-1"></i>Dashboard</a>
+                <a asp-controller="Teacher" asp-action="Students" class="tp-tab"><i class="fas fa-users me-1"></i>Students</a>
+                <a asp-controller="Teacher" asp-action="Messages" class="tp-tab"><i class="fas fa-envelope me-1"></i>Messages @(unreadMessages > 0 ? $"({unreadMessages})" : "")</a>
+                <a asp-area="Identity" asp-page="/Account/Manage/Index" class="tp-tab"><i class="fas fa-cog me-1"></i>Settings</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- BODY -->
+    <div class="container tp-body">
+        <div class="row g-4">
+
+            <!-- LEFT -->
+            <div class="col-lg-8">
+
+                <!-- KPI Chips -->
+                <div class="tp-chips">
+                    <div class="tp-chip c-teal">
+                        <div class="tp-chip-ico"><i class="fas fa-book"></i></div>
+                        <div class="tp-chip-val">@teacherCourses.Count</div>
+                        <div class="tp-chip-lbl">Courses</div>
+                    </div>
+                    <div class="tp-chip c-amber">
+                        <div class="tp-chip-ico"><i class="fas fa-users"></i></div>
+                        <div class="tp-chip-val">@totalStudents</div>
+                        <div class="tp-chip-lbl">Students</div>
+                    </div>
+                    <div class="tp-chip c-blue">
+                        <div class="tp-chip-ico"><i class="fas fa-list"></i></div>
+                        <div class="tp-chip-val">@totalLessonsCreated</div>
+                        <div class="tp-chip-lbl">Lessons</div>
+                    </div>
+                    <div class="tp-chip c-rose">
+                        <div class="tp-chip-ico"><i class="fas fa-envelope"></i></div>
+                        <div class="tp-chip-val">@unreadMessages</div>
+                        <div class="tp-chip-lbl">Unread Msgs</div>
+                    </div>
+                </div>
+
+                <!-- Courses -->
+                <div class="tp-card">
+                    <div class="tp-card-hdr">
+                        <h5 class="tp-card-title"><i class="fas fa-book-open ico-t"></i>Your Courses</h5>
+                        <a asp-controller="Teacher" asp-action="CreateCourse" class="btn btn-sm" style="border-radius:10px;font-size:.77rem;background:#CCFBF1;color:#0F766E;font-weight:700;border:none;">
+                            <i class="fas fa-plus me-1"></i>New Course
+                        </a>
+                    </div>
+                    <div class="tp-card-bod" style="padding-top:.4rem;padding-bottom:.4rem;">
+                        @if (teacherCourses.Any())
+                        {
+                            @foreach (var c in teacherCourses.Take(6))
+                            {
+                                <div class="tc-row">
+                                    <div class="tc-dot">
+                                        @switch (c.Language.ToLower())
+                                        {
+                                            case "spanish":
+                                                <i class="fas fa-language"></i>
+                                                break;
+                                            case "french":
+
+                                                <i class="fas fa-flag"></i>
+                                                break;
+                                            case "german":
+
+                                                <i class="fas fa-book"></i>
+                                                break;
+                                            case "japanese":
+
+                                                <i class="fas fa-yen-sign"></i>
+                                                break;
+                                            default:
+
+                                                <i class="fas fa-globe"></i>
+                                                break;
+                                        }
+                                    </div>
+                                    <div style="flex:1;min-width:0;">
+                                        <div class="tc-name">@c.Title</div>
+                                        <div class="tc-meta">@c.Lessons.Count lessons · @c.Enrollments.Count students</div>
+                                        <div class="tc-badges">
+                                            <span class="tc-badge @(c.IsPublished ? "tc-badge-pub" : "tc-badge-dft")">@(c.IsPublished ? "Published" : "Draft")</span>
+                                            <span class="tc-badge tc-badge-lvl">@c.Level</span>
+                                            <span class="tc-badge" style="background:#F1F5F9;color:#64748B;">@c.Language</span>
+                                        </div>
+                                    </div>
+                                    <a asp-controller="Teacher" asp-action="CourseDetails" asp-route-id="@c.Id"
+                                       class="btn btn-sm" style="border-radius:9px;background:#F1F5F9;color:#334155;font-weight:600;font-size:.75rem;white-space:nowrap;border:none;">
+                                        <i class="fas fa-cog me-1"></i>Manage
+                                    </a>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="empty-state"><i class="fas fa-book"></i><p>No courses yet. <a asp-controller="Teacher" asp-action="CreateCourse" style="color:#0F766E;font-weight:700;">Create one →</a></p></div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Recent Messages -->
+                <div class="tp-card">
+                    <div class="tp-card-hdr">
+                        <h5 class="tp-card-title"><i class="fas fa-inbox ico-b"></i>Recent Messages</h5>
+                        <a asp-controller="Teacher" asp-action="Messages" class="btn btn-sm" style="border-radius:10px;font-size:.77rem;background:#DBEAFE;color:#1D4ED8;font-weight:700;border:none;">View All</a>
+                    </div>
+                    <div class="tp-card-bod" style="padding-top:.4rem;padding-bottom:.4rem;">
+                        @if (recentMessages.Any())
+                        {
+                            @foreach (var msg in recentMessages)
+                            {
+                                <div class="tm-row">
+                                    <div class="tm-av">@(msg.Student?.FirstName?.Substring(0, 1))@(msg.Student?.LastName?.Substring(0, 1))</div>
+                                    <div style="flex:1;min-width:0;">
+                                        <div class="tm-name">@msg.Student?.FirstName @msg.Student?.LastName</div>
+                                        <div class="tm-msg">@msg.Message</div>
+                                    </div>
+                                    <div class="tm-time">@msg.SentAt.ToString("MMM dd")</div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="empty-state"><i class="fas fa-envelope-open"></i><p>No messages yet.</p></div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Personal achievements -->
+                @if (recentAchievements != null && recentAchievements.Any())
+                {
+                    <div class="tp-card">
+                        <div class="tp-card-hdr">
+                            <h5 class="tp-card-title"><i class="fas fa-trophy ico-a"></i>My Achievements</h5>
+                            <a asp-action="Achievements" class="btn btn-sm" style="border-radius:10px;font-size:.77rem;background:#FEF3C7;color:#D97706;font-weight:700;border:none;">View All</a>
+                        </div>
+                        <div class="tp-card-bod">
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (var ua in recentAchievements)
+                                {
+                                    <div style="background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;padding:.75rem 1rem;display:flex;align-items:center;gap:.6rem;min-width:180px;">
+                                        <i class="fas fa-@(ua.Achievement.IsRare ? "medal" : "award")" style="color:@(ua.Achievement.IsRare ? "#D97706" : "#0F766E");font-size:1.1rem;"></i>
+                                        <div>
+                                            <div style="font-weight:700;font-size:.82rem;color:#0F172A;">@ua.Achievement.Title</div>
+                                            <div style="font-size:.68rem;color:#94A3B8;">+@ua.Achievement.PointsReward pts</div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+
+            </div>
+
+            <!-- RIGHT SIDEBAR -->
+            <div class="col-lg-4">
+                <div style="position:sticky;top:1.5rem;">
+
+                    <div class="tp-card">
+                        <div class="tp-card-hdr"><h5 class="tp-card-title"><i class="fas fa-bolt ico-t"></i>Quick Actions</h5></div>
+                        <div class="tp-card-bod">
+                            <a asp-controller="Teacher" asp-action="Dashboard" class="ta-btn"><i class="fas fa-tachometer-alt ico-ta-t"></i>Teacher Dashboard</a>
+                            <a asp-controller="Teacher" asp-action="CreateCourse" class="ta-btn"><i class="fas fa-plus-circle ico-ta-t"></i>Create New Course</a>
+                            <a asp-controller="Teacher" asp-action="Students" class="ta-btn"><i class="fas fa-users ico-ta-b"></i>View All Students</a>
+                            <a asp-controller="Teacher" asp-action="Messages" class="ta-btn">
+                                <i class="fas fa-envelope ico-ta-b"></i>
+                                Messages @(unreadMessages > 0 ? $"({unreadMessages} new)" : "")
+                            </a>
+                            <a asp-controller="Forum" asp-action="Index" class="ta-btn"><i class="fas fa-comments ico-ta-s"></i>Community Forum</a>
+                            <a asp-action="Achievements" class="ta-btn"><i class="fas fa-trophy ico-ta-a"></i>My Achievements</a>
+                            <a asp-area="Identity" asp-page="/Account/Manage/Index" class="ta-btn"><i class="fas fa-cog ico-ta-s"></i>Account Settings</a>
+                        </div>
+                    </div>
+
+                    <!-- Personal stats summary -->
+                    <div class="tp-card">
+                        <div class="tp-card-hdr"><h5 class="tp-card-title"><i class="fas fa-user ico-b"></i>My Learning Stats</h5></div>
+                        <div class="tp-card-bod">
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+                                <div style="text-align:center;background:#F8FAFC;border-radius:12px;padding:.9rem .5rem;border:1.5px solid #E2E8F0;">
+                                    <div style="font-family:'Fraunces',serif;font-size:1.4rem;font-weight:800;color:#0F766E;">@totalPoints</div>
+                                    <div style="font-size:.68rem;color:#94A3B8;font-weight:700;text-transform:uppercase;letter-spacing:.04em;">Points</div>
+                                </div>
+                                <div style="text-align:center;background:#F8FAFC;border-radius:12px;padding:.9rem .5rem;border:1.5px solid #E2E8F0;">
+                                    <div style="font-family:'Fraunces',serif;font-size:1.4rem;font-weight:800;color:#D97706;">@accuracy.ToString("F0")%</div>
+                                    <div style="font-size:.68rem;color:#94A3B8;font-weight:700;text-transform:uppercase;letter-spacing:.04em;">Accuracy</div>
+                                </div>
+                                <div style="text-align:center;background:#F8FAFC;border-radius:12px;padding:.9rem .5rem;border:1.5px solid #E2E8F0;">
+                                    <div style="font-family:'Fraunces',serif;font-size:1.4rem;font-weight:800;color:#BE185D;">@learningStreak</div>
+                                    <div style="font-size:.68rem;color:#94A3B8;font-weight:700;text-transform:uppercase;letter-spacing:.04em;">Day Streak</div>
+                                </div>
+                                <div style="text-align:center;background:#F8FAFC;border-radius:12px;padding:.9rem .5rem;border:1.5px solid #E2E8F0;">
+                                    <div style="font-family:'Fraunces',serif;font-size:1.4rem;font-weight:800;color:#1D4ED8;">@totalExercises</div>
+                                    <div style="font-size:.68rem;color:#94A3B8;font-weight:700;text-transform:uppercase;letter-spacing:.04em;">Exercises</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

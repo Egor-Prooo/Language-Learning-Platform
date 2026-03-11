@@ -1,12 +1,16 @@
-﻿// Enhanced Interactive Exercise Handler - Duolingo Style
+﻿// ============================================================
+// LingoLearn – Interactive Exercise Handler
+// Covers: MultipleChoice, FillInBlank, Translation,
+//         Matching, Listening, Speaking
+// ============================================================
+
 class InteractiveExerciseHandler {
     constructor() {
-        this.currentExerciseIndex = 0;
         this.exercises = [];
         this.completedExercises = new Set();
         this.totalPoints = 0;
         this.streak = 0;
-        this.hearts = 5; // Lives system like Duolingo
+        this.hearts = 5;
         this.init();
     }
 
@@ -18,416 +22,312 @@ class InteractiveExerciseHandler {
     }
 
     loadExercises() {
-        // Get all exercise items from the DOM
-        const exerciseElements = document.querySelectorAll('.exercise-item');
-        exerciseElements.forEach((element, index) => {
+        document.querySelectorAll('.exercise-item').forEach((el, i) => {
             this.exercises.push({
-                id: element.dataset.exerciseId,
-                element: element,
-                type: element.dataset.type,
-                correctAnswer: element.dataset.correctAnswer,
-                points: parseInt(element.dataset.points) || 10,
-                index: index
+                id: el.dataset.exerciseId,
+                element: el,
+                type: el.dataset.type,
+                points: parseInt(el.dataset.points) || 10,
+                index: i
             });
         });
     }
 
     bindEventListeners() {
-        // Multiple choice options with animation
-        document.querySelectorAll('.exercise-option').forEach(option => {
-            option.addEventListener('click', (e) => this.handleMultipleChoice(e));
+        // ── Multiple choice ───────────────────────────────
+        document.querySelectorAll('.exercise-option').forEach(opt => {
+            opt.addEventListener('click', e => this.handleMultipleChoice(e));
         });
 
-        // Text input exercises
-        document.querySelectorAll('.exercise-input').forEach(input => {
-            input.addEventListener('input', (e) => this.handleInputChange(e));
-            input.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    this.checkAnswer(e.target);
-                }
+        // ── Text inputs (Fill / Translation / Listening fallback) ──
+        document.querySelectorAll('.exercise-input').forEach(inp => {
+            inp.addEventListener('input', e => this.handleInputChange(e));
+            inp.addEventListener('keypress', e => {
+                if (e.key === 'Enter') { e.preventDefault(); this.triggerCheckFromInput(e.target); }
             });
         });
 
-        // Check answer buttons
+        // ── Check answer buttons ──────────────────────────
         document.querySelectorAll('.btn-check-answer').forEach(btn => {
-            btn.addEventListener('click', (e) => this.handleCheckAnswer(e));
+            btn.addEventListener('click', e => this.handleCheckAnswer(e));
         });
 
-        // Hint buttons
+        // ── Hint buttons ──────────────────────────────────
         document.querySelectorAll('.btn-hint').forEach(btn => {
-            btn.addEventListener('click', (e) => this.showHint(e));
+            btn.addEventListener('click', e => this.showHint(e));
         });
 
-        // Skip buttons
+        // ── Skip buttons ──────────────────────────────────
         document.querySelectorAll('.btn-skip').forEach(btn => {
-            btn.addEventListener('click', (e) => this.skipExercise(e));
-        });
-
-        // Pronunciation buttons
-        document.querySelectorAll('.btn-pronunciation').forEach(btn => {
-            btn.addEventListener('click', (e) => this.playPronunciation(e));
+            btn.addEventListener('click', e => this.skipExercise(e));
         });
     }
 
     handleInputChange(event) {
         const input = event.target;
-        const checkBtn = input.closest('.exercise-item').querySelector('.btn-check-answer');
-
-        // Enable/disable check button based on input
-        if (checkBtn) {
-            checkBtn.disabled = input.value.trim().length === 0;
-        }
-
-        // Remove any previous error states
+        const exItem = input.closest('.exercise-item');
+        const checkBtn = exItem?.querySelector('.btn-check-answer');
+        if (checkBtn) checkBtn.disabled = input.value.trim().length === 0;
         input.classList.remove('is-invalid');
+    }
+
+    triggerCheckFromInput(input) {
+        const checkBtn = input.closest('.exercise-item')?.querySelector('.btn-check-answer');
+        if (checkBtn && !checkBtn.disabled) checkBtn.click();
     }
 
     handleMultipleChoice(event) {
         const option = event.currentTarget;
-        const exerciseItem = option.closest('.exercise-item');
-        const options = exerciseItem.querySelectorAll('.exercise-option');
+        const exItem = option.closest('.exercise-item');
 
-        // Remove previous selections
-        options.forEach(opt => {
-            opt.classList.remove('selected', 'pulse-animation');
-        });
-
-        // Select current option with animation
+        exItem.querySelectorAll('.exercise-option').forEach(o => o.classList.remove('selected', 'pulse-animation'));
         option.classList.add('selected', 'pulse-animation');
-
-        // Play selection sound
         this.playSound('select');
 
-        // Enable check button
-        const checkBtn = exerciseItem.querySelector('.btn-check-answer');
-        if (checkBtn) {
-            checkBtn.disabled = false;
-        }
-
-        // Remove animation class after animation completes
+        const checkBtn = exItem.querySelector('.btn-check-answer');
+        if (checkBtn) checkBtn.disabled = false;
         setTimeout(() => option.classList.remove('pulse-animation'), 300);
     }
 
     async handleCheckAnswer(event) {
-        const button = event.currentTarget;
-        const exerciseItem = button.closest('.exercise-item');
-        const exerciseId = exerciseItem.dataset.exerciseId;
-        const exerciseType = exerciseItem.dataset.type;
+        const btn = event.currentTarget;
+        const exItem = btn.closest('.exercise-item');
+        const exId = exItem.dataset.exerciseId;
+        const exType = exItem.dataset.type;
 
-        let userAnswer = '';
-
-        // Get answer based on exercise type
-        if (exerciseType === 'MultipleChoice') {
-            const selected = exerciseItem.querySelector('.exercise-option.selected');
-            if (!selected) return;
-            userAnswer = selected.dataset.value;
-        } else {
-            const input = exerciseItem.querySelector('.exercise-input');
-            if (!input) return;
-            userAnswer = input.value.trim();
-        }
-
+        let userAnswer = this.getUserAnswer(exItem, exType);
         if (!userAnswer) return;
 
-        // Disable button during check
-        button.disabled = true;
-        button.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Checking...';
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Checking…';
 
         try {
-            await this.submitAnswer(exerciseId, userAnswer, exerciseItem);
-        } catch (error) {
-            console.error('Error checking answer:', error);
-            this.showError(exerciseItem, 'An error occurred. Please try again.');
+            await this.submitAnswer(exId, userAnswer, exItem);
+        } catch (err) {
+            console.error('Answer submit error:', err);
+            this.showError(exItem, 'An error occurred. Please try again.');
         } finally {
-            button.disabled = false;
-            button.innerHTML = '<i class="fas fa-check me-1"></i>Check Answer';
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-check me-1"></i>Check Answer';
         }
     }
 
-    async submitAnswer(exerciseId, userAnswer, exerciseItem) {
-        const startTime = exerciseItem.dataset.startTime
-            ? parseInt(exerciseItem.dataset.startTime)
-            : Date.now();
+    // ── Get the user's answer depending on exercise type ──
+    getUserAnswer(exItem, exType) {
+        switch (exType) {
+            case 'MultipleChoice': {
+                const sel = exItem.querySelector('.exercise-option.selected');
+                return sel ? sel.dataset.value : null;
+            }
+            case 'Listening': {
+                // Try the dedicated listening input first
+                const liInput = exItem.querySelector('[id^="listeningInput-"]');
+                if (liInput && liInput.value.trim()) return liInput.value.trim();
+                // Fallback to any exercise-input
+                const inp = exItem.querySelector('.exercise-input');
+                return inp ? inp.value.trim() : null;
+            }
+            case 'Speaking': {
+                // Hidden answer set by speech recogniser or typed fallback
+                const hidden = exItem.querySelector('[id^="speakingAnswer-"]');
+                if (hidden && hidden.value.trim()) return hidden.value.trim();
+                const fallback = exItem.querySelector('[id^="speakingFallback-"]');
+                return fallback ? fallback.value.trim() : null;
+            }
+            case 'Matching': {
+                const hidden = exItem.querySelector('[id^="matching-answer-"]');
+                return hidden ? hidden.value.trim() : null;
+            }
+            default: {
+                const inp = exItem.querySelector('.exercise-input');
+                return inp ? inp.value.trim() : null;
+            }
+        }
+    }
+
+    async submitAnswer(exId, userAnswer, exItem) {
+        const startTime = exItem.dataset.startTime ? parseInt(exItem.dataset.startTime) : Date.now();
         const timeSpent = Math.max(0, Math.floor((Date.now() - startTime) / 1000));
 
         const payload = {
-            exerciseId: exerciseId,
+            exerciseId: exId,
             userAnswer: userAnswer,
             timeSpentSeconds: timeSpent,
-            attemptsCount: parseInt(exerciseItem.dataset.attempts || '1')
+            attemptsCount: parseInt(exItem.dataset.attempts || '1')
         };
-
-        console.log('Submitting payload:', JSON.stringify(payload)); // debug
 
         const response = await fetch('/api/exercises/submit', {
             method: 'POST',
             credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
 
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Server error:', response.status, errorText);
-            throw new Error(`Server returned ${response.status}: ${errorText}`);
+            const text = await response.text();
+            throw new Error(`Server ${response.status}: ${text}`);
         }
 
         const result = await response.json();
-        this.handleAnswerResult(result, exerciseItem);
+        this.handleAnswerResult(result, exItem);
     }
 
-    handleAnswerResult(result, exerciseItem) {
-        if (result.isCorrect) {
-            this.handleCorrectAnswer(result, exerciseItem);
-        } else {
-            this.handleIncorrectAnswer(result, exerciseItem);
-        }
+    handleAnswerResult(result, exItem) {
+        if (result.isCorrect) this.handleCorrectAnswer(result, exItem);
+        else this.handleIncorrectAnswer(result, exItem);
     }
 
-    handleCorrectAnswer(result, exerciseItem) {
-        // Play success sound
+    handleCorrectAnswer(result, exItem) {
         this.playSound('correct');
-
-        // Show success feedback
-        this.showFeedback(exerciseItem, true, result.feedback, result.explanation);
-
-        // Animate the exercise item
-        exerciseItem.classList.add('exercise-success');
-
-        // Create confetti
-        this.createConfetti(exerciseItem);
-
-        // Update points with animation
+        this.showFeedback(exItem, true, result.feedback, result.explanation);
+        exItem.classList.add('exercise-success');
+        this.createConfetti(exItem);
         this.updatePoints(result.pointsEarned, result.totalPoints);
-
-        // Update streak
         this.updateStreak(result.streak);
-
-        // Mark as completed
-        this.completedExercises.add(exerciseItem.dataset.exerciseId);
-
-        // Update progress
+        this.completedExercises.add(exItem.dataset.exerciseId);
         this.updateProgress();
-
-        // Disable further interaction
-        setTimeout(() => {
-            this.disableExercise(exerciseItem);
-        }, 2000);
-
-        // Check if level up
-        if (result.levelUp) {
-            this.showLevelUpModal();
-        }
+        setTimeout(() => this.disableExercise(exItem), 2200);
+        if (result.levelUp) this.showLevelUpModal();
     }
 
-    handleIncorrectAnswer(result, exerciseItem) {
-        // Decrease hearts
+    handleIncorrectAnswer(result, exItem) {
         this.hearts = Math.max(0, this.hearts - 1);
         this.updateHeartsDisplay();
-
-        // Play error sound
         this.playSound('incorrect');
-
-        // Shake animation
-        exerciseItem.classList.add('exercise-error');
-        setTimeout(() => exerciseItem.classList.remove('exercise-error'), 600);
-
-        // Show feedback
-        this.showFeedback(exerciseItem, false, result.feedback, result.correctAnswer);
-
-        // Increment attempts
-        const currentAttempts = parseInt(exerciseItem.dataset.attempts || '1');
-        exerciseItem.dataset.attempts = (currentAttempts + 1).toString();
-
-        // If out of hearts, show game over
-        if (this.hearts === 0) {
-            this.showGameOver();
-        }
+        exItem.classList.add('exercise-error');
+        setTimeout(() => exItem.classList.remove('exercise-error'), 600);
+        this.showFeedback(exItem, false, result.feedback, result.correctAnswer
+            ? `Correct answer: <strong>${result.correctAnswer}</strong>` : null);
+        exItem.dataset.attempts = (parseInt(exItem.dataset.attempts || '1') + 1).toString();
+        if (this.hearts === 0) this.showGameOver();
     }
 
-    showFeedback(exerciseItem, isCorrect, message, extraInfo) {
-        let feedbackDiv = exerciseItem.querySelector('.exercise-feedback');
-
-        if (!feedbackDiv) {
-            feedbackDiv = document.createElement('div');
-            feedbackDiv.className = 'exercise-feedback';
-            exerciseItem.querySelector('.exercise-content').appendChild(feedbackDiv);
+    showFeedback(exItem, isCorrect, message, extraInfo) {
+        let div = exItem.querySelector('.exercise-feedback');
+        if (!div) {
+            div = document.createElement('div');
+            div.className = 'exercise-feedback';
+            exItem.querySelector('.exercise-content').appendChild(div);
         }
-
         const icon = isCorrect ? 'check-circle' : 'times-circle';
-        const className = isCorrect ? 'correct' : 'incorrect';
-
-        feedbackDiv.className = `exercise-feedback ${className}`;
-        feedbackDiv.innerHTML = `
-            <div class="feedback-icon">
-                <i class="fas fa-${icon}"></i>
-            </div>
+        const klass = isCorrect ? 'correct' : 'incorrect';
+        div.className = `exercise-feedback ${klass}`;
+        div.innerHTML = `
+            <div class="feedback-icon"><i class="fas fa-${icon}"></i></div>
             <div class="feedback-content">
                 <div class="feedback-message">${message}</div>
                 ${extraInfo ? `<div class="feedback-extra">${extraInfo}</div>` : ''}
-            </div>
-        `;
-
-        feedbackDiv.style.display = 'flex';
-        feedbackDiv.classList.add('slide-down-animation');
+            </div>`;
+        div.style.display = 'flex';
+        div.classList.add('slide-down-animation');
     }
 
     createConfetti(element) {
-        const colors = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
-        const confettiCount = 30;
-
-        for (let i = 0; i < confettiCount; i++) {
-            const confetti = document.createElement('div');
-            confetti.className = 'confetti';
-            confetti.style.left = Math.random() * 100 + '%';
-            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-            confetti.style.animationDelay = Math.random() * 0.3 + 's';
-            confetti.style.animationDuration = (Math.random() * 1 + 1) + 's';
-
-            element.appendChild(confetti);
-
-            setTimeout(() => confetti.remove(), 2000);
+        const colors = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#F4623A'];
+        for (let i = 0; i < 28; i++) {
+            const c = document.createElement('div');
+            c.className = 'confetti';
+            c.style.left = Math.random() * 100 + '%';
+            c.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            c.style.animationDelay = Math.random() * 0.35 + 's';
+            c.style.animationDuration = (Math.random() * 1 + 1) + 's';
+            element.appendChild(c);
+            setTimeout(() => c.remove(), 2200);
         }
     }
 
     updatePoints(earned, total) {
-        const pointsDisplay = document.getElementById('user-total-points');
-        if (pointsDisplay) {
-            // Animate points increment
-            const startPoints = parseInt(pointsDisplay.textContent) || 0;
-            const duration = 1000;
-            const startTime = Date.now();
-
-            const animatePoints = () => {
-                const now = Date.now();
-                const progress = Math.min((now - startTime) / duration, 1);
-                const currentPoints = Math.floor(startPoints + (total - startPoints) * progress);
-
-                pointsDisplay.textContent = currentPoints;
-                pointsDisplay.classList.add('points-earned');
-
-                if (progress < 1) {
-                    requestAnimationFrame(animatePoints);
-                } else {
-                    setTimeout(() => pointsDisplay.classList.remove('points-earned'), 500);
-                }
-            };
-
-            animatePoints();
-        }
-
-        // Show floating points
+        const el = document.getElementById('user-total-points');
+        if (!el) return;
+        const start = parseInt(el.textContent) || 0;
+        const duration = 900;
+        const began = Date.now();
+        const tick = () => {
+            const t = Math.min((Date.now() - began) / duration, 1);
+            el.textContent = Math.floor(start + (total - start) * t);
+            el.classList.add('points-earned');
+            if (t < 1) requestAnimationFrame(tick);
+            else setTimeout(() => el.classList.remove('points-earned'), 400);
+        };
+        tick();
         this.showFloatingPoints(earned);
     }
 
     showFloatingPoints(points) {
-        const floatingPoints = document.createElement('div');
-        floatingPoints.className = 'floating-points';
-        floatingPoints.textContent = `+${points}`;
-        floatingPoints.style.position = 'fixed';
-        floatingPoints.style.top = '50%';
-        floatingPoints.style.left = '50%';
-        floatingPoints.style.transform = 'translate(-50%, -50%)';
-
-        document.body.appendChild(floatingPoints);
-
-        setTimeout(() => floatingPoints.remove(), 2000);
+        if (!points) return;
+        const el = document.createElement('div');
+        el.className = 'floating-points';
+        el.textContent = `+${points}`;
+        el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 2000);
     }
 
     updateStreak(streak) {
-        const streakDisplay = document.getElementById('user-streak');
-        if (streakDisplay) {
-            streakDisplay.textContent = streak;
+        const el = document.getElementById('user-streak');
+        if (el) {
+            el.textContent = streak;
             if (streak > this.streak) {
-                streakDisplay.classList.add('streak-increase');
-                setTimeout(() => streakDisplay.classList.remove('streak-increase'), 500);
+                el.classList.add('streak-increase');
+                setTimeout(() => el.classList.remove('streak-increase'), 500);
             }
         }
         this.streak = streak;
     }
 
     updateHeartsDisplay() {
-        const heartsContainer = document.getElementById('hearts-container');
-        if (heartsContainer) {
-            heartsContainer.innerHTML = '';
-            for (let i = 0; i < 5; i++) {
-                const heart = document.createElement('i');
-                heart.className = i < this.hearts ? 'fas fa-heart' : 'far fa-heart';
-                heart.style.color = i < this.hearts ? '#EF4444' : '#E5E7EB';
-                heartsContainer.appendChild(heart);
-            }
+        const c = document.getElementById('hearts-container');
+        if (!c) return;
+        c.innerHTML = '';
+        for (let i = 0; i < 5; i++) {
+            const h = document.createElement('i');
+            h.className = i < this.hearts ? 'fas fa-heart' : 'far fa-heart';
+            h.style.color = i < this.hearts ? '#EF4444' : '#D1D5DB';
+            h.style.fontSize = '1.4rem';
+            h.style.transition = 'all 0.3s ease';
+            c.appendChild(h);
         }
     }
 
     updateProgress() {
-        const completed = this.completedExercises.size;
+        const done = this.completedExercises.size;
         const total = this.exercises.length;
-        const percentage = (completed / total) * 100;
+        const pct = total > 0 ? (done / total) * 100 : 0;
 
-        const progressBar = document.getElementById('progress-bar');
-        const progressText = document.getElementById('completed-count');
+        const bar = document.getElementById('progress-bar');
+        const text = document.getElementById('completed-count');
+        if (bar) bar.style.width = pct + '%';
+        if (text) text.textContent = done;
 
-        if (progressBar) {
-            progressBar.style.width = percentage + '%';
-        }
-
-        if (progressText) {
-            progressText.textContent = completed;
-        }
-
-        // Check if all exercises completed
-        if (completed === total) {
+        if (done === total && total > 0) {
             setTimeout(() => this.showCompletionCelebration(), 1000);
         }
     }
 
     showHint(event) {
-        const button = event.currentTarget;
-        const exerciseItem = button.closest('.exercise-item');
-        const hintDiv = exerciseItem.querySelector('.exercise-hint');
-
-        if (hintDiv) {
-            hintDiv.style.display = hintDiv.style.display === 'none' ? 'flex' : 'none';
-            button.innerHTML = hintDiv.style.display === 'none'
-                ? '<i class="fas fa-lightbulb me-1"></i>Show Hint'
-                : '<i class="fas fa-lightbulb me-1"></i>Hide Hint';
-        }
+        const btn = event.currentTarget;
+        const exItem = btn.closest('.exercise-item');
+        const hintDiv = exItem.querySelector('.exercise-hint');
+        if (!hintDiv) return;
+        const showing = hintDiv.style.display === 'flex';
+        hintDiv.style.display = showing ? 'none' : 'flex';
+        btn.innerHTML = showing
+            ? '<i class="fas fa-lightbulb me-1"></i>Hint'
+            : '<i class="fas fa-lightbulb me-1"></i>Hide Hint';
     }
 
     skipExercise(event) {
-        const exerciseItem = event.currentTarget.closest('.exercise-item');
-        this.disableExercise(exerciseItem);
+        const exItem = event.currentTarget.closest('.exercise-item');
+        this.disableExercise(exItem);
         this.updateProgress();
     }
 
-    disableExercise(exerciseItem) {
-        // Disable all interactive elements
-        exerciseItem.querySelectorAll('button, input, .exercise-option').forEach(el => {
+    disableExercise(exItem) {
+        exItem.querySelectorAll('button, input, .exercise-option').forEach(el => {
             el.disabled = true;
             el.style.pointerEvents = 'none';
         });
-
-        exerciseItem.classList.add('exercise-completed');
-    }
-
-    playPronunciation(event) {
-        const button = event.currentTarget;
-        const text = button.dataset.text;
-        const lang = button.dataset.lang || 'es-ES';
-
-        if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = lang;
-            utterance.rate = 0.85;
-            window.speechSynthesis.speak(utterance);
-
-            // Animate button
-            button.classList.add('speaking');
-            utterance.onend = () => button.classList.remove('speaking');
-        }
+        exItem.classList.add('exercise-completed');
     }
 
     initializeProgressBar() {
@@ -436,43 +336,40 @@ class InteractiveExerciseHandler {
     }
 
     initializeSoundEffects() {
-        // Preload sounds for better performance
-        this.sounds = {
-            correct: new Audio('/sounds/correct.mp3'),
-            incorrect: new Audio('/sounds/incorrect.mp3'),
-            select: new Audio('/sounds/select.mp3')
-        };
-
-        // Set volume
-        Object.values(this.sounds).forEach(sound => {
-            sound.volume = 0.3;
-        });
+        this.sounds = {};
+        try {
+            this.sounds = {
+                correct: new Audio('/sounds/correct.mp3'),
+                incorrect: new Audio('/sounds/incorrect.mp3'),
+                select: new Audio('/sounds/select.mp3')
+            };
+            Object.values(this.sounds).forEach(s => { s.volume = 0.3; });
+        } catch (e) { /* sounds optional */ }
     }
 
     playSound(type) {
-        if (this.sounds[type]) {
-            this.sounds[type].currentTime = 0;
-            this.sounds[type].play().catch(e => console.log('Sound play failed:', e));
-        }
+        try {
+            const s = this.sounds[type];
+            if (s) { s.currentTime = 0; s.play().catch(() => { }); }
+        } catch (e) { }
     }
 
     showCompletionCelebration() {
+        const totalPoints = parseInt(document.getElementById('user-total-points')?.textContent || 0);
         const modal = document.createElement('div');
         modal.className = 'completion-modal';
         modal.innerHTML = `
             <div class="completion-content">
-                <div class="completion-trophy">
-                    <i class="fas fa-trophy"></i>
-                </div>
+                <div class="completion-trophy"><i class="fas fa-trophy"></i></div>
                 <h2>Lesson Complete! 🎉</h2>
-                <p class="completion-message">Amazing work! You've mastered this lesson.</p>
+                <p class="completion-message">Outstanding work! You've finished all exercises.</p>
                 <div class="completion-stats">
                     <div class="stat">
                         <div class="stat-value">${this.completedExercises.size}</div>
                         <div class="stat-label">Exercises</div>
                     </div>
                     <div class="stat">
-                        <div class="stat-value">${this.totalPoints}</div>
+                        <div class="stat-value">${totalPoints}</div>
                         <div class="stat-label">Points</div>
                     </div>
                     <div class="stat">
@@ -482,20 +379,12 @@ class InteractiveExerciseHandler {
                 </div>
                 <div class="completion-actions">
                     <button class="btn btn-enroll" onclick="window.location.href='/courses/mycourses'">
-                        Continue Learning
+                        <i class="fas fa-arrow-right me-2"></i>Continue Learning
                     </button>
                 </div>
-            </div>
-        `;
+            </div>`;
         document.body.appendChild(modal);
-
-        // Animate modal in
         setTimeout(() => modal.classList.add('show'), 10);
-    }
-
-    showLevelUpModal() {
-        // Implement level up celebration
-        console.log('Level up!');
     }
 
     showGameOver() {
@@ -503,38 +392,54 @@ class InteractiveExerciseHandler {
         modal.className = 'completion-modal';
         modal.innerHTML = `
             <div class="completion-content">
-                <div class="game-over-icon">
-                    <i class="fas fa-heart-broken"></i>
-                </div>
+                <div class="game-over-icon"><i class="fas fa-heart-broken"></i></div>
                 <h2>Out of Hearts!</h2>
-                <p>Don't worry, you can try again or review the material.</p>
+                <p>Don't worry — review the material and try again.</p>
                 <div class="completion-actions">
                     <button class="btn btn-enroll" onclick="location.reload()">
-                        Try Again
+                        <i class="fas fa-redo me-2"></i>Try Again
                     </button>
                     <button class="btn btn-outline-primary" onclick="window.location.href='/courses/mycourses'">
                         Back to Courses
                     </button>
                 </div>
-            </div>
-        `;
+            </div>`;
         document.body.appendChild(modal);
         setTimeout(() => modal.classList.add('show'), 10);
     }
 
-    showError(exerciseItem, message) {
-        this.showFeedback(exerciseItem, false, message, null);
+    showLevelUpModal() {
+        const modal = document.createElement('div');
+        modal.className = 'completion-modal';
+        modal.innerHTML = `
+            <div class="completion-content">
+                <div style="font-size:4.5rem;margin-bottom:1rem;">⬆️</div>
+                <h2>Level Up!</h2>
+                <p class="completion-message">You've reached a new level. Keep it up!</p>
+                <div class="completion-actions">
+                    <button class="btn btn-enroll" onclick="this.closest('.completion-modal').remove()">
+                        Continue
+                    </button>
+                </div>
+            </div>`;
+        document.body.appendChild(modal);
+        setTimeout(() => modal.classList.add('show'), 10);
+        setTimeout(() => { modal.classList.remove('show'); setTimeout(() => modal.remove(), 300); }, 3500);
+    }
+
+    showError(exItem, message) {
+        this.showFeedback(exItem, false, message, null);
     }
 }
 
-// Initialize when DOM is loaded
+// ── Init ──────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     if (document.querySelector('.exercise-item')) {
         window.exerciseHandler = new InteractiveExerciseHandler();
     }
 });
 
-// Utility function for hint toggle (called from inline onclick)
+// Utility: hint toggle called from inline onclick in the view
 function toggleHint(button) {
     if (window.exerciseHandler) {
         window.exerciseHandler.showHint({ currentTarget: button });

@@ -1268,14 +1268,28 @@
             }
         }
 
-        function calcAccuracy(spoken, target) {
-            // Word-overlap similarity (Jaccard-like)
+            function calcAccuracy(spoken, target) {
+            const numberWords = {
+                'zero':'0','one':'1','two':'2','three':'3','four':'4','five':'5',
+                'six':'6','seven':'7','eight':'8','nine':'9','ten':'10',
+                'eleven':'11','twelve':'12','thirteen':'13','fourteen':'14',
+                'fifteen':'15','sixteen':'16','seventeen':'17','eighteen':'18',
+                'nineteen':'19','twenty':'20','thirty':'30','forty':'40',
+                'fifty':'50','sixty':'60','seventy':'70','eighty':'80',
+                'ninety':'90','hundred':'100','thousand':'1000'
+            };
+
             var norm = function (s) {
-                return s.toLowerCase().trim()
+                var out = s.toLowerCase().trim()
                     .replace(/[áàä]/g,'a').replace(/[éèë]/g,'e')
                     .replace(/[íìï]/g,'i').replace(/[óòö]/g,'o').replace(/[úùü]/g,'u')
                     .replace(/[^a-z0-9\s]/g, '');
+                Object.keys(numberWords).forEach(function(word) {
+                    out = out.replace(new RegExp('\\b' + word + '\\b', 'gi'), numberWords[word]);
+                });
+                return out;
             };
+
             var spokenWords = norm(spoken).split(/\s+/).filter(Boolean);
             var targetWords = norm(target).split(/\s+/).filter(Boolean);
             if (targetWords.length === 0) return 0;

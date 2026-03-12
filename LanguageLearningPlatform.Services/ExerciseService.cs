@@ -4,6 +4,7 @@ using LanguageLearningPlatform.Data.Models;
 using LanguageLearningPlatform.Services.Contracts;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace LanguageLearningPlatform.Services
 {
@@ -18,13 +19,11 @@ namespace LanguageLearningPlatform.Services
 
         public async Task<IEnumerable<ExerciseViewModel>> GetLessonExercisesAsync(Guid lessonId)
         {
-            // First, get the exercises from database
             var exercises = await _context.Exercises
                 .Where(e => e.LessonId == lessonId)
                 .OrderBy(e => e.OrderIndex)
-                .ToListAsync(); // Materialize the query first
+                .ToListAsync();
 
-            // Then map to view model in memory (not in expression tree)
             return exercises.Select(e => new ExerciseViewModel
             {
                 Id = e.Id,
@@ -47,14 +46,12 @@ namespace LanguageLearningPlatform.Services
 
         public async Task<ExerciseViewModel?> GetExerciseByIdAsync(Guid exerciseId)
         {
-            // First, get the exercise from database
             var exercise = await _context.Exercises
                 .FirstOrDefaultAsync(e => e.Id == exerciseId);
 
             if (exercise == null)
                 return null;
 
-            // Then map to view model in memory
             return new ExerciseViewModel
             {
                 Id = exercise.Id,
@@ -104,32 +101,25 @@ namespace LanguageLearningPlatform.Services
 
         public async Task<ExerciseStatsViewModel> GetUserExerciseStatsAsync(string userId)
         {
-            // Get all user exercise results
             var results = await _context.UserExerciseResults
                 .Where(r => r.UserId == userId)
                 .OrderByDescending(r => r.CompletedAt)
                 .ToListAsync();
 
-            // Calculate total points from all progresses
             var totalPoints = await _context.Progresses
                 .Where(p => p.UserId == userId)
                 .SumAsync(p => p.PointsEarned);
 
-            // Calculate streak (consecutive days with activity)
             var streak = CalculateStreak(results);
 
-            // Calculate accuracy
             var totalExercises = results.Count;
             var correctAnswers = results.Count(r => r.IsCorrect);
             var accuracyRate = totalExercises > 0
                 ? (double)correctAnswers / totalExercises * 100
                 : 0;
 
-            // Get today's exercises count
             var today = DateTime.UtcNow.Date;
             var todayExercises = results.Count(r => r.CompletedAt.Date == today);
-
-            // Get last activity date
             var lastActivity = results.Any() ? results.First().CompletedAt : (DateTime?)null;
 
             return new ExerciseStatsViewModel
@@ -165,10 +155,8 @@ namespace LanguageLearningPlatform.Services
 
         private bool CompareAnswers(string userAnswer, string correctAnswer)
         {
-            // Normalize both answers for comparison
             var normalizedUser = NormalizeAnswer(userAnswer);
             var normalizedCorrect = NormalizeAnswer(correctAnswer);
-
             return normalizedUser == normalizedCorrect;
         }
 
@@ -177,7 +165,7 @@ namespace LanguageLearningPlatform.Services
             if (string.IsNullOrWhiteSpace(answer))
                 return string.Empty;
 
-            return answer.ToLowerInvariant()
+            var normalized = answer.ToLowerInvariant()
                 .Trim()
                 .Replace("á", "a")
                 .Replace("à", "a")
@@ -196,6 +184,60 @@ namespace LanguageLearningPlatform.Services
                 .Replace("ü", "u")
                 .Replace("ñ", "n")
                 .Replace("ç", "c");
+
+            // Normalise number words → digits so "three cats" and "3 cats" compare equal
+            return NormalizeNumbers(normalized);
+        }
+
+        // Maps number words to their digit equivalents.
+        // Covers 0-19, tens (20-90), and common large values.
+        private static readonly Dictionary<string, string> WordToDigit =
+            new(StringComparer.OrdinalIgnoreCase)
+            {
+                ["zero"] = "0",
+                ["one"] = "1",
+                ["two"] = "2",
+                ["three"] = "3",
+                ["four"] = "4",
+                ["five"] = "5",
+                ["six"] = "6",
+                ["seven"] = "7",
+                ["eight"] = "8",
+                ["nine"] = "9",
+                ["ten"] = "10",
+                ["eleven"] = "11",
+                ["twelve"] = "12",
+                ["thirteen"] = "13",
+                ["fourteen"] = "14",
+                ["fifteen"] = "15",
+                ["sixteen"] = "16",
+                ["seventeen"] = "17",
+                ["eighteen"] = "18",
+                ["nineteen"] = "19",
+                ["twenty"] = "20",
+                ["thirty"] = "30",
+                ["forty"] = "40",
+                ["fifty"] = "50",
+                ["sixty"] = "60",
+                ["seventy"] = "70",
+                ["eighty"] = "80",
+                ["ninety"] = "90",
+                ["hundred"] = "100",
+                ["thousand"] = "1000",
+            };
+
+        private static string NormalizeNumbers(string input)
+        {
+            var result = input;
+            foreach (var kvp in WordToDigit)
+            {
+                result = Regex.Replace(
+                    result,
+                    $@"\b{Regex.Escape(kvp.Key)}\b",
+                    kvp.Value,
+                    RegexOptions.IgnoreCase);
+            }
+            return result;
         }
 
         private int CalculateStreak(List<UserExerciseResult> results)
@@ -207,21 +249,15 @@ namespace LanguageLearningPlatform.Services
             var streak = 0;
             var currentDate = today;
 
-            // Group results by date
             var resultsByDate = results
                 .GroupBy(r => r.CompletedAt.Date)
                 .OrderByDescending(g => g.Key)
                 .ToList();
 
-            // Check if there's activity today or yesterday (to maintain streak)
             var lastActivityDate = resultsByDate.First().Key;
             if ((today - lastActivityDate).Days > 1)
-            {
-                // Streak is broken
                 return 0;
-            }
 
-            // Count consecutive days
             foreach (var dateGroup in resultsByDate)
             {
                 if (dateGroup.Key == currentDate || dateGroup.Key == currentDate.AddDays(-1))

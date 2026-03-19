@@ -44,5 +44,7 @@ namespace LanguageLearningPlatform.Services.Contracts
         Task<IEnumerable<string>> GetCategoriesAsync();
         Task<bool> TogglePinAsync(Guid postId);
         Task<bool> ToggleCloseAsync(Guid postId);
+        Task<int> LikeCommentAsync(Guid commentId);
+        Task<int> LikePostAsync(Guid postId);
     }
 }

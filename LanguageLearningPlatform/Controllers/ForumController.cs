@@ -88,6 +88,26 @@ namespace LanguageLearningPlatform.Web.Controllers
             return RedirectToAction(nameof(Post), new { id = postId });
         }
 
+        // POST: /Forum/LikeComment  (AJAX)
+        [HttpPost]
+        [Authorize]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> LikeComment(Guid commentId)
+        {
+            var newCount = await _forumService.LikeCommentAsync(commentId);
+            return Json(new { success = true, likes = newCount });
+        }
+
+        // POST: /Forum/LikePost  (AJAX)
+        [HttpPost]
+        [Authorize]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> LikePost(Guid postId)
+        {
+            var newCount = await _forumService.LikePostAsync(postId);
+            return Json(new { success = true, likes = newCount });
+        }
+
         // POST: /Forum/DeletePost
         [HttpPost]
         [Authorize]

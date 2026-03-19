@@ -94,6 +94,61 @@ namespace LanguageLearningPlatform.Services
             return comment;
         }
 
+        public async Task<int> LikeCommentAsync(Guid commentId)
+        {
+            var comment = await _context.ForumComments.FindAsync(commentId);
+            if (comment == null) return 0;
+
+            comment.Likes++;
+            await _context.SaveChangesAsync();
+            return comment.Likes;
+        }
+
+        public async Task<int> LikePostAsync(Guid postId)
+        {
+            // Post-level likes are stored on the post's own first comment, 
+            // or we can track them via the Views field incremented separately.
+            // Since ForumPost doesn't have a Likes column we add a synthetic
+            // "like" comment owned by the system, or we simply count comments
+            // that start with "[LIKE]". Cleaner: we just add a Likes column to
+            // the ForumPost migration. For now we use an EF shadow approach —
+            // increment a dedicated field if present, otherwise use Views as proxy.
+            //
+            // The cleanest path without a migration is to store likes as special
+            // ForumComment records. We do that here:
+
+            // Check if a likes-comment placeholder exists
+            const string LikesMarker = "[SYSTEM:LIKES]";
+
+            var likesComment = await _context.ForumComments
+                .FirstOrDefaultAsync(c => c.PostId == postId && c.Content == LikesMarker);
+
+            if (likesComment == null)
+            {
+                // First like — create the placeholder
+                var post = await _context.ForumPosts.FindAsync(postId);
+                if (post == null) return 0;
+
+                likesComment = new ForumComment
+                {
+                    Id = Guid.NewGuid(),
+                    PostId = postId,
+                    UserId = post.UserId, // system marker owned by author
+                    Content = LikesMarker,
+                    CreatedAt = DateTime.UtcNow,
+                    Likes = 1
+                };
+                _context.ForumComments.Add(likesComment);
+            }
+            else
+            {
+                likesComment.Likes++;
+            }
+
+            await _context.SaveChangesAsync();
+            return likesComment.Likes;
+        }
+
         public async Task<bool> DeletePostAsync(Guid postId, string userId, bool isAdmin = false)
         {
             var post = await _context.ForumPosts
@@ -131,9 +186,7 @@ namespace LanguageLearningPlatform.Services
         }
 
         public Task<IEnumerable<string>> GetCategoriesAsync()
-        {
-            return Task.FromResult<IEnumerable<string>>(DefaultCategories);
-        }
+            => Task.FromResult<IEnumerable<string>>(DefaultCategories);
 
         public async Task<bool> TogglePinAsync(Guid postId)
         {
@@ -153,13 +206,23 @@ namespace LanguageLearningPlatform.Services
             return true;
         }
 
-        // ── Helpers ──────────────────────────────────────────────────
+        // ── Helpers ──────────────────────────────────────────────────────────
+
+        private const string LikesMarkerConst = "[SYSTEM:LIKES]";
 
         private ForumPostViewModel MapToViewModel(ForumPost post)
         {
             var (category, cleanContent) = ParseContent(post.Content);
             var firstName = post.User?.FirstName ?? "Unknown";
             var lastName = post.User?.LastName ?? "";
+
+            // Separate real comments from the system likes placeholder
+            var realComments = post.Comments?
+                .Where(c => c.Content != LikesMarkerConst)
+                .ToList() ?? new List<ForumComment>();
+
+            var likesPlaceholder = post.Comments?
+                .FirstOrDefault(c => c.Content == LikesMarkerConst);
 
             return new ForumPostViewModel
             {
@@ -173,10 +236,11 @@ namespace LanguageLearningPlatform.Services
                 CreatedAt = post.CreatedAt,
                 UpdatedAt = post.UpdatedAt,
                 Views = post.Views,
-                CommentCount = post.Comments?.Count ?? 0,
+                CommentCount = realComments.Count,
+                Likes = likesPlaceholder?.Likes ?? 0,
                 IsPinned = post.IsPinned,
                 IsClosed = post.IsClosed,
-                Comments = post.Comments?
+                Comments = realComments
                     .OrderBy(c => c.CreatedAt)
                     .Select(c =>
                     {
@@ -192,7 +256,7 @@ namespace LanguageLearningPlatform.Services
                             CreatedAt = c.CreatedAt,
                             Likes = c.Likes
                         };
-                    }).ToList() ?? new()
+                    }).ToList()
             };
         }
 

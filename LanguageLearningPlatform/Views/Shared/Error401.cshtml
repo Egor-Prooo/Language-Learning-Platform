@@ -1,0 +1,320 @@
+﻿@{
+    ViewData["Title"] = "Sign In Required";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var returnUrl = ViewBag.OriginalPath as string ?? "/";
+}
+
+@section Styles {
+    <style>
+        @@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap');
+
+        .err-root {
+            min-height: calc(100vh - 200px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 1rem;
+            background: #0D0D12;
+            font-family: 'Space Grotesk', sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Animated grid */
+        .err-grid {
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(rgba(16,185,129,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(16,185,129,.05) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            animation: gridDrift 20s linear infinite;
+        }
+
+        @@keyframes gridDrift {
+            0% {
+                background-position: 0 0;
+            }
+
+            100% {
+                background-position: 60px 60px;
+            }
+        }
+
+        .err-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            pointer-events: none;
+        }
+
+        .err-orb-1 {
+            width: 350px;
+            height: 350px;
+            background: #10B981;
+            opacity: .1;
+            top: -80px;
+            right: -60px;
+        }
+
+        .err-orb-2 {
+            width: 200px;
+            height: 200px;
+            background: #6366F1;
+            opacity: .08;
+            bottom: -60px;
+            left: -60px;
+        }
+
+        .err-content {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            max-width: 560px;
+        }
+
+        /* Key icon with glow */
+        .err-key-wrap {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1.25rem;
+        }
+
+        .err-key-icon {
+            width: 96px;
+            height: 96px;
+            border-radius: 28px;
+            background: linear-gradient(135deg, rgba(16,185,129,.15), rgba(99,102,241,.12));
+            border: 1.5px solid rgba(16,185,129,.3);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.6rem;
+            color: #34D399;
+            filter: drop-shadow(0 0 20px rgba(16,185,129,.35));
+            animation: keyFloat 4s ease-in-out infinite;
+        }
+
+        @@keyframes keyFloat {
+            0%, 100% {
+                transform: translateY(0) rotate(-15deg);
+            }
+
+            50% {
+                transform: translateY(-10px) rotate(-15deg);
+            }
+        }
+
+        /* Scan line on key */
+        .err-key-scan {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #34D399, transparent);
+            animation: keyScan 2.5s ease-in-out infinite;
+            top: 10%;
+            opacity: .6;
+        }
+
+        @@keyframes keyScan {
+            0% {
+                top: 10%;
+                opacity: 0;
+            }
+
+            20% {
+                opacity: .6;
+            }
+
+            80% {
+                opacity: .6;
+            }
+
+            100% {
+                top: 90%;
+                opacity: 0;
+            }
+        }
+
+        .err-code {
+            font-family: 'Space Mono', monospace;
+            font-size: clamp(5rem, 16vw, 8.5rem);
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: -4px;
+            color: transparent;
+            background: linear-gradient(135deg, #10B981 0%, #34D399 50%, #10B981 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            user-select: none;
+            filter: drop-shadow(0 0 35px rgba(16,185,129,.35));
+            margin-bottom: .5rem;
+        }
+
+        .err-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            background: rgba(16,185,129,.1);
+            border: 1px solid rgba(16,185,129,.25);
+            color: #34D399;
+            font-size: .72rem;
+            font-weight: 700;
+            padding: .35rem .9rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            font-family: 'Space Mono', monospace;
+            margin-bottom: 1.5rem;
+        }
+
+        .err-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #F1F5F9;
+            margin-bottom: .75rem;
+            line-height: 1.3;
+        }
+
+        .err-desc {
+            color: #64748B;
+            font-size: .95rem;
+            line-height: 1.7;
+            margin-bottom: 2rem;
+        }
+
+        /* Login form card */
+        .err-login-card {
+            background: rgba(255,255,255,.04);
+            border: 1.5px solid rgba(255,255,255,.08);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+
+        .err-login-label {
+            font-size: .72rem;
+            font-weight: 700;
+            color: #64748B;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            margin-bottom: .5rem;
+            font-family: 'Space Mono', monospace;
+        }
+
+        .err-login-input {
+            width: 100%;
+            background: rgba(255,255,255,.06);
+            border: 1.5px solid rgba(255,255,255,.1);
+            border-radius: 10px;
+            padding: .7rem 1rem;
+            color: #F1F5F9;
+            font-size: .9rem;
+            font-family: 'Space Grotesk', sans-serif;
+            outline: none;
+            transition: border-color .2s;
+            margin-bottom: .75rem;
+        }
+
+            .err-login-input:focus {
+                border-color: #10B981;
+            }
+
+            .err-login-input::placeholder {
+                color: #334155;
+            }
+
+        .err-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-err-primary {
+            flex: 1;
+            max-width: 200px;
+            padding: .85rem 1.5rem;
+            background: #10B981;
+            color: #0D0D12;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: .9rem;
+            text-decoration: none;
+            transition: all .2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .5rem;
+        }
+
+            .btn-err-primary:hover {
+                background: #059669;
+                color: #0D0D12;
+                transform: translateY(-2px);
+                box-shadow: 0 8px 24px rgba(16,185,129,.35);
+            }
+
+        .btn-err-register {
+            flex: 1;
+            max-width: 200px;
+            padding: .85rem 1.5rem;
+            background: transparent;
+            color: #94A3B8;
+            border: 1.5px solid #1E293B;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: .9rem;
+            text-decoration: none;
+            transition: all .2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .5rem;
+        }
+
+            .btn-err-register:hover {
+                border-color: #10B981;
+                color: #34D399;
+            }
+    </style>
+}
+
+<div class="err-root">
+    <div class="err-grid"></div>
+    <div class="err-orb err-orb-1"></div>
+    <div class="err-orb err-orb-2"></div>
+
+    <div class="err-content">
+        <div class="err-key-wrap">
+            <div class="err-key-icon"><i class="fas fa-key"></i></div>
+            <div class="err-key-scan"></div>
+        </div>
+
+        <div class="err-code">401</div>
+
+        <div class="err-badge">
+            <i class="fas fa-user-lock"></i>Authentication Required
+        </div>
+
+        <h1 class="err-title">You need to sign in first</h1>
+        <p class="err-desc">
+            This page requires an account. Sign in to access your courses,
+            lessons, exercises, and progress.
+        </p>
+
+        <div class="err-actions">
+            <a asp-area="Identity" asp-page="/Account/Login"
+               asp-route-returnUrl="@returnUrl"
+               class="btn-err-primary">
+                <i class="fas fa-sign-in-alt"></i>Sign In
+            </a>
+            <a asp-area="Identity" asp-page="/Account/Register"
+               class="btn-err-register">
+                <i class="fas fa-user-plus"></i>Create Account
+            </a>
+        </div>
+    </div>
+</div>

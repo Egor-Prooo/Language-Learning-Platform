@@ -14,8 +14,11 @@ namespace LanguageLearningPlatform.Web.Controllers
 
             return statusCode switch
             {
-                404 => View("Error404"),
+                400 => View("Error400"),
+                401 => View("Error401"),
                 403 => View("Error403"),
+                404 => View("Error404"),
+                503 => View("Error503"),
                 _ => View("Error500")
             };
         }
@@ -28,4 +31,4 @@ namespace LanguageLearningPlatform.Web.Controllers
             return View("Error500");
         }
     }
-}
+}   

@@ -1,0 +1,280 @@
+﻿@{
+    ViewData["Title"] = "Service Unavailable";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <style>
+        @@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap');
+
+        .err-root {
+            min-height: calc(100vh - 200px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 1rem;
+            background: #0D0D12;
+            font-family: 'Space Grotesk', sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .err-grid {
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(rgba(234,179,8,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(234,179,8,.04) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+        }
+
+        .err-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            pointer-events: none;
+        }
+
+        .err-orb-1 {
+            width: 400px;
+            height: 400px;
+            background: #EAB308;
+            opacity: .1;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .err-orb-2 {
+            width: 200px;
+            height: 200px;
+            background: #F97316;
+            opacity: .08;
+            bottom: -60px;
+            right: -40px;
+        }
+
+        .err-content {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            max-width: 580px;
+        }
+
+        /* Radar animation */
+        .err-radar-wrap {
+            position: relative;
+            width: 96px;
+            height: 96px;
+            margin: 0 auto 1.25rem;
+        }
+
+        .err-radar-icon {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            background: rgba(234,179,8,.1);
+            border: 1.5px solid rgba(234,179,8,.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.4rem;
+            color: #FDE047;
+            position: relative;
+            z-index: 2;
+        }
+
+        .err-radar-ring {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 1.5px solid rgba(234,179,8,.3);
+            animation: radarPulse 2s ease-out infinite;
+        }
+
+            .err-radar-ring:nth-child(2) {
+                animation-delay: .66s;
+            }
+
+            .err-radar-ring:nth-child(3) {
+                animation-delay: 1.32s;
+            }
+
+        @@keyframes radarPulse {
+            0% {
+                transform: scale(1);
+                opacity: .7;
+            }
+
+            100% {
+                transform: scale(2.2);
+                opacity: 0;
+            }
+        }
+
+        .err-code {
+            font-family: 'Space Mono', monospace;
+            font-size: clamp(5rem, 16vw, 8.5rem);
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: -4px;
+            color: transparent;
+            background: linear-gradient(135deg, #EAB308 0%, #FDE047 50%, #EAB308 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            user-select: none;
+            filter: drop-shadow(0 0 35px rgba(234,179,8,.4));
+            margin-bottom: .5rem;
+        }
+
+        .err-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            background: rgba(234,179,8,.1);
+            border: 1px solid rgba(234,179,8,.25);
+            color: #FDE047;
+            font-size: .72rem;
+            font-weight: 700;
+            padding: .35rem .9rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            font-family: 'Space Mono', monospace;
+            margin-bottom: 1.5rem;
+        }
+
+        .err-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #F1F5F9;
+            margin-bottom: .75rem;
+            line-height: 1.3;
+        }
+
+        .err-desc {
+            color: #64748B;
+            font-size: .95rem;
+            line-height: 1.7;
+            margin-bottom: 1.75rem;
+        }
+
+        /* Auto-refresh note */
+        .err-refresh-note {
+            font-size: .78rem;
+            color: #475569;
+            font-family: 'Space Mono', monospace;
+            margin-bottom: 2rem;
+        }
+
+        #err-countdown {
+            color: #FDE047;
+            font-weight: 700;
+        }
+
+        .err-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-err-primary {
+            padding: .85rem 2rem;
+            background: #EAB308;
+            color: #0D0D12;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: .9rem;
+            text-decoration: none;
+            transition: all .2s;
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            cursor: pointer;
+        }
+
+            .btn-err-primary:hover {
+                background: #CA8A04;
+                color: #0D0D12;
+                transform: translateY(-2px);
+                box-shadow: 0 8px 24px rgba(234,179,8,.35);
+            }
+
+        .btn-err-secondary {
+            padding: .85rem 2rem;
+            background: transparent;
+            color: #94A3B8;
+            border: 1.5px solid #1E293B;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: .9rem;
+            text-decoration: none;
+            transition: all .2s;
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+            .btn-err-secondary:hover {
+                border-color: #334155;
+                color: #CBD5E1;
+            }
+    </style>
+}
+
+<div class="err-root">
+    <div class="err-grid"></div>
+    <div class="err-orb err-orb-1"></div>
+    <div class="err-orb err-orb-2"></div>
+
+    <div class="err-content">
+        <div class="err-radar-wrap">
+            <div class="err-radar-ring"></div>
+            <div class="err-radar-ring"></div>
+            <div class="err-radar-ring"></div>
+            <div class="err-radar-icon"><i class="fas fa-satellite-dish"></i></div>
+        </div>
+
+        <div class="err-code">503</div>
+
+        <div class="err-badge">
+            <i class="fas fa-tools"></i>Service Unavailable
+        </div>
+
+        <h1 class="err-title">We'll be back shortly</h1>
+        <p class="err-desc">
+            LingoLearn is temporarily unavailable — either for scheduled maintenance
+            or due to unusually high traffic. Your progress is safe.
+        </p>
+
+        <p class="err-refresh-note">
+            Auto-retrying in <span id="err-countdown">30</span>s &nbsp;·&nbsp;
+            or <a href="javascript:location.reload()" style="color:#FDE047;text-decoration:none;font-weight:700;">retry now</a>
+        </p>
+
+        <div class="err-actions">
+            <button onclick="location.reload()" class="btn-err-primary">
+                <i class="fas fa-redo"></i>Try Again
+            </button>
+            <a href="/" class="btn-err-secondary">
+                <i class="fas fa-home"></i>Go Home
+            </a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let count = 30;
+        const el = document.getElementById('err-countdown');
+        const timer = setInterval(() => {
+            count--;
+            if (el) el.textContent = count;
+            if (count <= 0) {
+                clearInterval(timer);
+                location.reload();
+            }
+        }, 1000);
+    </script>
+}

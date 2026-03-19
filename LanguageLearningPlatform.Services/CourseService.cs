@@ -69,7 +69,16 @@ namespace LanguageLearningPlatform.Services
                 .FirstOrDefaultAsync(e => e.UserId == userId && e.CourseId == courseId);
 
             if (existingEnrollment != null)
+            {
+                // Re-activate if previously unenrolled
+                if (!existingEnrollment.IsActive)
+                {
+                    existingEnrollment.IsActive = true;
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
                 return false;
+            }
 
             var enrollment = new CourseEnrollment
             {
@@ -112,6 +121,18 @@ namespace LanguageLearningPlatform.Services
                     .ThenInclude(c => c.Lessons)
                 .Select(e => e.Course)
                 .ToListAsync();
+        }
+
+        public async Task<bool> UnenrollUserFromCourseAsync(string userId, Guid courseId)
+        {
+            var enrollment = await _context.CourseEnrollments
+                .FirstOrDefaultAsync(e => e.UserId == userId && e.CourseId == courseId && e.IsActive);
+
+            if (enrollment == null) return false;
+
+            enrollment.IsActive = false;
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

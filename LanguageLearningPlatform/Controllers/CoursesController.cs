@@ -1,5 +1,4 @@
-﻿
-using LanguageLearningPlatform.Services.Contracts;
+﻿using LanguageLearningPlatform.Services.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -23,14 +22,10 @@ namespace LanguageLearningPlatform.Web.Controllers
             var courses = await _courseService.GetPublishedCoursesAsync();
 
             if (!string.IsNullOrEmpty(language))
-            {
                 courses = courses.Where(c => c.Language == language);
-            }
 
             if (!string.IsNullOrEmpty(level))
-            {
                 courses = courses.Where(c => c.Level == level);
-            }
 
             ViewBag.SelectedLanguage = language;
             ViewBag.SelectedLevel = level;
@@ -42,11 +37,7 @@ namespace LanguageLearningPlatform.Web.Controllers
         public async Task<IActionResult> Details(Guid id)
         {
             var course = await _courseService.GetCourseWithLessonsAsync(id);
-
-            if (course == null)
-            {
-                return NotFound();
-            }
+            if (course == null) return NotFound();
 
             if (User.Identity?.IsAuthenticated == true)
             {
@@ -65,24 +56,33 @@ namespace LanguageLearningPlatform.Web.Controllers
         public async Task<IActionResult> Enroll(Guid id)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (userId == null)
-            {
-                return Unauthorized();
-            }
+            if (userId == null) return Unauthorized();
 
             var success = await _courseService.EnrollUserInCourseAsync(userId, id);
 
-            if (success)
-            {
-                TempData["SuccessMessage"] = "Successfully enrolled in the course!";
-            }
-            else
-            {
-                TempData["ErrorMessage"] = "You are already enrolled in this course.";
-            }
+            TempData[success ? "SuccessMessage" : "ErrorMessage"] = success
+                ? "Successfully enrolled in the course!"
+                : "You are already enrolled in this course.";
 
             return RedirectToAction(nameof(Details), new { id });
+        }
+
+        // POST: Courses/Unenroll/5
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Unenroll(Guid id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var success = await _courseService.UnenrollUserFromCourseAsync(userId, id);
+
+            TempData[success ? "SuccessMessage" : "ErrorMessage"] = success
+                ? "You have been unenrolled from the course. Your progress has been saved."
+                : "Could not unenroll — you may not be enrolled in this course.";
+
+            return RedirectToAction(nameof(MyCourses));
         }
 
         // GET: Courses/MyCourses
@@ -90,16 +90,25 @@ namespace LanguageLearningPlatform.Web.Controllers
         public async Task<IActionResult> MyCourses()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (userId == null)
-            {
-                return Unauthorized();
-            }
+            if (userId == null) return Unauthorized();
 
             var courses = await _courseService.GetUserEnrolledCoursesAsync(userId);
             var progresses = await _progressService.GetUserProgressAsync(userId);
+            var progressDict = progresses.ToDictionary(p => p.CourseId, p => p);
 
-            ViewBag.Progresses = progresses.ToDictionary(p => p.CourseId, p => p);
+            ViewBag.Progresses = progressDict;
+
+            // Split into active and completed
+            var activeCourses = courses.Where(c =>
+                !progressDict.ContainsKey(c.Id) ||
+                progressDict[c.Id].CompletionPercentage < 100).ToList();
+
+            var completedCourses = courses.Where(c =>
+                progressDict.ContainsKey(c.Id) &&
+                progressDict[c.Id].CompletionPercentage >= 100).ToList();
+
+            ViewBag.ActiveCourses = activeCourses;
+            ViewBag.CompletedCourses = completedCourses;
 
             return View(courses);
         }

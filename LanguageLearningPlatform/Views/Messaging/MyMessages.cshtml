@@ -2,168 +2,842 @@
 @model IEnumerable<StudentConversationViewModel>
 
 @{
-    ViewData["Title"] = "My Messages";
+    ViewData["Title"] = "Messages";
     var available = ViewBag.AvailableCourses as List<AvailableCourseForMessaging> ?? new();
+    var selectedTeacherId = ViewBag.SelectedTeacherId as string ?? "";
+    var selectedCourseId = ViewBag.SelectedCourseId as Guid? ?? Guid.Empty;
+    var allConvs = Model.ToList();
+    var selected = allConvs.FirstOrDefault(c =>
+        c.TeacherId == selectedTeacherId && c.CourseId == selectedCourseId);
+    var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "";
 }
 
-<div class="container my-5">
+@section Styles {
+    <style>
+        @@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
 
-    <div class="row g-4">
+        .msg-root {
+            font-family: 'Outfit', sans-serif;
+            background: #F7F6F2;
+            height: calc(100vh - 70px);
+            display: flex;
+            overflow: hidden;
+        }
 
-        <!-- ── LEFT: active conversations ── -->
-        <div class="col-lg-8">
+        /* ── Sidebar ── */
+        .msg-sidebar {
+            width: 320px;
+            flex-shrink: 0;
+            background: #FFFFFF;
+            border-right: 1.5px solid #EDECEA;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
 
-            <h1 class="fw-bold mb-1">
-                <i class="fas fa-inbox me-2 text-primary"></i>My Messages
-            </h1>
-            <p class="text-secondary mb-4">Conversations with your course teachers</p>
+        .msg-sidebar-header {
+            padding: 1.25rem 1.5rem 1rem;
+            border-bottom: 1px solid #EDECEA;
+        }
 
-            @if (!Model.Any())
+        .msg-sidebar-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1C1917;
+            margin-bottom: .75rem;
+        }
+
+        .msg-search {
+            position: relative;
+        }
+
+        .msg-search-input {
+            width: 100%;
+            padding: .6rem 1rem .6rem 2.4rem;
+            background: #F7F6F2;
+            border: 1.5px solid #EDECEA;
+            border-radius: 20px;
+            font-size: .85rem;
+            font-family: 'Outfit', sans-serif;
+            color: #1C1917;
+            outline: none;
+            transition: border-color .2s;
+        }
+
+            .msg-search-input:focus {
+                border-color: #A78BFA;
+            }
+
+        .msg-search-icon {
+            position: absolute;
+            left: .85rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #A8A29E;
+            font-size: .8rem;
+        }
+
+        /* Conversation list */
+        .msg-conv-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: .5rem 0;
+        }
+
+            .msg-conv-list::-webkit-scrollbar {
+                width: 4px;
+            }
+
+            .msg-conv-list::-webkit-scrollbar-track {
+                background: transparent;
+            }
+
+            .msg-conv-list::-webkit-scrollbar-thumb {
+                background: #E7E5E0;
+                border-radius: 4px;
+            }
+
+        .msg-conv-item {
+            display: flex;
+            align-items: center;
+            gap: .9rem;
+            padding: .85rem 1.5rem;
+            cursor: pointer;
+            transition: background .15s;
+            text-decoration: none;
+            border-left: 3px solid transparent;
+            position: relative;
+        }
+
+            .msg-conv-item:hover {
+                background: #F7F6F2;
+            }
+
+            .msg-conv-item.active {
+                background: #F5F3FF;
+                border-left-color: #7C3AED;
+            }
+
+        .msg-conv-avatar {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #7C3AED, #A78BFA);
+            color: white;
+            font-weight: 700;
+            font-size: .9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .msg-conv-item.active .msg-conv-avatar {
+            background: linear-gradient(135deg, #5B21B6, #7C3AED);
+        }
+
+        .msg-unread-dot {
+            position: absolute;
+            top: -3px;
+            right: -3px;
+            width: 12px;
+            height: 12px;
+            background: #EF4444;
+            border-radius: 50%;
+            border: 2px solid white;
+            animation: dotPulse 2s ease-in-out infinite;
+        }
+
+        @@keyframes dotPulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+        }
+
+        .msg-conv-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .msg-conv-name {
+            font-weight: 700;
+            font-size: .88rem;
+            color: #1C1917;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: .15rem;
+        }
+
+        .msg-conv-item.active .msg-conv-name {
+            color: #5B21B6;
+        }
+
+        .msg-conv-course {
+            font-size: .72rem;
+            color: #A8A29E;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: .2rem;
+        }
+
+        .msg-conv-preview {
+            font-size: .75rem;
+            color: #78716C;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .msg-conv-item.active .msg-conv-preview {
+            color: #7C3AED;
+        }
+
+        .msg-conv-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: .3rem;
+            flex-shrink: 0;
+        }
+
+        .msg-conv-time {
+            font-size: .68rem;
+            color: #A8A29E;
+            white-space: nowrap;
+        }
+
+        .msg-conv-badge {
+            background: #7C3AED;
+            color: white;
+            font-size: .63rem;
+            font-weight: 700;
+            padding: .1rem .45rem;
+            border-radius: 10px;
+        }
+
+        /* New chat section in sidebar */
+        .msg-new-section {
+            border-top: 1.5px solid #EDECEA;
+            padding: .75rem 1.5rem 1rem;
+            max-height: 280px;
+            overflow-y: auto;
+        }
+
+        .msg-new-label {
+            font-size: .68rem;
+            font-weight: 700;
+            color: #A8A29E;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            margin-bottom: .6rem;
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+        }
+
+        .msg-new-item {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            padding: .6rem .75rem;
+            border-radius: 12px;
+            background: #F7F6F2;
+            border: 1.5px solid #EDECEA;
+            cursor: pointer;
+            transition: all .15s;
+            text-decoration: none;
+            margin-bottom: .4rem;
+        }
+
+            .msg-new-item:hover {
+                background: #EDE9FE;
+                border-color: #C4B5FD;
+            }
+
+        .msg-new-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: #EDE9FE;
+            color: #7C3AED;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .8rem;
+            flex-shrink: 0;
+        }
+
+        .msg-new-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .msg-new-name {
+            font-weight: 600;
+            font-size: .8rem;
+            color: #1C1917;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .msg-new-teacher {
+            font-size: .7rem;
+            color: #A8A29E;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .msg-new-arrow {
+            color: #C4B5FD;
+            font-size: .75rem;
+            flex-shrink: 0;
+        }
+
+        /* ── Chat Area ── */
+        .msg-chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-width: 0;
+        }
+
+        /* Chat header */
+        .msg-chat-header {
+            background: white;
+            border-bottom: 1.5px solid #EDECEA;
+            padding: 1rem 1.75rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-shrink: 0;
+        }
+
+        .msg-chat-header-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #7C3AED, #A78BFA);
+            color: white;
+            font-weight: 700;
+            font-size: .9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .msg-chat-header-name {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #1C1917;
+            margin-bottom: .1rem;
+        }
+
+        .msg-chat-header-course {
+            font-size: .75rem;
+            color: #A8A29E;
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+        }
+
+        /* Messages area */
+        .msg-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem 1.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: .75rem;
+        }
+
+            .msg-messages::-webkit-scrollbar {
+                width: 4px;
+            }
+
+            .msg-messages::-webkit-scrollbar-thumb {
+                background: #E7E5E0;
+                border-radius: 4px;
+            }
+
+        /* Date separator */
+        .msg-date-sep {
+            text-align: center;
+            margin: .5rem 0;
+            position: relative;
+        }
+
+            .msg-date-sep::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                right: 0;
+                top: 50%;
+                height: 1px;
+                background: #EDECEA;
+            }
+
+            .msg-date-sep span {
+                position: relative;
+                background: #F7F6F2;
+                padding: 0 .75rem;
+                font-size: .68rem;
+                color: #A8A29E;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: .05em;
+            }
+
+        /* Message bubble */
+        .msg-bubble-row {
+            display: flex;
+            gap: .6rem;
+            align-items: flex-end;
+        }
+
+            .msg-bubble-row.from-me {
+                flex-direction: row-reverse;
+            }
+
+        .msg-bubble-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #7C3AED, #A78BFA);
+            color: white;
+            font-weight: 700;
+            font-size: .65rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-bottom: 2px;
+        }
+
+        .msg-bubble {
+            max-width: 68%;
+            padding: .75rem 1.1rem;
+            border-radius: 18px;
+            font-size: .875rem;
+            line-height: 1.55;
+            word-break: break-word;
+        }
+
+        .msg-bubble-row:not(.from-me) .msg-bubble {
+            background: white;
+            color: #1C1917;
+            border: 1.5px solid #EDECEA;
+            border-bottom-left-radius: 4px;
+        }
+
+        .msg-bubble-row.from-me .msg-bubble {
+            background: linear-gradient(135deg, #7C3AED, #6D28D9);
+            color: white;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 16px rgba(124,58,237,.25);
+        }
+
+        .msg-bubble-time {
+            font-size: .63rem;
+            color: #C4B5D0;
+            margin-top: .3rem;
+            display: block;
+            text-align: right;
+        }
+
+        .msg-bubble-row:not(.from-me) .msg-bubble-time {
+            color: #A8A29E;
+            text-align: left;
+        }
+
+        /* Input area */
+        .msg-input-area {
+            background: white;
+            border-top: 1.5px solid #EDECEA;
+            padding: 1rem 1.75rem;
+            flex-shrink: 0;
+        }
+
+        .msg-input-wrap {
+            display: flex;
+            align-items: flex-end;
+            gap: .75rem;
+            background: #F7F6F2;
+            border: 1.5px solid #EDECEA;
+            border-radius: 18px;
+            padding: .65rem 1rem;
+            transition: border-color .2s;
+        }
+
+            .msg-input-wrap:focus-within {
+                border-color: #A78BFA;
+                background: white;
+                box-shadow: 0 0 0 3px rgba(167,139,250,.15);
+            }
+
+        .msg-textarea {
+            flex: 1;
+            border: none;
+            background: transparent;
+            outline: none;
+            resize: none;
+            font-size: .9rem;
+            font-family: 'Outfit', sans-serif;
+            color: #1C1917;
+            max-height: 120px;
+            line-height: 1.5;
+            padding: 0;
+        }
+
+            .msg-textarea::placeholder {
+                color: #A8A29E;
+            }
+
+        .msg-send-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            background: #7C3AED;
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all .2s;
+            flex-shrink: 0;
+            font-size: .9rem;
+        }
+
+            .msg-send-btn:hover {
+                background: #6D28D9;
+                transform: scale(1.05);
+            }
+
+            .msg-send-btn:disabled {
+                background: #E7E5E0;
+                cursor: not-allowed;
+                transform: none;
+            }
+
+        /* Empty states */
+        .msg-empty-chat {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 1rem;
+            color: #A8A29E;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .msg-empty-chat-icon {
+            font-size: 3.5rem;
+            opacity: .25;
+        }
+
+        .msg-empty-chat h4 {
+            font-weight: 700;
+            color: #78716C;
+            margin: 0;
+        }
+
+        .msg-empty-chat p {
+            font-size: .875rem;
+            margin: 0;
+        }
+
+        /* No conversations */
+        .msg-no-convs {
+            padding: 1.5rem;
+            text-align: center;
+            color: #A8A29E;
+            font-size: .85rem;
+        }
+
+            .msg-no-convs i {
+                display: block;
+                font-size: 2rem;
+                opacity: .25;
+                margin-bottom: .75rem;
+            }
+
+        /* Mobile */
+        @@media (max-width: 768px) {
+            .msg-root {
+                height: auto;
+                flex-direction: column;
+            }
+
+            .msg-sidebar {
+                width: 100%;
+                height: 280px;
+                border-right: none;
+                border-bottom: 1.5px solid #EDECEA;
+            }
+
+            .msg-chat {
+                height: calc(100vh - 350px);
+            }
+
+            .msg-new-section {
+                display: none;
+            }
+        }
+    </style>
+}
+
+<div class="msg-root">
+
+    <!-- ── SIDEBAR ── -->
+    <div class="msg-sidebar">
+        <div class="msg-sidebar-header">
+            <div class="msg-sidebar-title">
+                <i class="fas fa-comments me-2" style="color:#7C3AED;font-size:.9rem;"></i>Messages
+            </div>
+            <div class="msg-search">
+                <i class="fas fa-search msg-search-icon"></i>
+                <input class="msg-search-input" type="text" id="convSearch"
+                       placeholder="Search conversations…" autocomplete="off" />
+            </div>
+        </div>
+
+        <!-- Conversation list -->
+        <div class="msg-conv-list" id="convList">
+            @if (!allConvs.Any())
             {
-                <div class="text-center py-5 border rounded-4" style="border-style:dashed!important;">
-                    <i class="fas fa-comments" style="font-size:3.5rem;color:#D1D5DB;"></i>
-                    <h4 class="mt-3 text-secondary">No conversations yet</h4>
-                    <p class="text-secondary mb-0">Pick a course on the right to message its teacher.</p>
+                <div class="msg-no-convs">
+                    <i class="fas fa-inbox"></i>
+                    No conversations yet.<br>Start one below.
                 </div>
             }
             else
             {
-                <div class="d-flex flex-column gap-3">
-                    @foreach (var conv in Model)
-                    {
-                        <div class="card shadow-sm"
-                             style="border-radius:16px;border:2px solid @(conv.HasUnreadReplies ? "#4F46E5" : "#E5E7EB");">
-                            <div class="card-body p-4">
+                @foreach (var conv in allConvs)
+                {
+                    var isActive = conv.TeacherId == selectedTeacherId && conv.CourseId == selectedCourseId;
+                    var initials = string.Concat(conv.TeacherName.Split(' ').Take(2).Select(p => p.Length > 0 ? p[0].ToString() : ""));
+                    var timeStr = conv.LastMessageAt.Date == DateTime.Today
+                    ? conv.LastMessageAt.ToString("HH:mm")
+                    : conv.LastMessageAt.Date == DateTime.Today.AddDays(-1)
+                    ? "Yesterday"
+                    : conv.LastMessageAt.ToString("MMM dd");
 
-                                <!-- Conversation header -->
-                                <div class="d-flex justify-content-between align-items-start mb-3">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0"
-                                             style="width:48px;height:48px;background:linear-gradient(135deg,#4F46E5,#7C3AED);font-size:1rem;">
-                                            @string.Concat(conv.TeacherName.Split(' ').Take(2).Select(p => p[0]))
-                                        </div>
-                                        <div>
-                                            <div class="fw-bold">
-                                                @conv.TeacherName
-                                                <span class="badge bg-primary ms-1" style="font-size:0.7rem;">Teacher</span>
-                                                @if (conv.HasUnreadReplies)
-                                                {
-                                                    <span class="badge ms-1" style="background:#4F46E5;font-size:0.7rem;">New reply</span>
-                                                }
-                                            </div>
-                                            <div class="text-secondary small">
-                                                <i class="fas fa-book me-1"></i>@conv.CourseName
-                                                @if (!string.IsNullOrEmpty(conv.CourseLanguage))
-                                                {
-                                                    <span class="ms-2 badge bg-light text-dark" style="font-size:0.7rem;">@conv.CourseLanguage</span>
-                                                }
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="text-secondary small">@conv.LastMessageAt.ToString("MMM dd, HH:mm")</div>
-                                </div>
-
-                                <!-- Message thread (collapsed, last 3) -->
-                                <div class="d-flex flex-column gap-2 mb-3"
-                                     style="max-height:220px;overflow-y:auto;">
-                                    @foreach (var msg in conv.Messages.TakeLast(10))
-                                    {
-                                        <div class="d-flex @(msg.IsFromTeacher ? "justify-content-start" : "justify-content-end")">
-                                            <div class="p-3 rounded-3"
-                                                 style="max-width:78%;
-                                                                    background:@(msg.IsFromTeacher ? "#EEF2FF" : "#F9FAFB");
-                                                                    border:1px solid @(msg.IsFromTeacher ? "#C7D2FE" : "#E5E7EB");">
-                                                <div class="small text-secondary mb-1">
-                                                    @(msg.IsFromTeacher ? $"{conv.TeacherName} (Teacher)" : "You")
-                                                    · @msg.SentAt.ToString("MMM dd, HH:mm")
-                                                </div>
-                                                <div>@msg.Message</div>
-                                            </div>
-                                        </div>
-                                    }
-                                </div>
-
-                                <!-- Inline reply box -->
-                                <form asp-action="SendMessage" method="post" class="d-flex gap-2 align-items-end">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="courseId" value="@conv.CourseId" />
-                                    <textarea name="message" class="form-control" rows="2"
-                                      placeholder="Write a reply…" required
-                                      style="resize:none;border-radius:12px;"></textarea>
-                                    <button type="submit" class="btn btn-primary px-3 flex-shrink-0"
-                                            style="border-radius:12px;height:fit-content;">
-                                        <i class="fas fa-paper-plane"></i>
-                                    </button>
-                                </form>
-
-                            </div>
+                    <a href="@Url.Action("MyMessages", "Messaging", new { selectedTeacherId = conv.TeacherId, selectedCourseId = conv.CourseId })"
+                       class="msg-conv-item @(isActive ? "active" : "")"
+                       data-name="@conv.TeacherName.ToLower()"
+                       data-course="@conv.CourseName.ToLower()">
+                        <div class="msg-conv-avatar">
+                            @initials
+                            @if (conv.HasUnreadReplies)
+                            {
+                                <div class="msg-unread-dot"></div>
+                            }
                         </div>
-                    }
-                </div>
+                        <div class="msg-conv-info">
+                            <div class="msg-conv-name">@conv.TeacherName</div>
+                            <div class="msg-conv-course">
+                                <i class="fas fa-book" style="font-size:.6rem;"></i>@conv.CourseName
+                            </div>
+                            <div class="msg-conv-preview">@conv.LastMessage</div>
+                        </div>
+                        <div class="msg-conv-meta">
+                            <span class="msg-conv-time">@timeStr</span>
+                            @if (conv.HasUnreadReplies)
+                            {
+                                <span class="msg-conv-badge">New</span>
+                            }
+                        </div>
+                    </a>
+                }
             }
         </div>
 
-        <!-- ── RIGHT: start a new conversation ── -->
-        <div class="col-lg-4">
-            <div class="sticky-top" style="top:1.5rem;">
-
-                <h5 class="fw-bold mb-3">
-                    <i class="fas fa-plus-circle me-2 text-primary"></i>Message a Teacher
-                </h5>
-
-                @if (!available.Any())
+        <!-- Start new conversation -->
+        @if (available.Any())
+        {
+            <div class="msg-new-section">
+                <div class="msg-new-label">
+                    <i class="fas fa-plus-circle"></i>New Conversation
+                </div>
+                @foreach (var course in available.Where(c => c.HasTeacher))
                 {
-                    <div class="p-4 border rounded-4 text-center text-secondary" style="border-style:dashed!important;">
-                        <i class="fas fa-check-circle d-block mb-2" style="font-size:2rem;color:#10B981;"></i>
-                        You have an active conversation for every enrolled course.
-                    </div>
+                    <a href="@Url.Action("MyMessages", "Messaging", new { selectedTeacherId = course.TeacherId, selectedCourseId = course.CourseId })"
+                       class="msg-new-item">
+                        <div class="msg-new-icon"><i class="fas fa-book"></i></div>
+                        <div class="msg-new-info">
+                            <div class="msg-new-name">@course.CourseName</div>
+                            <div class="msg-new-teacher">@course.TeacherName</div>
+                        </div>
+                        <i class="fas fa-chevron-right msg-new-arrow"></i>
+                    </a>
                 }
-                else
-                {
-                    <p class="text-secondary small mb-3">
-                        Select a course below to start a new conversation with its teacher.
-                    </p>
+            </div>
+        }
+    </div>
 
-                    <div class="d-flex flex-column gap-2">
-                        @foreach (var course in available)
-                        {
-                            <div class="card border-0 shadow-sm" style="border-radius:14px;">
-                                <div class="card-body p-3">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
-                                             style="width:42px;height:42px;background:linear-gradient(135deg,#F0F0FF,#E0E7FF);">
-                                            <i class="fas fa-book" style="color:#4F46E5;font-size:1rem;"></i>
-                                        </div>
-                                        <div class="flex-grow-1 min-w-0">
-                                            <div class="fw-semibold text-truncate" style="font-size:0.9rem;">@course.CourseName</div>
-                                            <div class="text-secondary" style="font-size:0.78rem;">
-                                                <i class="fas fa-user me-1"></i>@course.TeacherName
-                                            </div>
-                                            <div class="mt-1">
-                                                <span class="badge bg-light text-dark" style="font-size:0.7rem;">@course.CourseLanguage</span>
-                                                <span class="badge bg-light text-dark ms-1" style="font-size:0.7rem;">@course.CourseLevel</span>
-                                            </div>
-                                        </div>
-                                        <a asp-action="ContactTeacher"
-                                           asp-route-courseId="@course.CourseId"
-                                           class="btn btn-sm btn-primary flex-shrink-0"
-                                           style="border-radius:10px;">
-                                            <i class="fas fa-pen"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        }
+    <!-- ── CHAT PANEL ── -->
+    <div class="msg-chat">
+        @if (selected != null)
+        {
+            var teacherInitials = string.Concat(selected.TeacherName.Split(' ').Take(2).Select(p => p.Length > 0 ? p[0].ToString() : ""));
+
+            <!-- Chat header -->
+            <div class="msg-chat-header">
+                <div class="msg-chat-header-avatar">@teacherInitials</div>
+                <div style="flex:1;min-width:0;">
+                    <div class="msg-chat-header-name">@selected.TeacherName</div>
+                    <div class="msg-chat-header-course">
+                        <i class="fas fa-graduation-cap"></i>
+                        @selected.CourseName
+                        <span class="badge rounded-pill ms-1"
+                              style="background:#EDE9FE;color:#5B21B6;font-size:.65rem;">@selected.CourseLanguage</span>
                     </div>
-                }
-
-                <hr class="my-4" />
-
-                <a asp-controller="Courses" asp-action="MyCourses" class="btn btn-outline-secondary w-100">
-                    <i class="fas fa-book me-2"></i>My Courses
+                </div>
+                <a asp-controller="Courses" asp-action="Details" asp-route-id="@selected.CourseId"
+                   class="btn btn-sm"
+                   style="background:#F7F6F2;color:#78716C;border-radius:10px;font-size:.75rem;font-weight:600;border:1.5px solid #EDECEA;text-decoration:none;">
+                    <i class="fas fa-external-link-alt me-1"></i>Course
                 </a>
             </div>
-        </div>
 
+            <!-- Messages -->
+            <div class="msg-messages" id="messagesArea">
+                @{
+                    DateTime? lastDate = null;
+                    foreach (var msg in selected.Messages)
+                    {
+                        var msgDate = msg.SentAt.Date;
+                        if (lastDate == null || lastDate != msgDate)
+                        {
+                            var dateLbl = msgDate == DateTime.Today ? "Today"
+                            : msgDate == DateTime.Today.AddDays(-1) ? "Yesterday"
+                            : msgDate.ToString("MMMM d, yyyy");
+                            <div class="msg-date-sep"><span>@dateLbl</span></div>
+                            lastDate = msgDate;
+                        }
+
+                        var fromMe = !msg.IsFromTeacher;
+                        var initials2 = fromMe ? "Me" : teacherInitials;
+                        var timeDisplay = msg.SentAt.ToString("HH:mm");
+                        <div class="msg-bubble-row @(fromMe ? "from-me" : "")">
+                            @if (!fromMe)
+                            {
+                                <div class="msg-bubble-avatar">@initials2</div>
+                            }
+                            <div>
+                                <div class="msg-bubble">@msg.Message</div>
+                                <span class="msg-bubble-time">@timeDisplay</span>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+
+            <!-- Input -->
+            <div class="msg-input-area">
+                <form asp-action="SendMessage" asp-controller="Messaging" method="post"
+                      id="sendForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="courseId" value="@selected.CourseId" />
+                    <input type="hidden" name="selectedTeacherId" value="@selected.TeacherId" />
+                    <div class="msg-input-wrap">
+                        <textarea class="msg-textarea"
+                              name="message"
+                              id="msgTextarea"
+                              rows="1"
+                              placeholder="Write a message…"
+                              required></textarea>
+                        <button type="submit" class="msg-send-btn" id="sendBtn" disabled>
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        }
+        else if (!allConvs.Any() && !available.Any())
+        {
+            <div class="msg-empty-chat">
+                <div class="msg-empty-chat-icon"><i class="fas fa-comment-slash"></i></div>
+                <h4>No messages yet</h4>
+                <p>Enroll in a course to contact its teacher.</p>
+                <a asp-controller="Courses" asp-action="Index"
+                   class="btn btn-sm mt-2"
+                   style="background:#7C3AED;color:white;border-radius:12px;font-weight:700;padding:.6rem 1.4rem;text-decoration:none;">
+                    <i class="fas fa-compass me-2"></i>Find Courses
+                </a>
+            </div>
+        }
+        else if (!allConvs.Any() && available.Any())
+        {
+            <div class="msg-empty-chat">
+                <div class="msg-empty-chat-icon"><i class="fas fa-comments"></i></div>
+                <h4>Start a conversation</h4>
+                <p>Pick a course from the sidebar to message your teacher.</p>
+            </div>
+        }
+        else
+        {
+            <div class="msg-empty-chat">
+                <div class="msg-empty-chat-icon"><i class="fas fa-hand-point-left"></i></div>
+                <h4>Select a conversation</h4>
+                <p>Choose a conversation from the sidebar.</p>
+            </div>
+        }
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // ── Scroll to bottom of messages ──
+            const area = document.getElementById('messagesArea');
+            if (area) area.scrollTop = area.scrollHeight;
+
+            // ── Auto-resize textarea ──
+            const textarea = document.getElementById('msgTextarea');
+            const sendBtn = document.getElementById('sendBtn');
+
+            if (textarea) {
+                textarea.addEventListener('input', () => {
+                    textarea.style.height = 'auto';
+                    textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+                    if (sendBtn) sendBtn.disabled = textarea.value.trim().length === 0;
+                });
+
+                // Send on Ctrl+Enter / Cmd+Enter
+                textarea.addEventListener('keydown', e => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                        e.preventDefault();
+                        if (textarea.value.trim()) document.getElementById('sendForm')?.submit();
+                    }
+                });
+            }
+
+            // ── Conversation search ──
+            const searchInput = document.getElementById('convSearch');
+            const convItems = document.querySelectorAll('.msg-conv-item');
+
+            searchInput?.addEventListener('input', () => {
+                const q = searchInput.value.toLowerCase().trim();
+                convItems.forEach(item => {
+                    const name = item.dataset.name || '';
+                    const course = item.dataset.course || '';
+                    item.style.display = (name.includes(q) || course.includes(q)) ? '' : 'none';
+                });
+            });
+        });
+    </script>
+}

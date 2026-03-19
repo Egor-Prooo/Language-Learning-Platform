@@ -17,20 +17,121 @@ namespace LanguageLearningPlatform.Web.Controllers
             _context = context;
         }
 
+        // GET: /Messaging/MyMessages
+        public async Task<IActionResult> MyMessages(
+            string? selectedTeacherId = null,
+            Guid? selectedCourseId = null)
+        {
+            var studentId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+            // All existing messages for this student
+            var allMessages = await _context.TeacherMessages
+                .Where(m => m.StudentId == studentId)
+                .Include(m => m.Teacher)
+                .Include(m => m.Course)
+                .OrderBy(m => m.SentAt)
+                .ToListAsync();
+
+            // Build conversations from messages
+            var conversations = allMessages
+                .GroupBy(m => (m.TeacherId, m.CourseId))
+                .Select(g => new StudentConversationViewModel
+                {
+                    TeacherId = g.Key.TeacherId,
+                    CourseId = g.Key.CourseId,
+                    TeacherName = $"{g.First().Teacher?.FirstName} {g.First().Teacher?.LastName}".Trim(),
+                    CourseName = g.First().Course?.Title ?? "Unknown",
+                    CourseLanguage = g.First().Course?.Language ?? string.Empty,
+                    LastMessage = g.OrderByDescending(m => m.SentAt).First().Message,
+                    LastMessageAt = g.Max(m => m.SentAt),
+                    HasUnreadReplies = g.Any(m => m.IsFromTeacher && !m.IsRead),
+                    Messages = g.OrderBy(m => m.SentAt).ToList()
+                })
+                .OrderByDescending(c => c.LastMessageAt)
+                .ToList();
+
+            // Enrolled courses without active conversations → available to start new chat
+            var existingCourseIds = conversations.Select(c => c.CourseId).ToHashSet();
+
+            var enrolledCourses = await _context.CourseEnrollments
+                .Where(e => e.UserId == studentId && e.IsActive && !existingCourseIds.Contains(e.CourseId))
+                .Include(e => e.Course)
+                    .ThenInclude(c => c.Creator)
+                .Include(e => e.Course)
+                    .ThenInclude(c => c.CourseTeachers)
+                        .ThenInclude(ct => ct.Teacher)
+                .ToListAsync();
+
+            var availableCourses = enrolledCourses
+                .Where(e => e.Course != null)
+                .Select(e =>
+                {
+                    var primaryTeacher = e.Course.CourseTeachers
+                        .OrderByDescending(ct => ct.IsPrimary)
+                        .FirstOrDefault()?.Teacher ?? e.Course.Creator;
+
+                    return new AvailableCourseForMessaging
+                    {
+                        CourseId = e.CourseId,
+                        CourseName = e.Course.Title,
+                        CourseLanguage = e.Course.Language,
+                        CourseLevel = e.Course.Level,
+                        TeacherName = primaryTeacher != null
+                            ? $"{primaryTeacher.FirstName} {primaryTeacher.LastName}".Trim()
+                            : "No teacher assigned",
+                        HasTeacher = primaryTeacher != null,
+                        TeacherId = primaryTeacher?.Id ?? string.Empty
+                    };
+                })
+                .ToList();
+
+            // Mark messages as read for selected conversation
+            if (!string.IsNullOrEmpty(selectedTeacherId) && selectedCourseId.HasValue)
+            {
+                var unreadMessages = await _context.TeacherMessages
+                    .Where(m => m.StudentId == studentId
+                             && m.TeacherId == selectedTeacherId
+                             && m.CourseId == selectedCourseId.Value
+                             && m.IsFromTeacher
+                             && !m.IsRead)
+                    .ToListAsync();
+
+                if (unreadMessages.Any())
+                {
+                    unreadMessages.ForEach(m => m.IsRead = true);
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+            // Auto-select first conversation if none specified but conversations exist
+            if (string.IsNullOrEmpty(selectedTeacherId) && conversations.Any())
+            {
+                selectedTeacherId = conversations.First().TeacherId;
+                selectedCourseId = conversations.First().CourseId;
+            }
+
+            ViewBag.SelectedTeacherId = selectedTeacherId;
+            ViewBag.SelectedCourseId = selectedCourseId;
+            ViewBag.AvailableCourses = availableCourses;
+
+            return View(conversations);
+        }
+
         // GET: /Messaging/ContactTeacher/courseId
         public async Task<IActionResult> ContactTeacher(Guid courseId)
         {
+            // Just redirect to MyMessages — the new messenger UI handles everything
             var course = await _context.Courses
                 .Include(c => c.Creator)
+                .Include(c => c.CourseTeachers)
+                    .ThenInclude(ct => ct.Teacher)
                 .FirstOrDefaultAsync(c => c.Id == courseId);
 
             if (course == null) return NotFound();
 
-            var courseTeacher = await _context.CourseTeachers
-                .Include(ct => ct.Teacher)
-                .Where(ct => ct.CourseId == courseId)
+            var courseTeacher = course.CourseTeachers
                 .OrderByDescending(ct => ct.IsPrimary)
-                .FirstOrDefaultAsync();
+                .FirstOrDefault();
 
             var teacher = courseTeacher?.Teacher ?? course.Creator;
 
@@ -40,29 +141,21 @@ namespace LanguageLearningPlatform.Web.Controllers
                 return RedirectToAction("Details", "Courses", new { id = courseId });
             }
 
-            var studentId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-
-            var previousMessages = await _context.TeacherMessages
-                .Where(m => m.StudentId == studentId && m.CourseId == courseId)
-                .OrderBy(m => m.SentAt)
-                .ToListAsync();
-
-            ViewBag.Course = course;
-            ViewBag.Teacher = teacher;
-            ViewBag.PreviousMessages = previousMessages;
-
-            return View();
+            return RedirectToAction(nameof(MyMessages),
+                new { selectedTeacherId = teacher.Id, selectedCourseId = courseId });
         }
 
         // POST: /Messaging/SendMessage
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SendMessage(Guid courseId, string message)
+        public async Task<IActionResult> SendMessage(Guid courseId, string message,
+            string? selectedTeacherId = null)
         {
             if (string.IsNullOrWhiteSpace(message))
             {
                 TempData["ErrorMessage"] = "Message cannot be empty.";
-                return RedirectToAction(nameof(ContactTeacher), new { courseId });
+                return RedirectToAction(nameof(MyMessages),
+                    new { selectedTeacherId, selectedCourseId = courseId });
             }
 
             var course = await _context.Courses.FindAsync(courseId);
@@ -101,76 +194,8 @@ namespace LanguageLearningPlatform.Web.Controllers
 
             await _context.SaveChangesAsync();
 
-            TempData["SuccessMessage"] = "Message sent to teacher!";
-            return RedirectToAction(nameof(MyMessages));
-        }
-
-        // GET: /Messaging/MyMessages
-        public async Task<IActionResult> MyMessages()
-        {
-            var studentId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-
-            var messages = await _context.TeacherMessages
-                .Where(m => m.StudentId == studentId)
-                .Include(m => m.Teacher)
-                .Include(m => m.Course)
-                .OrderByDescending(m => m.SentAt)
-                .ToListAsync();
-
-            var conversations = messages
-                .GroupBy(m => (m.TeacherId, m.CourseId))
-                .Select(g => new StudentConversationViewModel
-                {
-                    TeacherId = g.Key.TeacherId,
-                    CourseId = g.Key.CourseId,
-                    TeacherName = $"{g.First().Teacher?.FirstName} {g.First().Teacher?.LastName}".Trim(),
-                    CourseName = g.First().Course?.Title ?? "Unknown",
-                    CourseLanguage = g.First().Course?.Language ?? string.Empty,
-                    LastMessage = g.OrderByDescending(m => m.SentAt).First().Message,
-                    LastMessageAt = g.Max(m => m.SentAt),
-                    HasUnreadReplies = g.Any(m => m.IsFromTeacher && !m.IsRead),
-                    Messages = g.OrderBy(m => m.SentAt).ToList()
-                })
-                .OrderByDescending(c => c.LastMessageAt)
-                .ToList();
-
-            // Courses the student is enrolled in but hasn't messaged anyone about yet
-            var existingCourseIds = conversations.Select(c => c.CourseId).ToHashSet();
-
-            var enrolledCourses = await _context.CourseEnrollments
-                .Where(e => e.UserId == studentId && e.IsActive && !existingCourseIds.Contains(e.CourseId))
-                .Include(e => e.Course)
-                    .ThenInclude(c => c.Creator)
-                .Include(e => e.Course)
-                    .ThenInclude(c => c.CourseTeachers)
-                        .ThenInclude(ct => ct.Teacher)
-                .ToListAsync();
-
-            var availableCourses = enrolledCourses
-                .Where(e => e.Course != null)
-                .Select(e =>
-                {
-                    var primaryTeacher = e.Course.CourseTeachers
-                        .OrderByDescending(ct => ct.IsPrimary)
-                        .FirstOrDefault()?.Teacher ?? e.Course.Creator;
-
-                    return new AvailableCourseForMessaging
-                    {
-                        CourseId = e.CourseId,
-                        CourseName = e.Course.Title,
-                        CourseLanguage = e.Course.Language,
-                        CourseLevel = e.Course.Level,
-                        TeacherName = primaryTeacher != null
-                            ? $"{primaryTeacher.FirstName} {primaryTeacher.LastName}".Trim()
-                            : "No teacher assigned",
-                        HasTeacher = primaryTeacher != null
-                    };
-                })
-                .ToList();
-
-            ViewBag.AvailableCourses = availableCourses;
-
-            return View(conversations);
+            return RedirectToAction(nameof(MyMessages),
+                new { selectedTeacherId = teacherId, selectedCourseId = courseId });
         }
     }
 
@@ -194,6 +219,7 @@ namespace LanguageLearningPlatform.Web.Controllers
         public string CourseLanguage { get; set; } = string.Empty;
         public string CourseLevel { get; set; } = string.Empty;
         public string TeacherName { get; set; } = string.Empty;
+        public string TeacherId { get; set; } = string.Empty;
         public bool HasTeacher { get; set; }
     }
 }

@@ -1,0 +1,229 @@
+﻿@{
+    ViewData["Title"] = "Access Denied";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <style>
+        @@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap');
+
+        .err-root {
+            min-height: calc(100vh - 200px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 1rem;
+            background: #0D0D12;
+            font-family: 'Space Grotesk', sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .err-grid {
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(rgba(245,158,11,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(245,158,11,.05) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+        }
+
+        .err-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            pointer-events: none;
+        }
+
+        .err-orb-1 {
+            width: 400px;
+            height: 400px;
+            background: #F59E0B;
+            opacity: .1;
+            top: -100px;
+            right: -100px;
+        }
+
+        .err-orb-2 {
+            width: 250px;
+            height: 250px;
+            background: #EF4444;
+            opacity: .08;
+            bottom: -60px;
+            left: -60px;
+        }
+
+        .err-content {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            max-width: 560px;
+        }
+
+        .err-lock-icon {
+            width: 100px;
+            height: 100px;
+            border-radius: 28px;
+            background: linear-gradient(135deg, rgba(245,158,11,.15), rgba(239,68,68,.12));
+            border: 1.5px solid rgba(245,158,11,.25);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.8rem;
+            color: #FCD34D;
+            margin-bottom: 1.5rem;
+            animation: lockWiggle 3s ease-in-out infinite;
+        }
+
+        @@keyframes lockWiggle {
+            0%, 100% {
+                transform: rotate(0deg) scale(1);
+            }
+
+            25% {
+                transform: rotate(-4deg) scale(1.02);
+            }
+
+            75% {
+                transform: rotate(4deg) scale(1.02);
+            }
+        }
+
+        .err-code {
+            font-family: 'Space Mono', monospace;
+            font-size: clamp(5rem, 16vw, 8.5rem);
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: -4px;
+            color: transparent;
+            background: linear-gradient(135deg, #F59E0B 0%, #FCD34D 50%, #F59E0B 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            user-select: none;
+            filter: drop-shadow(0 0 40px rgba(245,158,11,.35));
+            margin-bottom: .5rem;
+        }
+
+        .err-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            background: rgba(245,158,11,.1);
+            border: 1px solid rgba(245,158,11,.25);
+            color: #FCD34D;
+            font-size: .72rem;
+            font-weight: 700;
+            padding: .35rem .9rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            font-family: 'Space Mono', monospace;
+            margin-bottom: 1.5rem;
+        }
+
+        .err-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #F1F5F9;
+            margin-bottom: .75rem;
+            line-height: 1.3;
+        }
+
+        .err-desc {
+            color: #64748B;
+            font-size: .95rem;
+            line-height: 1.7;
+            margin-bottom: 2rem;
+        }
+
+        .err-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-err-primary {
+            padding: .85rem 2rem;
+            background: #F59E0B;
+            color: #1C1917;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: .9rem;
+            text-decoration: none;
+            transition: all .2s;
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+            .btn-err-primary:hover {
+                background: #D97706;
+                color: #1C1917;
+                transform: translateY(-2px);
+                box-shadow: 0 8px 24px rgba(245,158,11,.35);
+            }
+
+        .btn-err-secondary {
+            padding: .85rem 2rem;
+            background: transparent;
+            color: #94A3B8;
+            border: 1.5px solid #1E293B;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: .9rem;
+            text-decoration: none;
+            transition: all .2s;
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+            .btn-err-secondary:hover {
+                border-color: #334155;
+                color: #CBD5E1;
+            }
+    </style>
+}
+
+<div class="err-root">
+    <div class="err-grid"></div>
+    <div class="err-orb err-orb-1"></div>
+    <div class="err-orb err-orb-2"></div>
+
+    <div class="err-content">
+        <div class="err-lock-icon"><i class="fas fa-lock"></i></div>
+        <div class="err-code">403</div>
+
+        <div class="err-badge">
+            <i class="fas fa-shield-alt"></i>Access Denied
+        </div>
+
+        <h1 class="err-title">You don't have permission here</h1>
+        <p class="err-desc">
+            This page is restricted. You either need to log in with a different account
+            or don't have the required role to access this resource.
+        </p>
+
+        <div class="err-actions">
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <a href="/" class="btn-err-primary">
+                    <i class="fas fa-home"></i>Go Home
+                </a>
+                <a asp-controller="Profile" asp-action="Index" class="btn-err-secondary">
+                    <i class="fas fa-user"></i>My Profile
+                </a>
+            }
+            else
+            {
+                <a asp-area="Identity" asp-page="/Account/Login" class="btn-err-primary">
+                    <i class="fas fa-sign-in-alt"></i>Sign In
+                </a>
+                <a href="/" class="btn-err-secondary">
+                    <i class="fas fa-home"></i>Go Home
+                </a>
+            }
+        </div>
+    </div>
+</div>

@@ -1,7 +1,9 @@
-﻿using LanguageLearningPlatform.Data.Models;
+﻿using LanguageLearningPlatform.Data;
+using LanguageLearningPlatform.Data.Models;
 using LanguageLearningPlatform.Services.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace LanguageLearningPlatform.Web.Controllers
@@ -12,10 +14,17 @@ namespace LanguageLearningPlatform.Web.Controllers
     public class VideoLessonsController : ControllerBase
     {
         private readonly IVideoLessonService _videoService;
+        private readonly ApplicationDbContext _context;
+        private readonly ILessonProgressService _lessonProgressService;
 
-        public VideoLessonsController(IVideoLessonService videoService)
+        public VideoLessonsController(
+            IVideoLessonService videoService,
+            ApplicationDbContext context,
+            ILessonProgressService lessonProgressService)
         {
             _videoService = videoService;
+            _context = context;
+            _lessonProgressService = lessonProgressService;
         }
 
         [HttpGet("lesson/{lessonId}")]
@@ -37,7 +46,19 @@ namespace LanguageLearningPlatform.Web.Controllers
             var success = await _videoService.MarkVideoProgressAsync(
                 request.VideoId, userId, request.WatchedSeconds, request.IsCompleted);
 
-            return success ? Ok(new { success = true }) : NotFound();
+            if (!success) return NotFound();
+
+            // ── After updating video progress, check whether the lesson is now complete ──
+            // We need the lesson ID that this video belongs to.
+            var lessonId = await _context.VideoLessons
+                .Where(v => v.Id == request.VideoId)
+                .Select(v => v.LessonId)
+                .FirstOrDefaultAsync();
+
+            if (lessonId != Guid.Empty)
+                await _lessonProgressService.TryCompleteLessonAsync(userId, lessonId);
+
+            return Ok(new { success = true });
         }
     }
 

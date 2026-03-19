@@ -1,6 +1,7 @@
 ﻿using LanguageLearningPlatform.Core.Models;
 using LanguageLearningPlatform.Data;
 using LanguageLearningPlatform.Data.Models;
+using LanguageLearningPlatform.Services;
 using LanguageLearningPlatform.Services.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,11 +17,16 @@ namespace LanguageLearningPlatform.Web.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IExerciseService _exerciseService;
+        private readonly ILessonProgressService _lessonProgressService;
+        private readonly IAchievementService _achievementService;
 
-        public ExercisesController(ApplicationDbContext context, IExerciseService exerciseService)
+        public ExercisesController(ApplicationDbContext context, IExerciseService exerciseService, 
+            ILessonProgressService lessonProgressService, IAchievementService achievementService)
         {
             _context = context;
             _exerciseService = exerciseService;
+            _lessonProgressService = lessonProgressService;
+            _achievementService = achievementService;
         }
 
         [HttpPost("submit")]
@@ -28,24 +34,18 @@ namespace LanguageLearningPlatform.Web.Controllers
         public async Task<IActionResult> SubmitExercise([FromBody] ExerciseSubmissionRequest submission)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized();
-            }
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
             var exercise = await _context.Exercises.FindAsync(submission.ExerciseId);
-
             if (exercise == null)
-            {
                 return NotFound(new { error = "Exercise not found" });
-            }
 
-            // Validate the answer
-            var validationResult = await _exerciseService.ValidateAnswerAsync(submission.ExerciseId, submission.UserAnswer);
+            // ── Validate answer ───────────────────────────────────────────────────
+            var validationResult = await _exerciseService.ValidateAnswerAsync(
+                submission.ExerciseId, submission.UserAnswer);
 
-            // Create the result record
-            var result = new UserExerciseResult
+            // ── Persist result ────────────────────────────────────────────────────
+            _context.UserExerciseResults.Add(new UserExerciseResult
             {
                 Id = Guid.NewGuid(),
                 UserId = userId,
@@ -57,11 +57,9 @@ namespace LanguageLearningPlatform.Web.Controllers
                 AttemptsCount = submission.AttemptsCount,
                 CompletedAt = DateTime.UtcNow,
                 Feedback = validationResult.Feedback
-            };
+            });
 
-            _context.UserExerciseResults.Add(result);
-
-            // Update user's course progress if correct
+            // ── Update course points on correct answer ────────────────────────────
             if (validationResult.IsCorrect)
             {
                 var progress = await _context.Progresses
@@ -71,30 +69,39 @@ namespace LanguageLearningPlatform.Web.Controllers
                 {
                     progress.PointsEarned += exercise.Points;
                     progress.LastAccessedAt = DateTime.UtcNow;
-                    _context.Progresses.Update(progress);
                 }
             }
 
             await _context.SaveChangesAsync();
 
-            // Get updated stats
-            var stats = await _exerciseService.GetUserExerciseStatsAsync(userId);
-            var totalPoints = await GetUserTotalPoints(userId);
+            // ── Try to complete the parent lesson ─────────────────────────────────
+            // This also triggers achievement/level checks internally when the lesson completes.
+            if (exercise.LessonId.HasValue)
+                await _lessonProgressService.TryCompleteLessonAsync(userId, exercise.LessonId.Value);
+            else
+                // No lesson context – still check achievements (points may have changed)
+                await _achievementService.CheckAndAwardAsync(userId);
 
-            // Make sure your response matches what JavaScript expects
+            // ── Build response ────────────────────────────────────────────────────
+            var stats = await _exerciseService.GetUserExerciseStatsAsync(userId);
+            var totalPoints = await GetUserTotalPointsAsync(userId);
+
             return Ok(new ExerciseSubmissionResponse
             {
                 Success = true,
                 IsCorrect = validationResult.IsCorrect,
                 PointsEarned = validationResult.PointsEarned,
                 TotalPoints = totalPoints,
-                Feedback = validationResult.IsCorrect ? "Correct! Well done! 🎉" : "Not quite right. Try again!",
+                Feedback = validationResult.IsCorrect
+                                    ? "Correct! Well done! 🎉"
+                                    : "Not quite right. Try again!",
                 CorrectAnswer = validationResult.IsCorrect ? null : validationResult.CorrectAnswer,
                 Explanation = validationResult.IsCorrect ? validationResult.Explanation : null,
                 Streak = stats.CurrentStreak,
-                LevelUp = false // Implement your level-up logic
+                LevelUp = false   // Could be wired up in future
             });
         }
+
 
         [HttpGet("lesson/{lessonId}")]
         [Authorize]
@@ -148,13 +155,9 @@ namespace LanguageLearningPlatform.Web.Controllers
             return Ok(new { hint = exercise.Hint });
         }
 
-        private async Task<int> GetUserTotalPoints(string userId)
-        {
-            return await _context.Progresses
+        private async Task<int> GetUserTotalPointsAsync(string userId)
+            => await _context.Progresses
                 .Where(p => p.UserId == userId)
                 .SumAsync(p => p.PointsEarned);
-        }
-
-
     }
 }

@@ -1,0 +1,258 @@
+﻿@{
+    ViewData["Title"] = "My Achievements";
+    var unlocked = ViewBag.UnlockedAchievements as List<LanguageLearningPlatform.Data.Models.UserAchievement> ?? new();
+    var locked = ViewBag.LockedAchievements as List<LanguageLearningPlatform.Data.Models.Achievement> ?? new();
+    int totalPoints = ViewBag.TotalPoints ?? 0;
+}
+
+<div class="container my-5">
+
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Profile
+        </a>
+        <div>
+            <h2 class="fw-bold mb-0"><i class="fas fa-trophy text-warning me-2"></i>Achievements</h2>
+            <p class="text-secondary mb-0 small">
+                @unlocked.Count unlocked &nbsp;·&nbsp; @locked.Count remaining
+            </p>
+        </div>
+    </div>
+
+    <!-- Progress summary -->
+    <div class="ach-summary-card mb-5">
+        <div class="row align-items-center g-3">
+            <div class="col-md-8">
+                <div class="fw-bold mb-1" style="font-size:1rem;">Achievement Progress</div>
+                <div class="progress" style="height:12px;border-radius:10px;background:#E5E7EB;">
+                    @{
+                        var total = unlocked.Count + locked.Count;
+                        var pct = total > 0 ? (double)unlocked.Count / total * 100 : 0;
+                    }
+                    <div class="progress-bar"
+                         style="width:@pct.ToString("F0")%;background:linear-gradient(90deg,#F59E0B,#4F46E5);border-radius:10px;"></div>
+                </div>
+                <div class="text-muted small mt-1">@unlocked.Count / @total achievements</div>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="fw-bold" style="font-size:2rem;color:#F59E0B;">
+                    <i class="fas fa-star me-1"></i>@totalPoints.ToString("N0")
+                </div>
+                <div class="text-muted small">Total XP</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Unlocked -->
+    @if (unlocked.Any())
+    {
+        <h4 class="fw-bold mb-3">
+            <i class="fas fa-check-circle text-success me-2"></i>Unlocked (@unlocked.Count)
+        </h4>
+        <div class="row g-3 mb-5">
+            @foreach (var ua in unlocked)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="ach-card unlocked @(ua.Achievement.IsRare ? "rare" : "")">
+                        <div class="ach-icon-wrap">
+                            <div class="ach-icon @(ua.Achievement.IsRare ? "ach-icon-rare" : "ach-icon-normal")">
+                                @if (!string.IsNullOrEmpty(ua.Achievement.IconUrl))
+                                {
+                                    <img src="@ua.Achievement.IconUrl" alt="" style="width:28px;height:28px;object-fit:contain;" />
+                                }
+                                else
+                                {
+                                    <i class="fas fa-@(ua.Achievement.IsRare ? "medal" : "award")"></i>
+                                }
+                            </div>
+                            @if (ua.Achievement.IsRare)
+                            {
+                                <span class="rare-badge">RARE</span>
+                            }
+                        </div>
+                        <div class="ach-info">
+                            <div class="ach-name">@ua.Achievement.Title</div>
+                            <div class="ach-desc">@ua.Achievement.Description</div>
+                            <div class="d-flex align-items-center gap-2 mt-2 flex-wrap">
+                                <span class="ach-pts">
+                                    <i class="fas fa-star"></i>+@ua.Achievement.PointsReward pts
+                                </span>
+                                <span class="ach-date">@ua.UnlockedAt.ToString("MMM dd, yyyy")</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <!-- Locked -->
+    @if (locked.Any())
+    {
+        <h4 class="fw-bold mb-3">
+            <i class="fas fa-lock text-muted me-2"></i>Locked (@locked.Count)
+        </h4>
+        <div class="row g-3">
+            @foreach (var a in locked)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="ach-card locked">
+                        <div class="ach-icon-wrap">
+                            <div class="ach-icon ach-icon-locked">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                        </div>
+                        <div class="ach-info">
+                            <div class="ach-name" style="color:#9CA3AF;">@a.Title</div>
+                            <div class="ach-desc">@a.Description</div>
+                            <div class="d-flex align-items-center gap-2 mt-2 flex-wrap">
+                                <span class="ach-pts" style="background:#F3F4F6;color:#6B7280;">
+                                    <i class="fas fa-star"></i>+@a.PointsReward pts
+                                </span>
+                                <span class="ach-condition">
+                                    @GetConditionLabel(a.TriggerType, a.TriggerValue)
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@functions {
+    string GetConditionLabel(string triggerType, int value) => triggerType switch
+    {
+        "PointsReached" => $"Earn {value:N0} pts",
+        "LessonsCompleted" => $"Complete {value} lessons",
+        "StreakDays" => $"Maintain a {value}-day streak",
+        "AccuracyRate" => $"Reach {value}% accuracy",
+        "CoursesCompleted" => $"Complete {value} course(s)",
+        _ => $"Reach threshold: {value}"
+    };
+}
+
+<style>
+    .ach-summary-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    .ach-card {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1.25rem;
+        border-radius: 16px;
+        border: 2px solid transparent;
+        background: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        transition: transform 0.2s, box-shadow 0.2s;
+        height: 100%;
+    }
+
+        .ach-card.unlocked {
+            border-color: #E5E7EB;
+        }
+
+            .ach-card.unlocked:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            }
+
+        .ach-card.rare {
+            border-color: #FDE68A;
+            background: linear-gradient(135deg,#FFFBEB,#FEF3C7 60%,#FFFBEB);
+        }
+
+        .ach-card.locked {
+            border-color: #F3F4F6;
+            background: #FAFAFA;
+            opacity: 0.8;
+        }
+
+    .ach-icon-wrap {
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    .ach-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+    }
+
+    .ach-icon-normal {
+        background: #EDE9FE;
+        color: #7C3AED;
+    }
+
+    .ach-icon-rare {
+        background: #FEF3C7;
+        color: #D97706;
+    }
+
+    .ach-icon-locked {
+        background: #F3F4F6;
+        color: #9CA3AF;
+    }
+
+    .rare-badge {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        background: #F59E0B;
+        color: white;
+        font-size: 0.55rem;
+        font-weight: 800;
+        padding: 0.1rem 0.35rem;
+        border-radius: 4px;
+        letter-spacing: 0.05em;
+    }
+
+    .ach-name {
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: #1F2937;
+        margin-bottom: 0.25rem;
+    }
+
+    .ach-desc {
+        font-size: 0.78rem;
+        color: #6B7280;
+        line-height: 1.4;
+    }
+
+    .ach-pts {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        background: #D1FAE5;
+        color: #059669;
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 0.2rem 0.5rem;
+        border-radius: 20px;
+    }
+
+    .ach-date {
+        font-size: 0.72rem;
+        color: #9CA3AF;
+    }
+
+    .ach-condition {
+        font-size: 0.72rem;
+        color: #6B7280;
+        background: #F9FAFB;
+        padding: 0.2rem 0.5rem;
+        border-radius: 6px;
+        border: 1px solid #E5E7EB;
+    }
+</style>

@@ -1,6 +1,6 @@
 ﻿namespace LanguageLearningPlatform.Core.Models
 {
-    public class LeaderboardEntryViewModel
+    public class LeaderboardViewModel
     {
         public int Rank { get; set; }
         public string UserId { get; set; } = string.Empty;

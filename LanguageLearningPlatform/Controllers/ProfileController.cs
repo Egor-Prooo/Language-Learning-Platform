@@ -194,7 +194,7 @@ namespace LanguageLearningPlatform.Web.Controllers
                 .GroupBy(r => r.UserId)
                 .ToDictionary(g => g.Key, g => g.Select(r => r.Date).OrderByDescending(d => d).ToList());
 
-            var entries = new List<LeaderboardEntryViewModel>();
+            var entries = new List<LeaderboardViewModel>();
             int rank = 1;
 
             foreach (var pts in pointsPerUser)
@@ -203,7 +203,7 @@ namespace LanguageLearningPlatform.Web.Controllers
 
                 var streak = CalculateStreak(resultsByUser.GetValueOrDefault(pts.UserId) ?? new List<DateTime>());
 
-                entries.Add(new LeaderboardEntryViewModel
+                entries.Add(new LeaderboardViewModel
                 {
                     Rank = rank++,
                     UserId = user.Id,

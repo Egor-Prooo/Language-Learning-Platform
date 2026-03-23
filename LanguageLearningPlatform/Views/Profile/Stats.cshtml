@@ -1,0 +1,232 @@
+﻿@{
+    ViewData["Title"] = "My Statistics";
+    var progresses = ViewBag.Progresses as IEnumerable<LanguageLearningPlatform.Data.Models.Progress> ?? Enumerable.Empty<LanguageLearningPlatform.Data.Models.Progress>();
+    var recentExercises = ViewBag.RecentExercises as List<LanguageLearningPlatform.Data.Models.UserExerciseResult> ?? new();
+    int totalExercises = ViewBag.TotalExercises ?? 0;
+    int correctExercises = ViewBag.CorrectExercises ?? 0;
+    double accuracy = ViewBag.AccuracyRate ?? 0.0;
+    int totalPoints = ViewBag.TotalPoints ?? 0;
+}
+
+<div class="container my-5">
+
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Profile
+        </a>
+        <div>
+            <h2 class="fw-bold mb-0"><i class="fas fa-chart-bar text-primary me-2"></i>My Statistics</h2>
+            <p class="text-secondary mb-0 small">A detailed look at your learning activity</p>
+        </div>
+    </div>
+
+    <!-- Top KPIs -->
+    <div class="row g-3 mb-5">
+        <div class="col-6 col-md-3">
+            <div class="kpi-card" style="border-left-color:#F59E0B;">
+                <div class="kpi-icon" style="background:#FEF3C7;color:#D97706;"><i class="fas fa-star"></i></div>
+                <div class="kpi-val">@totalPoints.ToString("N0")</div>
+                <div class="kpi-lbl">Total Points</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="kpi-card" style="border-left-color:#10B981;">
+                <div class="kpi-icon" style="background:#D1FAE5;color:#059669;"><i class="fas fa-dumbbell"></i></div>
+                <div class="kpi-val">@totalExercises</div>
+                <div class="kpi-lbl">Exercises Done</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="kpi-card" style="border-left-color:#4F46E5;">
+                <div class="kpi-icon" style="background:#EEF2FF;color:#4F46E5;"><i class="fas fa-check"></i></div>
+                <div class="kpi-val">@correctExercises</div>
+                <div class="kpi-lbl">Correct Answers</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="kpi-card" style="border-left-color:#EF4444;">
+                <div class="kpi-icon" style="background:#FEE2E2;color:#DC2626;"><i class="fas fa-bullseye"></i></div>
+                <div class="kpi-val">@accuracy.ToString("F0")%</div>
+                <div class="kpi-lbl">Accuracy</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Course progress breakdown -->
+    <div class="stats-card mb-4">
+        <div class="stats-card-header">
+            <h5 class="stats-card-title">
+                <i class="fas fa-book-open text-primary me-2"></i>Progress by Course
+            </h5>
+        </div>
+        <div class="stats-card-body">
+            @if (progresses.Any())
+            {
+                @foreach (var p in progresses.OrderByDescending(p => p.LastAccessedAt))
+                {
+                    <div class="course-stat-row">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-semibold" style="font-size:0.9rem;">@p.Course?.Title</span>
+                            <span class="fw-bold" style="color:#4F46E5;font-size:0.88rem;">
+                                @p.CompletionPercentage.ToString("F0")%
+                            </span>
+                        </div>
+                        <div style="height:8px;background:#F3F4F6;border-radius:10px;overflow:hidden;">
+                            <div style="height:100%;width:@p.CompletionPercentage%;background:linear-gradient(90deg,#4F46E5,#7C3AED);border-radius:10px;transition:width 0.8s ease;"></div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-1" style="font-size:0.72rem;color:#9CA3AF;">
+                            <span>@p.CompletedLessons lessons &nbsp;·&nbsp; @p.PointsEarned pts earned</span>
+                            <span>Last active @p.LastAccessedAt.ToString("MMM dd")</span>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center py-4 text-muted">
+                    <i class="fas fa-book-open" style="font-size:2.5rem;opacity:0.2;"></i>
+                    <p class="mt-2 mb-0">No courses enrolled yet.</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Recent exercise activity -->
+    <div class="stats-card">
+        <div class="stats-card-header">
+            <h5 class="stats-card-title">
+                <i class="fas fa-history text-primary me-2"></i>Recent Exercise Activity
+            </h5>
+        </div>
+        <div class="stats-card-body p-0">
+            @if (recentExercises.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead style="background:#F9FAFB;border-bottom:2px solid #E5E7EB;">
+                            <tr>
+                                <th class="ps-4 py-3">Exercise</th>
+                                <th class="py-3">Course</th>
+                                <th class="py-3 text-center">Result</th>
+                                <th class="py-3 text-end">Points</th>
+                                <th class="py-3 text-end pe-4">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var r in recentExercises)
+                            {
+                                <tr style="border-bottom:1px solid #F3F4F6;">
+                                    <td class="ps-4 py-2 fw-semibold" style="font-size:0.875rem;">
+                                        @r.Exercise?.Title
+                                    </td>
+                                    <td class="py-2 text-muted" style="font-size:0.78rem;">
+                                        @r.Exercise?.Course?.Title
+                                    </td>
+                                    <td class="py-2 text-center">
+                                        @if (r.IsCorrect)
+                                        {
+                                            <span class="badge bg-success-subtle text-success">
+                                                <i class="fas fa-check me-1"></i>Correct
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger-subtle text-danger">
+                                                <i class="fas fa-times me-1"></i>Wrong
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="py-2 text-end fw-bold" style="color:#F59E0B;">
+                                        @(r.PointsEarned > 0 ? $"+{r.PointsEarned}" : "—")
+                                    </td>
+                                    <td class="py-2 text-end pe-4 text-muted" style="font-size:0.78rem;">
+                                        @r.CompletedAt.ToString("MMM dd, HH:mm")
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4 text-muted p-4">
+                    <i class="fas fa-dumbbell" style="font-size:2.5rem;opacity:0.2;"></i>
+                    <p class="mt-2 mb-0">No exercises completed yet.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .kpi-card {
+        background: white;
+        border-radius: 14px;
+        border-left: 4px solid transparent;
+        padding: 1.1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 0.35rem;
+    }
+
+    .kpi-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+    }
+
+    .kpi-val {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #1F2937;
+        line-height: 1;
+    }
+
+    .kpi-lbl {
+        font-size: 0.7rem;
+        color: #9CA3AF;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .stats-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        overflow: hidden;
+    }
+
+    .stats-card-header {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid #F3F4F6;
+    }
+
+    .stats-card-title {
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: #1F2937;
+        margin: 0;
+    }
+
+    .stats-card-body {
+        padding: 1.25rem 1.5rem;
+    }
+
+    .course-stat-row {
+        padding: 0.85rem 0;
+        border-bottom: 1px solid #F9FAFB;
+    }
+
+        .course-stat-row:last-child {
+            border-bottom: none;
+        }
+</style>

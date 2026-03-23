@@ -1,0 +1,131 @@
+﻿@model LanguageLearningPlatform.Core.Models.EditProfileViewModel
+
+@{
+    ViewData["Title"] = "Edit Profile";
+}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Profile
+                </a>
+                <div>
+                    <h2 class="fw-bold mb-0">Edit Profile</h2>
+                    <p class="text-secondary mb-0 small">Update your personal information</p>
+                </div>
+            </div>
+
+            <div class="card shadow-sm" style="border-radius:20px;border:none;">
+                <div class="card-body p-4 p-lg-5">
+
+                    <form asp-action="Edit" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4"></div>
+
+                        <!-- Avatar preview -->
+                        <div class="text-center mb-4">
+                            <div id="avatar-preview"
+                                 class="rounded-circle d-inline-flex align-items-center justify-content-center text-white fw-bold mb-2"
+                                 style="width:90px;height:90px;font-size:1.8rem;background:linear-gradient(135deg,#4F46E5,#7C3AED);">
+                                @(Model.FirstName?.Length > 0 ? Model.FirstName[0].ToString().ToUpper() : "")@(Model.LastName?.Length > 0 ? Model.LastName[0].ToString().ToUpper() : "")
+                            </div>
+                            <div>
+                                <img id="avatar-img" src="@Model.AvatarUrl"
+                                     class="rounded-circle @(string.IsNullOrEmpty(Model.AvatarUrl) ? "d-none" : "")"
+                                     alt="Avatar"
+                                     style="width:90px;height:90px;object-fit:cover;border:3px solid #E5E7EB;" />
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="FirstName" class="form-label fw-semibold">
+                                    First Name <span class="text-danger">*</span>
+                                </label>
+                                <input asp-for="FirstName" class="form-control" />
+                                <span asp-validation-for="FirstName" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="LastName" class="form-label fw-semibold">
+                                    Last Name <span class="text-danger">*</span>
+                                </label>
+                                <input asp-for="LastName" class="form-control" />
+                                <span asp-validation-for="LastName" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Bio" class="form-label fw-semibold">Bio</label>
+                            <textarea asp-for="Bio" class="form-control" rows="4"
+                                      placeholder="Tell other learners a bit about yourself..."></textarea>
+                            <div class="form-text">Max 1000 characters.</div>
+                            <span asp-validation-for="Bio" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="AvatarUrl" class="form-label fw-semibold">Avatar URL</label>
+                            <input asp-for="AvatarUrl" class="form-control" id="avatarUrlInput"
+                                   placeholder="https://example.com/your-photo.jpg" />
+                            <div class="form-text">Paste a direct link to an image file.</div>
+                            <span asp-validation-for="AvatarUrl" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="PreferredLanguage" class="form-label fw-semibold">Preferred Language</label>
+                            <select asp-for="PreferredLanguage" class="form-select">
+                                <option value="">Not specified</option>
+                                <option value="Spanish">Spanish</option>
+                                <option value="French">French</option>
+                                <option value="German">German</option>
+                                <option value="Japanese">Japanese</option>
+                                <option value="Italian">Italian</option>
+                                <option value="Chinese">Chinese</option>
+                                <option value="Portuguese">Portuguese</option>
+                                <option value="Russian">Russian</option>
+                                <option value="Korean">Korean</option>
+                                <option value="Arabic">Arabic</option>
+                            </select>
+                        </div>
+
+                        <div class="d-flex gap-3">
+                            <button type="submit" class="btn btn-primary px-5">
+                                <i class="fas fa-save me-2"></i>Save Changes
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Live avatar preview when URL is typed
+        const urlInput = document.getElementById('avatarUrlInput');
+        const avatarImg = document.getElementById('avatar-img');
+        const avatarInitials = document.getElementById('avatar-preview');
+
+        urlInput?.addEventListener('input', function () {
+            const url = this.value.trim();
+            if (url) {
+                avatarImg.src = url;
+                avatarImg.classList.remove('d-none');
+                avatarInitials.classList.add('d-none');
+                avatarImg.onerror = () => {
+                    avatarImg.classList.add('d-none');
+                    avatarInitials.classList.remove('d-none');
+                };
+            } else {
+                avatarImg.classList.add('d-none');
+                avatarInitials.classList.remove('d-none');
+            }
+        });
+    </script>
+}

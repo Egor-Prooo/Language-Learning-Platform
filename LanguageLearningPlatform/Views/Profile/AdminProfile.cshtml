@@ -644,7 +644,7 @@
                 <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="ap-tab">[ ADMIN PANEL ]</a>
                 <a asp-controller="Courses" asp-action="Index" class="ap-tab">[ COURSES ]</a>
                 <a asp-controller="Forum" asp-action="Index" class="ap-tab">[ FORUM ]</a>
-                <a asp-area="Identity" asp-page="/Account/Manage/Index" class="ap-tab">[ SETTINGS ]</a>
+                <a asp-controller="Profile" asp-action="Settings" class="ap-tab">[ SETTINGS ]</a>
             </div>
         </div>
     </div>
@@ -822,7 +822,7 @@
                             <a asp-controller="Teacher" asp-action="Dashboard" class="aa-btn"><i class="fas fa-chalkboard-teacher ico-aa-a"></i>Teacher Dashboard</a>
                             <a asp-action="Achievements" class="aa-btn"><i class="fas fa-trophy ico-aa-a"></i>My Achievements</a>
                             <a asp-action="Stats" class="aa-btn"><i class="fas fa-chart-bar ico-aa-g"></i>Personal Stats</a>
-                            <a asp-area="Identity" asp-page="/Account/Manage/Index" class="aa-btn"><i class="fas fa-cog ico-aa-s"></i>Account Settings</a>
+                            <a asp-controller="Profile" asp-action="Settings" class="aa-btn"><i class="fas fa-cog ico-aa-s"></i>Account Settings</a>
                         </div>
                     </div>
 

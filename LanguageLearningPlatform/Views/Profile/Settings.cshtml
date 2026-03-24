@@ -1,0 +1,362 @@
+﻿@model LanguageLearningPlatform.Core.Models.SettingsViewModel
+
+@{
+    ViewData["Title"] = "Account Settings";
+    var activeTab = ViewBag.Tab as string ?? Model.ActiveTab ?? "profile";
+}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+
+            <!-- Header -->
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Profile
+                </a>
+                <div>
+                    <h2 class="fw-bold mb-0">
+                        <i class="fas fa-cog me-2 text-primary"></i>Account Settings
+                    </h2>
+                    <p class="text-secondary mb-0 small">@Model.Email</p>
+                </div>
+            </div>
+
+            <!-- Tab Navigation -->
+            <ul class="nav nav-pills mb-4 gap-2" id="settingsTabs">
+                <li class="nav-item">
+                    <a class="nav-link @(activeTab == "profile" ? "active" : "")"
+                       href="#" onclick="switchTab('profile', this); return false;">
+                        <i class="fas fa-user me-2"></i>Profile
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(activeTab == "security" ? "active" : "")"
+                       href="#" onclick="switchTab('security', this); return false;">
+                        <i class="fas fa-lock me-2"></i>Security
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Profile Tab -->
+            <div id="tab-profile" class="settings-tab @(activeTab == "profile" ? "" : "d-none")">
+                <div class="settings-card">
+                    <div class="settings-card-header">
+                        <h5 class="settings-card-title">
+                            <i class="fas fa-id-card me-2 text-primary"></i>Personal Information
+                        </h5>
+                    </div>
+                    <div class="settings-card-body">
+
+                        <!-- Avatar preview -->
+                        <div class="text-center mb-4">
+                            <div id="avatar-initials"
+                                 class="rounded-circle d-inline-flex align-items-center justify-content-center
+                                        text-white fw-bold @(string.IsNullOrEmpty(Model.AvatarUrl) ? "" : "d-none")"
+                                 style="width:90px;height:90px;font-size:1.8rem;
+                                        background:linear-gradient(135deg,#4F46E5,#7C3AED);">
+                                @(Model.FirstName.Length > 0 ? Model.FirstName[0].ToString().ToUpper() : "")@(Model.LastName.Length > 0 ? Model.LastName[0].ToString().ToUpper() : "")
+                            </div>
+                            <img id="avatar-img"
+                                 src="@Model.AvatarUrl"
+                                 class="rounded-circle @(string.IsNullOrEmpty(Model.AvatarUrl) ? "d-none" : "")"
+                                 alt="Avatar"
+                                 style="width:90px;height:90px;object-fit:cover;
+                                        border:3px solid #E5E7EB;" />
+                        </div>
+
+                        <form asp-action="UpdateProfile" method="post">
+                            @Html.AntiForgeryToken()
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">
+                                        First Name <span class="text-danger">*</span>
+                                    </label>
+                                    <input asp-for="FirstName" class="form-control"
+                                           placeholder="First name" />
+                                    <span asp-validation-for="FirstName" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">
+                                        Last Name <span class="text-danger">*</span>
+                                    </label>
+                                    <input asp-for="LastName" class="form-control"
+                                           placeholder="Last name" />
+                                    <span asp-validation-for="LastName" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Bio</label>
+                                <textarea asp-for="Bio" class="form-control" rows="3"
+                                          placeholder="Tell others a bit about yourself..."></textarea>
+                                <div class="form-text">Max 1000 characters.</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Avatar URL</label>
+                                <input asp-for="AvatarUrl" class="form-control"
+                                       id="avatarUrlInput"
+                                       placeholder="https://example.com/your-photo.jpg" />
+                                <div class="form-text">
+                                    Paste a direct link to a publicly accessible image.
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Preferred Language</label>
+                                <select asp-for="PreferredLanguage" class="form-select">
+                                    <option value="">Not specified</option>
+                                    <option>Spanish</option>
+                                    <option>French</option>
+                                    <option>German</option>
+                                    <option>Japanese</option>
+                                    <option>Italian</option>
+                                    <option>Chinese</option>
+                                    <option>Portuguese</option>
+                                    <option>Russian</option>
+                                    <option>Korean</option>
+                                    <option>Arabic</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary px-5">
+                                <i class="fas fa-save me-2"></i>Save Changes
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Tab -->
+            <div id="tab-security" class="settings-tab @(activeTab == "security" ? "" : "d-none")">
+                <div class="settings-card">
+                    <div class="settings-card-header">
+                        <h5 class="settings-card-title">
+                            <i class="fas fa-key me-2 text-primary"></i>Change Password
+                        </h5>
+                    </div>
+                    <div class="settings-card-body">
+
+                        <!-- Email (read-only) -->
+                        <div class="mb-4 p-3 rounded-3"
+                             style="background:#F9FAFB;border:1px solid #E5E7EB;">
+                            <div class="text-muted small fw-semibold mb-1">
+                                <i class="fas fa-envelope me-2"></i>Email Address
+                            </div>
+                            <div class="fw-semibold">@Model.Email</div>
+                            <div class="text-muted" style="font-size:.75rem;">
+                                Email changes are not supported at this time.
+                            </div>
+                        </div>
+
+                        <form asp-action="UpdatePassword" method="post">
+                            @Html.AntiForgeryToken()
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">
+                                    Current Password <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <input asp-for="CurrentPassword"
+                                           type="password"
+                                           class="form-control"
+                                           id="currentPwd"
+                                           placeholder="Enter current password" />
+                                    <button class="btn btn-outline-secondary"
+                                            type="button"
+                                            onclick="togglePwd('currentPwd', this)">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">
+                                    New Password <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <input asp-for="NewPassword"
+                                           type="password"
+                                           class="form-control"
+                                           id="newPwd"
+                                           placeholder="At least 6 characters"
+                                           oninput="checkStrength(this.value)" />
+                                    <button class="btn btn-outline-secondary"
+                                            type="button"
+                                            onclick="togglePwd('newPwd', this)">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <!-- Strength bar -->
+                                <div class="mt-2" id="strengthWrap" style="display:none;">
+                                    <div style="height:6px;background:#E5E7EB;border-radius:10px;overflow:hidden;">
+                                        <div id="strengthBar"
+                                             style="height:100%;width:0;border-radius:10px;
+                                                    transition:width .3s,background .3s;"></div>
+                                    </div>
+                                    <div id="strengthLabel"
+                                         class="text-muted mt-1"
+                                         style="font-size:.75rem;"></div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">
+                                    Confirm New Password <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <input asp-for="ConfirmNewPassword"
+                                           type="password"
+                                           class="form-control"
+                                           id="confirmPwd"
+                                           placeholder="Repeat new password" />
+                                    <button class="btn btn-outline-secondary"
+                                            type="button"
+                                            onclick="togglePwd('confirmPwd', this)">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary px-5">
+                                <i class="fas fa-lock me-2"></i>Update Password
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    .settings-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        border: 1px solid rgba(0,0,0,0.04);
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+
+    .settings-card-header {
+        padding: 1.1rem 1.5rem;
+        border-bottom: 1px solid #F3F4F6;
+    }
+
+    .settings-card-title {
+        margin: 0;
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: #1F2937;
+    }
+
+    .settings-card-body {
+        padding: 1.75rem;
+    }
+
+    .nav-pills .nav-link {
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: #6B7280;
+        padding: 0.6rem 1.2rem;
+    }
+
+        .nav-pills .nav-link.active {
+            background: #4F46E5;
+            color: white;
+        }
+
+        .nav-pills .nav-link:hover:not(.active) {
+            background: #F3F4F6;
+            color: #374151;
+        }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // ── Tab switching ──────────────────────────────
+        function switchTab(name, link) {
+            document.querySelectorAll('.settings-tab').forEach(t => t.classList.add('d-none'));
+            document.querySelectorAll('#settingsTabs .nav-link').forEach(l => l.classList.remove('active'));
+            document.getElementById('tab-' + name).classList.remove('d-none');
+            link.classList.add('active');
+        }
+
+        // Open security tab if redirected there
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('tab') === 'security') {
+            const secLink = document.querySelector('[onclick*="security"]');
+            if (secLink) switchTab('security', secLink);
+        }
+
+        // ── Avatar live preview ────────────────────────
+        const urlInput     = document.getElementById('avatarUrlInput');
+        const avatarImg    = document.getElementById('avatar-img');
+        const avatarInit   = document.getElementById('avatar-initials');
+
+        urlInput?.addEventListener('input', function () {
+            const url = this.value.trim();
+            if (url) {
+                avatarImg.src = url;
+                avatarImg.classList.remove('d-none');
+                avatarInit.classList.add('d-none');
+                avatarImg.onerror = () => {
+                    avatarImg.classList.add('d-none');
+                    avatarInit.classList.remove('d-none');
+                };
+            } else {
+                avatarImg.classList.add('d-none');
+                avatarInit.classList.remove('d-none');
+            }
+        });
+
+        // ── Show/hide password toggle ──────────────────
+        function togglePwd(id, btn) {
+            const inp = document.getElementById(id);
+            const icon = btn.querySelector('i');
+            if (inp.type === 'password') {
+                inp.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                inp.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
+        }
+
+        // ── Password strength meter ────────────────────
+        function checkStrength(val) {
+            const wrap  = document.getElementById('strengthWrap');
+            const bar   = document.getElementById('strengthBar');
+            const label = document.getElementById('strengthLabel');
+
+            wrap.style.display = val ? 'block' : 'none';
+            if (!val) return;
+
+            let score = 0;
+            if (val.length >= 6)  score++;
+            if (val.length >= 10) score++;
+            if (/[A-Z]/.test(val)) score++;
+            if (/[0-9]/.test(val)) score++;
+            if (/[^A-Za-z0-9]/.test(val)) score++;
+
+            const levels = [
+                { pct: '20%', color: '#EF4444', text: 'Very weak' },
+                { pct: '40%', color: '#F97316', text: 'Weak'      },
+                { pct: '60%', color: '#F59E0B', text: 'Fair'      },
+                { pct: '80%', color: '#84CC16', text: 'Good'      },
+                { pct: '100%',color: '#10B981', text: 'Strong'    },
+            ];
+            const lvl = levels[Math.min(score, 4)];
+            bar.style.width      = lvl.pct;
+            bar.style.background = lvl.color;
+            label.textContent    = lvl.text;
+            label.style.color    = lvl.color;
+        }
+    </script>
+}

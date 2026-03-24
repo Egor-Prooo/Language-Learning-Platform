@@ -17,17 +17,20 @@ namespace LanguageLearningPlatform.Web.Controllers
         private readonly UserManager<User> _userManager;
         private readonly IProgressService _progressService;
         private readonly IAchievementService _achievementService;
+        private readonly SignInManager<User> _signInManager;
 
         public ProfileController(
             ApplicationDbContext context,
             UserManager<User> userManager,
             IProgressService progressService,
-            IAchievementService achievementService)
+            IAchievementService achievementService,
+            SignInManager<User> signInManager)
         {
             _context = context;
             _userManager = userManager;
             _progressService = progressService;
             _achievementService = achievementService;
+            this._signInManager = signInManager;
         }
 
         // GET: Profile
@@ -326,6 +329,94 @@ namespace LanguageLearningPlatform.Web.Controllers
                 .ToListAsync();
 
             return View("TeacherProfile", user);
+        }
+
+        // GET: Profile/Settings
+        public async Task<IActionResult> Settings()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return NotFound();
+
+            var vm = new SettingsViewModel
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Bio = user.Bio,
+                AvatarUrl = user.ProfilePictureUrl,
+                PreferredLanguage = user.PreferredLanguage,
+                Email = user.Email
+            };
+            return View(vm);
+        }
+
+        // POST: Profile/Settings (profile tab)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateProfile(SettingsViewModel model)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return NotFound();
+
+            // Only validate profile fields
+            if (string.IsNullOrWhiteSpace(model.FirstName) ||
+                string.IsNullOrWhiteSpace(model.LastName))
+            {
+                ModelState.AddModelError("", "First and last name are required.");
+                model.Email = user.Email;
+                model.ActiveTab = "profile";
+                return View("Settings", model);
+            }
+
+            user.FirstName = model.FirstName;
+            user.LastName = model.LastName;
+            user.Bio = model.Bio;
+            user.ProfilePictureUrl = model.AvatarUrl;
+            user.PreferredLanguage = model.PreferredLanguage;
+
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Profile updated successfully!";
+            return RedirectToAction(nameof(Settings));
+        }
+
+        // POST: Profile/Settings (password tab)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdatePassword(SettingsViewModel model)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _userManager.FindByIdAsync(userId!);
+            if (user == null) return NotFound();
+
+            if (string.IsNullOrWhiteSpace(model.CurrentPassword) ||
+                string.IsNullOrWhiteSpace(model.NewPassword) ||
+                string.IsNullOrWhiteSpace(model.ConfirmNewPassword))
+            {
+                TempData["ErrorMessage"] = "All password fields are required.";
+                return RedirectToAction(nameof(Settings), new { tab = "security" });
+            }
+
+            if (model.NewPassword != model.ConfirmNewPassword)
+            {
+                TempData["ErrorMessage"] = "New passwords do not match.";
+                return RedirectToAction(nameof(Settings), new { tab = "security" });
+            }
+
+            var result = await _userManager.ChangePasswordAsync(
+                user, model.CurrentPassword!, model.NewPassword!);
+
+            if (result.Succeeded)
+            {
+                await _signInManager.RefreshSignInAsync(user);
+                TempData["SuccessMessage"] = "Password changed successfully!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = string.Join(" ", result.Errors.Select(e => e.Description));
+            }
+
+            return RedirectToAction(nameof(Settings), new { tab = "security" });
         }
 
         private static int CalculateStreak(List<DateTime> activityDates)

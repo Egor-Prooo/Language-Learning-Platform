@@ -595,7 +595,7 @@
                 <a asp-controller="Teacher" asp-action="Dashboard" class="tp-tab"><i class="fas fa-chalkboard me-1"></i>Dashboard</a>
                 <a asp-controller="Teacher" asp-action="Students" class="tp-tab"><i class="fas fa-users me-1"></i>Students</a>
                 <a asp-controller="Teacher" asp-action="Messages" class="tp-tab"><i class="fas fa-envelope me-1"></i>Messages @(unreadMessages > 0 ? $"({unreadMessages})" : "")</a>
-                <a asp-area="Identity" asp-page="/Account/Manage/Index" class="tp-tab"><i class="fas fa-cog me-1"></i>Settings</a>
+                <a asp-controller="Profile" asp-action="Settings" class="tp-tab"><i class="fas fa-cog me-1"></i>Settings</a>
             </div>
         </div>
     </div>
@@ -763,7 +763,7 @@
                             </a>
                             <a asp-controller="Forum" asp-action="Index" class="ta-btn"><i class="fas fa-comments ico-ta-s"></i>Community Forum</a>
                             <a asp-action="Achievements" class="ta-btn"><i class="fas fa-trophy ico-ta-a"></i>My Achievements</a>
-                            <a asp-area="Identity" asp-page="/Account/Manage/Index" class="ta-btn"><i class="fas fa-cog ico-ta-s"></i>Account Settings</a>
+                            <a asp-controller="Profile" asp-action="Settings" class="ta-btn"><i class="fas fa-cog ico-ta-s"></i>Account Settings</a>
                         </div>
                     </div>
 

@@ -1,13 +1,13 @@
 ﻿@page
-@model Index
+@using LanguageLearningPlatform.Areas.Identity.Pages.Account.Manage
+@model IndexModel
 @{
     ViewData["Title"] = "Account Settings";
     Layout = "/Views/Shared/_Layout.cshtml";
 }
 
-@* Redirect to the MVC Profile controller *@
-<script>window.location.href = '@Url.Action("Index", "Profile", new { area = "" })';</script>
-<meta http-equiv="refresh" content="0;url=@Url.Action("Index", "Profile", new { area = "" })" />
+<script>window.location.href = '@Url.Action("Settings", "Profile", new { area = "" })';</script>
+<meta http-equiv="refresh" content="0;url=@Url.Action("Settings", "Profile", new { area = "" })" />
 
 <div class="container my-5 text-center">
     <p>Redirecting to your profile... <a href="@Url.Action("Index", "Profile", new { area = "" })">Click here if not redirected</a></p>

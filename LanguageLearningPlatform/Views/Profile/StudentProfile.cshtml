@@ -216,7 +216,7 @@
             <a href="#" class="sp-tab active"><i class="fas fa-user me-1"></i>Overview</a>
             <a asp-action="Achievements" class="sp-tab"><i class="fas fa-trophy me-1"></i>Achievements</a>
             <a asp-action="Stats" class="sp-tab"><i class="fas fa-chart-bar me-1"></i>Stats</a>
-            <a asp-area="Identity" asp-page="/Account/Manage/Index" class="sp-tab"><i class="fas fa-cog me-1"></i>Settings</a>
+                <a asp-controller="Profile" asp-action="Settings" class="sp-tab"><i class="fas fa-cog me-1"></i>Settings</a>
         </div>
     </div>
 </div>
@@ -377,7 +377,7 @@
                         <a asp-action="Stats" class="sa-btn"><i class="fas fa-chart-bar ico-sa-green"></i>Detailed Stats</a>
                         <a asp-controller="Forum" asp-action="Index" class="sa-btn"><i class="fas fa-comments ico-sa-indigo"></i>Community Forum</a>
                         <a asp-controller="Messaging" asp-action="MyMessages" class="sa-btn"><i class="fas fa-inbox ico-sa-slate"></i>My Messages</a>
-                        <a asp-area="Identity" asp-page="/Account/Manage/Index" class="sa-btn"><i class="fas fa-cog ico-sa-slate"></i>Account Settings</a>
+                            <a asp-controller="Profile" asp-action="Settings" class="sa-btn"><i class="fas fa-cog ico-sa-slate"></i>Account Settings</a>
                     </div>
                 </div>
 

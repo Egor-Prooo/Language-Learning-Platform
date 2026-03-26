@@ -56,7 +56,7 @@
               "RelativeDocumentMoniker": "LanguageLearningPlatform.Tests\\UnitTests.cs",
               "ToolTip": "C:\\Users\\epros\\source\\repos\\LanguageLearningPlatform\\LanguageLearningPlatform.Tests\\UnitTests.cs",
               "RelativeToolTip": "LanguageLearningPlatform.Tests\\UnitTests.cs",
-              "ViewState": "AgIAADYAAAAAAAAAAAAAAA4AAAAjAAAAAAAAAA==",
+              "ViewState": "AgIAABUAAAAAAAAAAAAAAA4AAAAjAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-03-26T08:36:30.855Z",
               "EditorCaption": ""
@@ -71,8 +71,7 @@
               "RelativeToolTip": "LanguageLearningPlatform\\Program.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAB8AAAAgAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-26T08:34:41.055Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-26T08:34:41.055Z"
             },
             {
               "$type": "Document",
@@ -84,8 +83,7 @@
               "RelativeToolTip": "LanguageLearningPlatform\\wwwroot\\css\\site.css",
               "ViewState": "AgIAABMEAAAAAAAAAAAQwDQEAAAVAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
-              "WhenOpened": "2026-03-26T08:34:33.975Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-26T08:34:33.975Z"
             },
             {
               "$type": "Document",
@@ -97,8 +95,7 @@
               "RelativeToolTip": "LanguageLearningPlatform\\Views\\Profile\\StudentProfile.cshtml",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAKMBAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-03-25T07:49:55.049Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-25T07:49:55.049Z"
             }
           ]
         }

@@ -226,8 +226,7 @@ namespace LanguageLearningPlatform.Web.Controllers
 
         // ── Messaging ─────────────────────────────────────────────────
 
-        // GET: /Teacher/Messages
-        public async Task<IActionResult> Messages()
+        public async Task<IActionResult> Messages(string? selectedStudentId = null, Guid? selectedCourseId = null)
         {
             var teacherId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
@@ -235,13 +234,18 @@ namespace LanguageLearningPlatform.Web.Controllers
                 .Where(m => m.TeacherId == teacherId)
                 .Include(m => m.Student)
                 .Include(m => m.Course)
-                .OrderByDescending(m => m.SentAt)
+                .OrderBy(m => m.SentAt)
                 .ToListAsync();
 
-            // Mark all as read
-            var unread = messages.Where(m => !m.IsRead).ToList();
-            unread.ForEach(m => m.IsRead = true);
-            if (unread.Any()) await _context.SaveChangesAsync();
+            // Mark teacher-received messages (from students) as read for selected conversation
+            if (!string.IsNullOrEmpty(selectedStudentId) && selectedCourseId.HasValue)
+            {
+                var unread = messages
+                    .Where(m => m.StudentId == selectedStudentId && m.CourseId == selectedCourseId.Value && !m.IsFromTeacher && !m.IsRead)
+                    .ToList();
+                unread.ForEach(m => m.IsRead = true);
+                if (unread.Any()) await _context.SaveChangesAsync();
+            }
 
             var conversations = messages
                 .GroupBy(m => (m.StudentId, m.CourseId))
@@ -253,16 +257,26 @@ namespace LanguageLearningPlatform.Web.Controllers
                     CourseName = g.First().Course?.Title ?? "Unknown",
                     LastMessage = g.OrderByDescending(m => m.SentAt).First().Message,
                     LastMessageAt = g.Max(m => m.SentAt),
-                    UnreadCount = g.Count(m => !m.IsRead),
+                    UnreadCount = g.Count(m => !m.IsFromTeacher && !m.IsRead),
                     Messages = g.OrderBy(m => m.SentAt).ToList()
                 })
                 .OrderByDescending(c => c.LastMessageAt)
                 .ToList();
 
+            // Auto-select first if none specified
+            if (string.IsNullOrEmpty(selectedStudentId) && conversations.Any())
+            {
+                selectedStudentId = conversations.First().StudentId;
+                selectedCourseId = conversations.First().CourseId;
+            }
+
+            ViewBag.SelectedStudentId = selectedStudentId;
+            ViewBag.SelectedCourseId = selectedCourseId;
+
             return View(conversations);
         }
 
-        // POST: /Teacher/ReplyMessage
+        // Also update ReplyMessage to redirect to the correct conversation:
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ReplyMessage(string studentId, Guid courseId, string message)
@@ -283,8 +297,7 @@ namespace LanguageLearningPlatform.Web.Controllers
 
             await _context.SaveChangesAsync();
 
-            TempData["SuccessMessage"] = "Reply sent!";
-            return RedirectToAction(nameof(Messages));
+            return RedirectToAction(nameof(Messages), new { selectedStudentId = studentId, selectedCourseId = courseId });
         }
 
         // ── Student progress ──────────────────────────────────────────

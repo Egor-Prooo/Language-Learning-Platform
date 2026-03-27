@@ -68,71 +68,231 @@ class InteractiveExerciseHandler {
     }
 
     setupMatching(exItem, exId) {
-        const leftItems = exItem.querySelectorAll(`#left-column-${exId} .matching-item`);
+        const leftItems  = exItem.querySelectorAll(`#left-column-${exId}  .matching-item`);
         const rightItems = exItem.querySelectorAll(`#right-column-${exId} .matching-item`);
         const hiddenInput = exItem.querySelector(`#matching-answer-${exId}`);
-        const checkBtn = exItem.querySelector('.btn-check-answer');
+        const checkBtn    = exItem.querySelector('.btn-check-answer');
 
-        let selectedLeft = null;
+        // Map: leftEl -> rightEl (user's current pairing)
+        let userPairs = new Map();
+        // Reverse map for quick lookup: rightEl -> leftEl
+        let reverseMap = new Map();
+
+        let selectedLeft  = null;
         let selectedRight = null;
-        let pairs = {}; // pairId -> { left: el, right: el }
-        let matchedPairIds = new Set();
 
-        function tryMatch() {
+        const totalPairs = leftItems.length;
+
+        function updateCheckButton() {
+            if (checkBtn) checkBtn.disabled = userPairs.size !== totalPairs;
+        }
+
+        function clearLeftSelection() {
+            if (selectedLeft) {
+                selectedLeft.classList.remove('selected');
+                selectedLeft = null;
+            }
+        }
+
+        function clearRightSelection() {
+            if (selectedRight) {
+                selectedRight.classList.remove('selected');
+                selectedRight = null;
+            }
+        }
+
+        // Draw or redraw the SVG connector lines
+        function drawConnectors() {
+            // Remove old SVG overlay if any
+            const old = exItem.querySelector('.matching-connectors-svg');
+            if (old) old.remove();
+
+            if (userPairs.size === 0) return;
+
+            const container = exItem.querySelector('.matching-exercise');
+            if (!container) return;
+
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.classList.add('matching-connectors-svg');
+            svg.style.cssText = `
+                position: absolute;
+                top: 0; left: 0;
+                width: 100%; height: 100%;
+                pointer-events: none;
+                overflow: visible;
+                z-index: 5;
+            `;
+
+            // Make container relative so SVG positions correctly
+            if (getComputedStyle(container).position === 'static') {
+                container.style.position = 'relative';
+            }
+
+            container.appendChild(svg);
+
+            const containerRect = container.getBoundingClientRect();
+
+            userPairs.forEach((rightEl, leftEl) => {
+                const lr = leftEl.getBoundingClientRect();
+                const rr = rightEl.getBoundingClientRect();
+
+                const x1 = lr.right  - containerRect.left;
+                const y1 = lr.top    - containerRect.top  + lr.height / 2;
+                const x2 = rr.left   - containerRect.left;
+                const y2 = rr.top    - containerRect.top  + rr.height / 2;
+
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', x1);
+                line.setAttribute('y1', y1);
+                line.setAttribute('x2', x2);
+                line.setAttribute('y2', y2);
+                line.setAttribute('stroke', '#4F46E5');
+                line.setAttribute('stroke-width', '2.5');
+                line.setAttribute('stroke-dasharray', '6 3');
+                line.setAttribute('stroke-linecap', 'round');
+                svg.appendChild(line);
+            });
+        }
+
+        function recordPair(leftEl, rightEl) {
+            // If left was already paired, free the old right
+            if (userPairs.has(leftEl)) {
+                const oldRight = userPairs.get(leftEl);
+                oldRight.classList.remove('paired');
+                reverseMap.delete(oldRight);
+            }
+            // If right was already paired to a different left, free that left
+            if (reverseMap.has(rightEl)) {
+                const oldLeft = reverseMap.get(rightEl);
+                oldLeft.classList.remove('paired');
+                userPairs.delete(oldLeft);
+            }
+
+            userPairs.set(leftEl, rightEl);
+            reverseMap.set(rightEl, leftEl);
+
+            leftEl.classList.add('paired');
+            rightEl.classList.add('paired');
+        }
+
+        function tryPair() {
             if (!selectedLeft || !selectedRight) return;
 
-            const leftPairId = selectedLeft.dataset.pairId;
-            const rightPairId = selectedRight.dataset.pairId;
+            recordPair(selectedLeft, selectedRight);
+            drawConnectors();
+            updateCheckButton();
 
-            if (leftPairId === rightPairId) {
-                // Correct match
-                selectedLeft.classList.add('matched');
-                selectedRight.classList.add('matched');
-                selectedLeft.style.pointerEvents = 'none';
-                selectedRight.style.pointerEvents = 'none';
-                matchedPairIds.add(leftPairId);
-            } else {
-                // Wrong – flash red briefly
-                [selectedLeft, selectedRight].forEach(el => {
-                    el.classList.add('match-error');
-                    setTimeout(() => el.classList.remove('match-error'), 600);
-                });
-            }
-
-            selectedLeft.classList.remove('selected');
-            selectedRight.classList.remove('selected');
-            selectedLeft = null;
-            selectedRight = null;
-
-            // Build answer string from all matched pairs
-            const allPairs = exItem.querySelectorAll('.matching-item[data-pair-id]');
-            const totalPairs = exItem.querySelectorAll(`#left-column-${exId} .matching-item`).length;
-
-            if (matchedPairIds.size === totalPairs) {
-                hiddenInput.value = 'matched';
-                if (checkBtn) checkBtn.disabled = false;
-            }
+            clearLeftSelection();
+            clearRightSelection();
         }
 
         leftItems.forEach(item => {
             item.addEventListener('click', () => {
-                if (item.classList.contains('matched')) return;
-                leftItems.forEach(i => i.classList.remove('selected'));
+                if (exItem.classList.contains('exercise-completed')) return;
+
+                if (selectedLeft === item) {
+                    // Deselect
+                    clearLeftSelection();
+                    return;
+                }
+
+                clearLeftSelection();
                 item.classList.add('selected');
                 selectedLeft = item;
-                tryMatch();
+                tryPair();
             });
         });
 
         rightItems.forEach(item => {
             item.addEventListener('click', () => {
-                if (item.classList.contains('matched')) return;
-                rightItems.forEach(i => i.classList.remove('selected'));
+                if (exItem.classList.contains('exercise-completed')) return;
+
+                if (selectedRight === item) {
+                    // Deselect
+                    clearRightSelection();
+                    return;
+                }
+
+                clearRightSelection();
                 item.classList.add('selected');
                 selectedRight = item;
-                tryMatch();
+                tryPair();
             });
         });
+
+        // Store the userPairs map reference on the element so we can read it at submit time
+        exItem._matchingPairs = userPairs;
+        exItem._matchingLeft  = leftItems;
+        exItem._matchingRight = rightItems;
+
+        // Store drawConnectors so we can call it after reveal
+        exItem._drawMatchingConnectors = drawConnectors;
+
+        updateCheckButton();
+    }
+
+    // Build the answer string from the user's pairs map at submission time
+    // and reveal correct/incorrect feedback on each item
+    getMatchingAnswer(exItem) {
+        const userPairs = exItem._matchingPairs;
+        if (!userPairs || userPairs.size === 0) return null;
+
+        // We need to determine correctness: each left item has a data-pair-id
+        // that must match the right item's data-pair-id
+        let allCorrect = true;
+        const results = [];
+
+        userPairs.forEach((rightEl, leftEl) => {
+            const leftPairId  = leftEl.dataset.pairId;
+            const rightPairId = rightEl.dataset.pairId;
+            const correct = leftPairId === rightPairId;
+            results.push({ leftEl, rightEl, correct });
+            if (!correct) allCorrect = false;
+        });
+
+        // Reveal feedback colours on the items
+        results.forEach(({ leftEl, rightEl, correct }) => {
+            const cls = correct ? 'matched' : 'match-error-final';
+            leftEl.classList.add(cls);
+            rightEl.classList.add(cls);
+            leftEl.classList.remove('paired', 'selected');
+            rightEl.classList.remove('paired', 'selected');
+        });
+
+        // Redraw connectors in green/red
+        const container = exItem.querySelector('.matching-exercise');
+        if (container) {
+            const old = exItem.querySelector('.matching-connectors-svg');
+            if (old) old.remove();
+
+            const containerRect = container.getBoundingClientRect();
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.classList.add('matching-connectors-svg');
+            svg.style.cssText = `position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:5;`;
+            if (getComputedStyle(container).position === 'static') container.style.position = 'relative';
+            container.appendChild(svg);
+
+            results.forEach(({ leftEl, rightEl, correct }) => {
+                const lr = leftEl.getBoundingClientRect();
+                const rr = rightEl.getBoundingClientRect();
+                const x1 = lr.right - containerRect.left;
+                const y1 = lr.top   - containerRect.top + lr.height / 2;
+                const x2 = rr.left  - containerRect.left;
+                const y2 = rr.top   - containerRect.top + rr.height / 2;
+
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+                line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+                line.setAttribute('stroke', correct ? '#10B981' : '#EF4444');
+                line.setAttribute('stroke-width', '2.5');
+                line.setAttribute('stroke-linecap', 'round');
+                svg.appendChild(line);
+            });
+        }
+
+        // Return 'matched' if all correct so the server accepts it,
+        // otherwise a special marker so the server knows it's wrong
+        return allCorrect ? 'matched' : 'unmatched';
     }
 
     handleInputChange(event) {
@@ -165,7 +325,7 @@ class InteractiveExerciseHandler {
     async handleCheckAnswer(event) {
         const btn = event.currentTarget;
         const exItem = btn.closest('.exercise-item');
-        const exId = exItem.dataset.exerciseId;
+        const exId   = exItem.dataset.exerciseId;
         const exType = exItem.dataset.type;
 
         let userAnswer = this.getUserAnswer(exItem, exType);
@@ -180,7 +340,6 @@ class InteractiveExerciseHandler {
             console.error('Answer submit error:', err);
             this.showError(exItem, 'An error occurred. Please try again.');
         } finally {
-            // Re-enable only if not completed correctly
             if (!exItem.classList.contains('exercise-completed')) {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-check me-1"></i>Check Answer';
@@ -207,8 +366,8 @@ class InteractiveExerciseHandler {
                 return fallback ? fallback.value.trim() : null;
             }
             case 'Matching': {
-                const hidden = exItem.querySelector('[id^="matching-answer-"]');
-                return hidden ? hidden.value.trim() : null;
+                // Build visual feedback AND get the answer string
+                return this.getMatchingAnswer(exItem);
             }
             default: {
                 const inp = exItem.querySelector('.exercise-input');
@@ -257,7 +416,6 @@ class InteractiveExerciseHandler {
         this.updatePoints(result.pointsEarned, result.totalPoints);
         this.updateStreak(result.streak);
         this.completedExercises.add(exItem.dataset.exerciseId);
-        // Remove from skipped if it was skipped before
         this.skippedExercises.delete(exItem.dataset.exerciseId);
         this.updateProgress();
         this.disableExercise(exItem);
@@ -271,10 +429,41 @@ class InteractiveExerciseHandler {
         this.playSound('incorrect');
         exItem.classList.add('exercise-error');
         setTimeout(() => exItem.classList.remove('exercise-error'), 600);
-        this.showFeedback(exItem, false, result.feedback, result.correctAnswer
-            ? `Correct answer: <strong>${result.correctAnswer}</strong>` : null);
+
+        const extra = result.correctAnswer
+            ? `Correct answer: <strong>${result.correctAnswer}</strong>`
+            : null;
+        this.showFeedback(exItem, false, result.feedback, extra);
+
+        // For matching: re-enable the items so the user can try again
+        if (exItem.dataset.type === 'Matching') {
+            this.resetMatchingForRetry(exItem);
+        }
+
         exItem.dataset.attempts = (parseInt(exItem.dataset.attempts || '1') + 1).toString();
         if (this.hearts === 0) this.showGameOver();
+    }
+
+    // Reset matching items to allow another attempt after a wrong answer
+    resetMatchingForRetry(exItem) {
+        const exId = exItem.dataset.exerciseId;
+
+        // Clear visual state
+        exItem.querySelectorAll('.matching-item').forEach(el => {
+            el.classList.remove('matched', 'match-error-final', 'paired', 'selected');
+            el.style.pointerEvents = '';
+        });
+
+        // Remove connector lines
+        const old = exItem.querySelector('.matching-connectors-svg');
+        if (old) old.remove();
+
+        // Reset the pairs maps
+        if (exItem._matchingPairs) exItem._matchingPairs.clear();
+
+        // Re-disable the check button until all pairs are made again
+        const checkBtn = exItem.querySelector('.btn-check-answer');
+        if (checkBtn) checkBtn.disabled = true;
     }
 
     showFeedback(exItem, isCorrect, message, extraInfo) {
@@ -284,7 +473,7 @@ class InteractiveExerciseHandler {
             div.className = 'exercise-feedback';
             exItem.querySelector('.exercise-content').appendChild(div);
         }
-        const icon = isCorrect ? 'check-circle' : 'times-circle';
+        const icon  = isCorrect ? 'check-circle' : 'times-circle';
         const klass = isCorrect ? 'correct' : 'incorrect';
         div.className = `exercise-feedback ${klass}`;
         div.innerHTML = `
@@ -314,9 +503,9 @@ class InteractiveExerciseHandler {
     updatePoints(earned, total) {
         const el = document.getElementById('user-total-points');
         if (!el) return;
-        const start = parseInt(el.textContent) || 0;
+        const start    = parseInt(el.textContent) || 0;
         const duration = 900;
-        const began = Date.now();
+        const began    = Date.now();
         const tick = () => {
             const t = Math.min((Date.now() - began) / duration, 1);
             el.textContent = Math.floor(start + (total - start) * t);
@@ -356,7 +545,7 @@ class InteractiveExerciseHandler {
         c.innerHTML = '';
         for (let i = 0; i < 5; i++) {
             const h = document.createElement('i');
-            h.className = i < this.hearts ? 'fas fa-heart' : 'far fa-heart';
+            h.className  = i < this.hearts ? 'fas fa-heart' : 'far fa-heart';
             h.style.color = i < this.hearts ? '#EF4444' : '#D1D5DB';
             h.style.fontSize = '1.4rem';
             c.appendChild(h);
@@ -364,27 +553,25 @@ class InteractiveExerciseHandler {
     }
 
     updateProgress() {
-        const done = this.completedExercises.size;
+        const done  = this.completedExercises.size;
         const total = this.exercises.length;
-        const pct = total > 0 ? (done / total) * 100 : 0;
+        const pct   = total > 0 ? (done / total) * 100 : 0;
 
-        const bar = document.getElementById('progress-bar');
+        const bar  = document.getElementById('progress-bar');
         const text = document.getElementById('completed-count');
-        if (bar) bar.style.width = pct + '%';
+        if (bar)  bar.style.width = pct + '%';
         if (text) text.textContent = done;
     }
 
-    // ── Skip: mark as skipped but keep re-answerable ──────────
     skipExercise(event) {
-        const btn = event.currentTarget;
+        const btn    = event.currentTarget;
         const exItem = btn.closest('.exercise-item');
-        const exId = exItem.dataset.exerciseId;
+        const exId   = exItem.dataset.exerciseId;
 
-        if (this.completedExercises.has(exId)) return; // already done correctly
+        if (this.completedExercises.has(exId)) return;
 
         this.skippedExercises.add(exId);
 
-        // Show a subtle "skipped" indicator without locking the exercise
         let indicator = exItem.querySelector('.skipped-indicator');
         if (!indicator) {
             indicator = document.createElement('div');
@@ -397,7 +584,6 @@ class InteractiveExerciseHandler {
         this.updateFinishButton();
     }
 
-    // ── Finish Lesson Button ──────────────────────────────────
     renderFinishButton() {
         const container = document.getElementById('finish-lesson-container');
         if (!container) return;
@@ -408,13 +594,10 @@ class InteractiveExerciseHandler {
         const container = document.getElementById('finish-lesson-container');
         if (!container) return;
 
-        const total = this.exercises.length;
-        const done = this.completedExercises.size;
+        const total      = this.exercises.length;
+        const done       = this.completedExercises.size;
         const hasSkipped = this.skippedExercises.size > 0;
-        const unanswered = total - done - this.skippedExercises.size;
-
-        // Only allow finishing if ALL exercises are answered correctly (no skips remaining)
-        const canFinish = done === total && total > 0;
+        const canFinish  = done === total && total > 0;
         const allAttempted = (done + this.skippedExercises.size) === total;
 
         container.innerHTML = '';
@@ -447,8 +630,8 @@ class InteractiveExerciseHandler {
     }
 
     showHint(event) {
-        const btn = event.currentTarget;
-        const exItem = btn.closest('.exercise-item');
+        const btn     = event.currentTarget;
+        const exItem  = btn.closest('.exercise-item');
         const hintDiv = exItem.querySelector('.exercise-hint');
         if (!hintDiv) return;
         const showing = hintDiv.style.display === 'flex';
@@ -476,9 +659,9 @@ class InteractiveExerciseHandler {
         this.sounds = {};
         try {
             this.sounds = {
-                correct: new Audio('/sounds/correct.mp3'),
+                correct:   new Audio('/sounds/correct.mp3'),
                 incorrect: new Audio('/sounds/incorrect.mp3'),
-                select: new Audio('/sounds/select.mp3')
+                select:    new Audio('/sounds/select.mp3')
             };
             Object.values(this.sounds).forEach(s => { s.volume = 0.3; });
         } catch (e) { }
@@ -487,7 +670,7 @@ class InteractiveExerciseHandler {
     playSound(type) {
         try {
             const s = this.sounds[type];
-            if (s) { s.currentTime = 0; s.play().catch(() => { }); }
+            if (s) { s.currentTime = 0; s.play().catch(() => {}); }
         } catch (e) { }
     }
 
@@ -547,7 +730,6 @@ async function finishLesson() {
         const data = await resp.json();
 
         if (data.success) {
-            // Show success modal
             const modal = document.createElement('div');
             modal.className = 'completion-modal';
             modal.innerHTML = `

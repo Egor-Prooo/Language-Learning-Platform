@@ -816,6 +816,36 @@
             content: 'Recording...';
         }
 
+/* ── Matching exercise – add these rules to exercises.css ── */
+
+/* Paired (connected but not yet submitted) */
+.matching-item.paired {
+    border-color: #4F46E5;
+    background: rgba(79, 70, 229, 0.08);
+    font-weight: 600;
+}
+
+/* Correctly matched (revealed after submit) */
+.matching-item.matched {
+    background: linear-gradient(135deg, #D1FAE5, #A7F3D0);
+    border-color: #10B981;
+    pointer-events: none;
+}
+
+/* Incorrectly matched (revealed after submit) */
+.matching-item.match-error-final {
+    background: linear-gradient(135deg, #FEE2E2, #FECACA);
+    border-color: #EF4444;
+    animation: shake 0.5s ease;
+}
+
+/* Temporary red flash during setupMatching (old .match-error still used internally) */
+.matching-item.match-error {
+    border-color: #EF4444;
+    background: rgba(239, 68, 68, 0.08);
+    animation: shake 0.4s ease;
+}
+
 /* Progress Stats */
 .progress-stat {
     text-align: center;
@@ -866,5 +896,5 @@
     background: white;
     border-radius: 25px;
     font-weight: 700;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1
+

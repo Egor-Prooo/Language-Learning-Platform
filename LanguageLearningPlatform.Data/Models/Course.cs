@@ -44,7 +44,6 @@ namespace LanguageLearningPlatform.Data.Models
         public virtual ICollection<Progress> Progresses { get; set; } = new List<Progress>();
         public virtual ICollection<Exercise> Exercises { get; set; } = new List<Exercise>();
         public virtual ICollection<CourseEnrollment> Enrollments { get; set; } = new List<CourseEnrollment>();
-        public virtual ICollection<CourseSection> Sections { get; set; } = new List<CourseSection>();
         public virtual ICollection<ForumPost> ForumPosts { get; set; } = new List<ForumPost>();
         public virtual ICollection<TeacherLesson> TeacherLessons { get; set; } = new List<TeacherLesson>();
         public virtual ICollection<CourseTeacher> CourseTeachers { get; set; } = new List<CourseTeacher>();

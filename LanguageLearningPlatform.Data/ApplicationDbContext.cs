@@ -19,13 +19,11 @@ namespace LanguageLearningPlatform.Data
         public DbSet<UserAchievement> UserAchievements { get; set; }
         public DbSet<UserLevel> UserLevels { get; set; }
         public DbSet<ChatMessage> ChatMessages { get; set; }
-        public DbSet<Tutor> Tutors { get; set; }
         public DbSet<UserExerciseResult> UserExerciseResults { get; set; }
         public DbSet<CourseEnrollment> CourseEnrollments { get; set; }
         public DbSet<ForumPost> ForumPosts { get; set; }
         public DbSet<ForumComment> ForumComments { get; set; }
         public DbSet<TeacherLesson> TeacherLessons { get; set; }
-        public DbSet<CourseSection> CourseSections { get; set; }
         public DbSet<VideoLesson> VideoLessons { get; set; }
         public DbSet<UserVideoProgress> UserVideoProgresses { get; set; }
         public DbSet<TeacherMessage> TeacherMessages { get; set; }
@@ -53,12 +51,6 @@ namespace LanguageLearningPlatform.Data
                 .HasOne(cm => cm.User)
                 .WithMany(u => u.SentMessages)
                 .HasForeignKey(cm => cm.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<ChatMessage>()
-                .HasOne(cm => cm.Tutor)
-                .WithMany(t => t.ChatMessages)
-                .HasForeignKey(cm => cm.TutorId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Course Creator relationship
@@ -106,13 +98,6 @@ namespace LanguageLearningPlatform.Data
                 .WithMany(u => u.TeacherLessons)
                 .HasForeignKey(tl => tl.TeacherId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            // Course Section relationships
-            modelBuilder.Entity<CourseSection>()
-                .HasOne(cs => cs.Course)
-                .WithMany(c => c.Sections)
-                .HasForeignKey(cs => cs.CourseId)
-                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<TeacherMessage>(entity =>
             {

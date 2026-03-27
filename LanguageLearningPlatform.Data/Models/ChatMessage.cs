@@ -26,9 +26,5 @@ namespace LanguageLearningPlatform.Data.Models
         [ForeignKey(nameof(User))]
         public string UserId { get; set; } = string.Empty;
         public virtual User User { get; set; } = null!;
-
-        [ForeignKey(nameof(Tutor))]
-        public Guid? TutorId { get; set; }
-        public virtual Tutor? Tutor { get; set; }
     }
 }

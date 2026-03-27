@@ -1,13 +1,12 @@
 ﻿// ============================================================
 // LingoLearn – Interactive Exercise Handler
-// Covers: MultipleChoice, FillInBlank, Translation,
-//         Matching, Listening, Speaking
 // ============================================================
 
 class InteractiveExerciseHandler {
     constructor() {
         this.exercises = [];
-        this.completedExercises = new Set();
+        this.completedExercises = new Set();   // exerciseIds answered correctly
+        this.skippedExercises = new Set();     // exerciseIds skipped (not counted as done)
         this.totalPoints = 0;
         this.streak = 0;
         this.hearts = 5;
@@ -19,6 +18,8 @@ class InteractiveExerciseHandler {
         this.bindEventListeners();
         this.initializeProgressBar();
         this.initializeSoundEffects();
+        this.initMatchingExercises();
+        this.renderFinishButton();
     }
 
     loadExercises() {
@@ -34,12 +35,10 @@ class InteractiveExerciseHandler {
     }
 
     bindEventListeners() {
-        // ── Multiple choice ───────────────────────────────
         document.querySelectorAll('.exercise-option').forEach(opt => {
             opt.addEventListener('click', e => this.handleMultipleChoice(e));
         });
 
-        // ── Text inputs (Fill / Translation / Listening fallback) ──
         document.querySelectorAll('.exercise-input').forEach(inp => {
             inp.addEventListener('input', e => this.handleInputChange(e));
             inp.addEventListener('keypress', e => {
@@ -47,19 +46,92 @@ class InteractiveExerciseHandler {
             });
         });
 
-        // ── Check answer buttons ──────────────────────────
         document.querySelectorAll('.btn-check-answer').forEach(btn => {
             btn.addEventListener('click', e => this.handleCheckAnswer(e));
         });
 
-        // ── Hint buttons ──────────────────────────────────
         document.querySelectorAll('.btn-hint').forEach(btn => {
             btn.addEventListener('click', e => this.showHint(e));
         });
 
-        // ── Skip buttons ──────────────────────────────────
         document.querySelectorAll('.btn-skip').forEach(btn => {
             btn.addEventListener('click', e => this.skipExercise(e));
+        });
+    }
+
+    // ── Matching Exercise ─────────────────────────────────────
+    initMatchingExercises() {
+        document.querySelectorAll('.exercise-item[data-type="Matching"]').forEach(exItem => {
+            const exId = exItem.dataset.exerciseId;
+            this.setupMatching(exItem, exId);
+        });
+    }
+
+    setupMatching(exItem, exId) {
+        const leftItems = exItem.querySelectorAll(`#left-column-${exId} .matching-item`);
+        const rightItems = exItem.querySelectorAll(`#right-column-${exId} .matching-item`);
+        const hiddenInput = exItem.querySelector(`#matching-answer-${exId}`);
+        const checkBtn = exItem.querySelector('.btn-check-answer');
+
+        let selectedLeft = null;
+        let selectedRight = null;
+        let pairs = {}; // pairId -> { left: el, right: el }
+        let matchedPairIds = new Set();
+
+        function tryMatch() {
+            if (!selectedLeft || !selectedRight) return;
+
+            const leftPairId = selectedLeft.dataset.pairId;
+            const rightPairId = selectedRight.dataset.pairId;
+
+            if (leftPairId === rightPairId) {
+                // Correct match
+                selectedLeft.classList.add('matched');
+                selectedRight.classList.add('matched');
+                selectedLeft.style.pointerEvents = 'none';
+                selectedRight.style.pointerEvents = 'none';
+                matchedPairIds.add(leftPairId);
+            } else {
+                // Wrong – flash red briefly
+                [selectedLeft, selectedRight].forEach(el => {
+                    el.classList.add('match-error');
+                    setTimeout(() => el.classList.remove('match-error'), 600);
+                });
+            }
+
+            selectedLeft.classList.remove('selected');
+            selectedRight.classList.remove('selected');
+            selectedLeft = null;
+            selectedRight = null;
+
+            // Build answer string from all matched pairs
+            const allPairs = exItem.querySelectorAll('.matching-item[data-pair-id]');
+            const totalPairs = exItem.querySelectorAll(`#left-column-${exId} .matching-item`).length;
+
+            if (matchedPairIds.size === totalPairs) {
+                hiddenInput.value = 'matched';
+                if (checkBtn) checkBtn.disabled = false;
+            }
+        }
+
+        leftItems.forEach(item => {
+            item.addEventListener('click', () => {
+                if (item.classList.contains('matched')) return;
+                leftItems.forEach(i => i.classList.remove('selected'));
+                item.classList.add('selected');
+                selectedLeft = item;
+                tryMatch();
+            });
+        });
+
+        rightItems.forEach(item => {
+            item.addEventListener('click', () => {
+                if (item.classList.contains('matched')) return;
+                rightItems.forEach(i => i.classList.remove('selected'));
+                item.classList.add('selected');
+                selectedRight = item;
+                tryMatch();
+            });
         });
     }
 
@@ -79,6 +151,7 @@ class InteractiveExerciseHandler {
     handleMultipleChoice(event) {
         const option = event.currentTarget;
         const exItem = option.closest('.exercise-item');
+        if (exItem.classList.contains('exercise-completed')) return;
 
         exItem.querySelectorAll('.exercise-option').forEach(o => o.classList.remove('selected', 'pulse-animation'));
         option.classList.add('selected', 'pulse-animation');
@@ -107,12 +180,14 @@ class InteractiveExerciseHandler {
             console.error('Answer submit error:', err);
             this.showError(exItem, 'An error occurred. Please try again.');
         } finally {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-check me-1"></i>Check Answer';
+            // Re-enable only if not completed correctly
+            if (!exItem.classList.contains('exercise-completed')) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-check me-1"></i>Check Answer';
+            }
         }
     }
 
-    // ── Get the user's answer depending on exercise type ──
     getUserAnswer(exItem, exType) {
         switch (exType) {
             case 'MultipleChoice': {
@@ -120,15 +195,12 @@ class InteractiveExerciseHandler {
                 return sel ? sel.dataset.value : null;
             }
             case 'Listening': {
-                // Try the dedicated listening input first
                 const liInput = exItem.querySelector('[id^="listeningInput-"]');
                 if (liInput && liInput.value.trim()) return liInput.value.trim();
-                // Fallback to any exercise-input
                 const inp = exItem.querySelector('.exercise-input');
                 return inp ? inp.value.trim() : null;
             }
             case 'Speaking': {
-                // Hidden answer set by speech recogniser or typed fallback
                 const hidden = exItem.querySelector('[id^="speakingAnswer-"]');
                 if (hidden && hidden.value.trim()) return hidden.value.trim();
                 const fallback = exItem.querySelector('[id^="speakingFallback-"]');
@@ -185,8 +257,11 @@ class InteractiveExerciseHandler {
         this.updatePoints(result.pointsEarned, result.totalPoints);
         this.updateStreak(result.streak);
         this.completedExercises.add(exItem.dataset.exerciseId);
+        // Remove from skipped if it was skipped before
+        this.skippedExercises.delete(exItem.dataset.exerciseId);
         this.updateProgress();
-        setTimeout(() => this.disableExercise(exItem), 2200);
+        this.disableExercise(exItem);
+        this.updateFinishButton();
         if (result.levelUp) this.showLevelUpModal();
     }
 
@@ -223,7 +298,7 @@ class InteractiveExerciseHandler {
     }
 
     createConfetti(element) {
-        const colors = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#F4623A'];
+        const colors = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
         for (let i = 0; i < 28; i++) {
             const c = document.createElement('div');
             c.className = 'confetti';
@@ -258,7 +333,7 @@ class InteractiveExerciseHandler {
         const el = document.createElement('div');
         el.className = 'floating-points';
         el.textContent = `+${points}`;
-        el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);';
+        el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;';
         document.body.appendChild(el);
         setTimeout(() => el.remove(), 2000);
     }
@@ -284,7 +359,6 @@ class InteractiveExerciseHandler {
             h.className = i < this.hearts ? 'fas fa-heart' : 'far fa-heart';
             h.style.color = i < this.hearts ? '#EF4444' : '#D1D5DB';
             h.style.fontSize = '1.4rem';
-            h.style.transition = 'all 0.3s ease';
             c.appendChild(h);
         }
     }
@@ -298,9 +372,77 @@ class InteractiveExerciseHandler {
         const text = document.getElementById('completed-count');
         if (bar) bar.style.width = pct + '%';
         if (text) text.textContent = done;
+    }
 
-        if (done === total && total > 0) {
-            setTimeout(() => this.showCompletionCelebration(), 1000);
+    // ── Skip: mark as skipped but keep re-answerable ──────────
+    skipExercise(event) {
+        const btn = event.currentTarget;
+        const exItem = btn.closest('.exercise-item');
+        const exId = exItem.dataset.exerciseId;
+
+        if (this.completedExercises.has(exId)) return; // already done correctly
+
+        this.skippedExercises.add(exId);
+
+        // Show a subtle "skipped" indicator without locking the exercise
+        let indicator = exItem.querySelector('.skipped-indicator');
+        if (!indicator) {
+            indicator = document.createElement('div');
+            indicator.className = 'skipped-indicator';
+            indicator.innerHTML = '<i class="fas fa-forward me-1 text-secondary"></i><span class="text-secondary small">Skipped – you can still answer this</span>';
+            indicator.style.cssText = 'padding:0.5rem 0;margin-top:0.5rem;';
+            exItem.querySelector('.exercise-actions').after(indicator);
+        }
+
+        this.updateFinishButton();
+    }
+
+    // ── Finish Lesson Button ──────────────────────────────────
+    renderFinishButton() {
+        const container = document.getElementById('finish-lesson-container');
+        if (!container) return;
+        this.updateFinishButton();
+    }
+
+    updateFinishButton() {
+        const container = document.getElementById('finish-lesson-container');
+        if (!container) return;
+
+        const total = this.exercises.length;
+        const done = this.completedExercises.size;
+        const hasSkipped = this.skippedExercises.size > 0;
+        const unanswered = total - done - this.skippedExercises.size;
+
+        // Only allow finishing if ALL exercises are answered correctly (no skips remaining)
+        const canFinish = done === total && total > 0;
+        const allAttempted = (done + this.skippedExercises.size) === total;
+
+        container.innerHTML = '';
+
+        if (canFinish) {
+            container.innerHTML = `
+                <div class="finish-lesson-panel success">
+                    <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                    <h4 class="fw-bold mb-1">All exercises completed!</h4>
+                    <p class="text-secondary mb-3">Great work! You can now finish this lesson.</p>
+                    <button class="btn btn-success btn-lg px-5" onclick="finishLesson()">
+                        <i class="fas fa-flag-checkered me-2"></i>Finish Lesson
+                    </button>
+                </div>`;
+        } else if (hasSkipped) {
+            container.innerHTML = `
+                <div class="finish-lesson-panel warning">
+                    <i class="fas fa-exclamation-triangle fa-2x text-warning mb-2"></i>
+                    <h4 class="fw-bold mb-1">Skipped exercises detected</h4>
+                    <p class="text-secondary mb-1">You have <strong>${this.skippedExercises.size}</strong> skipped exercise(s). Answer all exercises correctly to complete the lesson.</p>
+                    <p class="text-secondary mb-0 small">Scroll up to complete the remaining exercises.</p>
+                </div>`;
+        } else if (allAttempted && done < total) {
+            container.innerHTML = `
+                <div class="finish-lesson-panel info">
+                    <i class="fas fa-info-circle fa-2x text-primary mb-2"></i>
+                    <p class="text-secondary mb-0">Answer all <strong>${total - done}</strong> remaining exercise(s) correctly to finish the lesson.</p>
+                </div>`;
         }
     }
 
@@ -316,14 +458,8 @@ class InteractiveExerciseHandler {
             : '<i class="fas fa-lightbulb me-1"></i>Hide Hint';
     }
 
-    skipExercise(event) {
-        const exItem = event.currentTarget.closest('.exercise-item');
-        this.disableExercise(exItem);
-        this.updateProgress();
-    }
-
     disableExercise(exItem) {
-        exItem.querySelectorAll('button, input, .exercise-option').forEach(el => {
+        exItem.querySelectorAll('button, input, .exercise-option, .matching-item').forEach(el => {
             el.disabled = true;
             el.style.pointerEvents = 'none';
         });
@@ -333,6 +469,7 @@ class InteractiveExerciseHandler {
     initializeProgressBar() {
         this.updateProgress();
         this.updateHeartsDisplay();
+        this.updateFinishButton();
     }
 
     initializeSoundEffects() {
@@ -344,7 +481,7 @@ class InteractiveExerciseHandler {
                 select: new Audio('/sounds/select.mp3')
             };
             Object.values(this.sounds).forEach(s => { s.volume = 0.3; });
-        } catch (e) { /* sounds optional */ }
+        } catch (e) { }
     }
 
     playSound(type) {
@@ -352,60 +489,6 @@ class InteractiveExerciseHandler {
             const s = this.sounds[type];
             if (s) { s.currentTime = 0; s.play().catch(() => { }); }
         } catch (e) { }
-    }
-
-    showCompletionCelebration() {
-        const totalPoints = parseInt(document.getElementById('user-total-points')?.textContent || 0);
-        const modal = document.createElement('div');
-        modal.className = 'completion-modal';
-        modal.innerHTML = `
-            <div class="completion-content">
-                <div class="completion-trophy"><i class="fas fa-trophy"></i></div>
-                <h2>Lesson Complete! 🎉</h2>
-                <p class="completion-message">Outstanding work! You've finished all exercises.</p>
-                <div class="completion-stats">
-                    <div class="stat">
-                        <div class="stat-value">${this.completedExercises.size}</div>
-                        <div class="stat-label">Exercises</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-value">${totalPoints}</div>
-                        <div class="stat-label">Points</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-value">${this.streak}</div>
-                        <div class="stat-label">Day Streak</div>
-                    </div>
-                </div>
-                <div class="completion-actions">
-                    <button class="btn btn-enroll" onclick="window.location.href='/courses/mycourses'">
-                        <i class="fas fa-arrow-right me-2"></i>Continue Learning
-                    </button>
-                </div>
-            </div>`;
-        document.body.appendChild(modal);
-        setTimeout(() => modal.classList.add('show'), 10);
-    }
-
-    showGameOver() {
-        const modal = document.createElement('div');
-        modal.className = 'completion-modal';
-        modal.innerHTML = `
-            <div class="completion-content">
-                <div class="game-over-icon"><i class="fas fa-heart-broken"></i></div>
-                <h2>Out of Hearts!</h2>
-                <p>Don't worry — review the material and try again.</p>
-                <div class="completion-actions">
-                    <button class="btn btn-enroll" onclick="location.reload()">
-                        <i class="fas fa-redo me-2"></i>Try Again
-                    </button>
-                    <button class="btn btn-outline-primary" onclick="window.location.href='/courses/mycourses'">
-                        Back to Courses
-                    </button>
-                </div>
-            </div>`;
-        document.body.appendChild(modal);
-        setTimeout(() => modal.classList.add('show'), 10);
     }
 
     showLevelUpModal() {
@@ -417,9 +500,7 @@ class InteractiveExerciseHandler {
                 <h2>Level Up!</h2>
                 <p class="completion-message">You've reached a new level. Keep it up!</p>
                 <div class="completion-actions">
-                    <button class="btn btn-enroll" onclick="this.closest('.completion-modal').remove()">
-                        Continue
-                    </button>
+                    <button class="btn btn-enroll" onclick="this.closest('.completion-modal').remove()">Continue</button>
                 </div>
             </div>`;
         document.body.appendChild(modal);
@@ -427,8 +508,72 @@ class InteractiveExerciseHandler {
         setTimeout(() => { modal.classList.remove('show'); setTimeout(() => modal.remove(), 300); }, 3500);
     }
 
+    showGameOver() {
+        const modal = document.createElement('div');
+        modal.className = 'completion-modal';
+        modal.innerHTML = `
+            <div class="completion-content">
+                <div class="game-over-icon"><i class="fas fa-heart-broken"></i></div>
+                <h2>Out of Hearts!</h2>
+                <p>Don't worry — review the material and try again.</p>
+                <div class="completion-actions">
+                    <button class="btn btn-enroll" onclick="location.reload()"><i class="fas fa-redo me-2"></i>Try Again</button>
+                    <button class="btn btn-outline-primary" onclick="window.location.href='/courses/mycourses'">Back to Courses</button>
+                </div>
+            </div>`;
+        document.body.appendChild(modal);
+        setTimeout(() => modal.classList.add('show'), 10);
+    }
+
     showError(exItem, message) {
         this.showFeedback(exItem, false, message, null);
+    }
+}
+
+// ── Finish lesson global function ─────────────────────────────
+async function finishLesson() {
+    const lessonId = document.getElementById('finish-lesson-container')?.dataset.lessonId;
+    if (!lessonId) return;
+
+    const btn = document.querySelector('#finish-lesson-container .btn-success');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Finishing…'; }
+
+    try {
+        const resp = await fetch(`/api/lessons/${lessonId}/complete`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await resp.json();
+
+        if (data.success) {
+            // Show success modal
+            const modal = document.createElement('div');
+            modal.className = 'completion-modal';
+            modal.innerHTML = `
+                <div class="completion-content">
+                    <div class="completion-trophy"><i class="fas fa-trophy"></i></div>
+                    <h2>Lesson Complete! 🎉</h2>
+                    <p class="completion-message">You've successfully finished this lesson.</p>
+                    <div class="completion-stats">
+                        <div class="stat"><div class="stat-value">${window.exerciseHandler?.completedExercises?.size || 0}</div><div class="stat-label">Exercises</div></div>
+                        <div class="stat"><div class="stat-value">${document.getElementById('user-total-points')?.textContent || 0}</div><div class="stat-label">Points</div></div>
+                    </div>
+                    <div class="completion-actions">
+                        <a href="${data.nextLessonUrl || '/courses/mycourses'}" class="btn btn-enroll">
+                            <i class="fas fa-arrow-right me-2"></i>${data.nextLessonUrl ? 'Next Lesson' : 'My Courses'}
+                        </a>
+                    </div>
+                </div>`;
+            document.body.appendChild(modal);
+            setTimeout(() => modal.classList.add('show'), 10);
+        } else {
+            alert(data.message || 'Could not finish lesson. Make sure all exercises are answered correctly.');
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-flag-checkered me-2"></i>Finish Lesson'; }
+        }
+    } catch (err) {
+        console.error(err);
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-flag-checkered me-2"></i>Finish Lesson'; }
     }
 }
 
@@ -439,7 +584,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Utility: hint toggle called from inline onclick in the view
 function toggleHint(button) {
     if (window.exerciseHandler) {
         window.exerciseHandler.showHint({ currentTarget: button });

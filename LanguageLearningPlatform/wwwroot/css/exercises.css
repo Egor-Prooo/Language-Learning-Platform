@@ -896,5 +896,190 @@
     background: white;
     border-radius: 25px;
     font-weight: 700;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1)
+    /* ── Finish Lesson Panel ─────────────────────────────────────
+   Add these styles at the bottom of exercises.css
+   ──────────────────────────────────────────────────────────── */
+    /* Container */
+    #finish-lesson-container
+
+{
+    margin: 1.5rem 0 2rem;
+}
+
+/* Shared panel base */
+.finish-panel {
+    border-radius: 20px;
+    padding: 2rem 2.5rem;
+    text-align: center;
+    border: 2px solid transparent;
+    animation: slideDown 0.4s ease;
+}
+
+    /* All-done / success state */
+    .finish-panel.finish-panel--complete {
+        background: linear-gradient(135deg, #D1FAE5 0%, #ECFDF5 60%, #D1FAE5 100%);
+        border-color: #34D399;
+        box-shadow: 0 4px 24px rgba(16, 185, 129, 0.18);
+    }
+
+.finish-panel--complete .finish-panel__icon {
+    font-size: 3.5rem;
+    color: #10B981;
+    margin-bottom: 0.75rem;
+    display: block;
+    animation: successPulse 0.6s ease;
+}
+
+.finish-panel--complete h3 {
+    color: #065F46;
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 0.4rem;
+}
+
+.finish-panel--complete p {
+    color: #047857;
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+}
+
+.btn-finish-lesson {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 1rem 2.5rem;
+    background: linear-gradient(135deg, #10B981, #059669);
+    color: white;
+    border: none;
+    border-radius: 16px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.35);
+    text-decoration: none;
+}
+
+    .btn-finish-lesson:hover:not(:disabled) {
+        background: linear-gradient(135deg, #059669, #047857);
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.45);
+    }
+
+    .btn-finish-lesson:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+/* Already-completed (revisiting) state */
+.finish-panel.finish-panel--already-done {
+    background: linear-gradient(135deg, #EDE9FE 0%, #F5F3FF 60%, #EDE9FE 100%);
+    border-color: #A78BFA;
+    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.15);
+}
+
+.finish-panel--already-done .finish-panel__icon {
+    font-size: 3rem;
+    color: #7C3AED;
+    margin-bottom: 0.75rem;
+    display: block;
+}
+
+.finish-panel--already-done h3 {
+    color: #4C1D95;
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin-bottom: 0.4rem;
+}
+
+.finish-panel--already-done p {
+    color: #6D28D9;
+    font-size: 0.92rem;
+    margin-bottom: 1.25rem;
+}
+
+.btn-next-lesson {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.9rem 2rem;
+    background: linear-gradient(135deg, #7C3AED, #6D28D9);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 14px rgba(109, 40, 217, 0.3);
+}
+
+    .btn-next-lesson:hover {
+        background: linear-gradient(135deg, #6D28D9, #5B21B6);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(109, 40, 217, 0.4);
+    }
+
+/* Some-skipped / incomplete warning state */
+.finish-panel.finish-panel--skipped {
+    background: linear-gradient(135deg, #FEF3C7 0%, #FFFBEB 60%, #FEF3C7 100%);
+    border-color: #FCD34D;
+    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.15);
+}
+
+.finish-panel--skipped .finish-panel__icon {
+    font-size: 3rem;
+    color: #F59E0B;
+    margin-bottom: 0.75rem;
+    display: block;
+}
+
+.finish-panel--skipped h3 {
+    color: #92400E;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+}
+
+.finish-panel--skipped p {
+    color: #B45309;
+    font-size: 0.9rem;
+    margin-bottom: 0;
+}
+
+/* Skipped badge on exercise items */
+.skipped-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    background: #F9FAFB;
+    border: 1.5px dashed #D1D5DB;
+    border-radius: 10px;
+    font-size: 0.78rem;
+    color: #6B7280;
+    width: fit-content;
+}
+
+/* Match-error flash for matching exercises */
+.matching-item.match-error {
+    border-color: var(--incorrect-color) !important;
+    background: #FEE2E2 !important;
+    animation: shake 0.45s ease;
+}
+
+/* Finish placeholder (initial state) */
+.finish-placeholder {
+    border: 2px dashed #E5E7EB;
+    border-radius: 16px;
+    padding: 1.5rem;
+    color: #9CA3AF;
+    font-size: 0.9rem;
+}
 

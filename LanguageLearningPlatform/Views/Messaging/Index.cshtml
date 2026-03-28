@@ -3,455 +3,666 @@
 
 @{
     ViewData["Title"] = "Messages";
-    var conversations    = Model.ToList();
-    var selected         = ViewBag.Selected  as StudentConversationViewModel;
-    var newConv          = ViewBag.NewConv   as NewConversationOption;
-    var newConvOptions   = ViewBag.NewConvOptions as List<NewConversationOption> ?? new();
-    var selectedTeacherId= ViewBag.SelectedTeacherId as string ?? "";
+    var conversations = Model.ToList();
+    var selected = ViewBag.Selected as StudentConversationViewModel;
+    var newConv = ViewBag.NewConv as NewConversationOption;
+    var newConvOptions = ViewBag.NewConvOptions as List<NewConversationOption> ?? new();
+    var selectedTeacherId = ViewBag.SelectedTeacherId as string ?? "";
     var selectedCourseId = ViewBag.SelectedCourseId is Guid g ? g.ToString() : "";
-    var studentId        = ViewBag.StudentId as string ?? "";
+    var studentId = ViewBag.StudentId as string ?? "";
 
-    // Active conversation details (either existing or new)
-    string? activeTeacherId  = selected?.TeacherId ?? newConv?.TeacherId;
-    Guid?   activeCourseId   = selected?.CourseId  ?? newConv?.CourseId;
-    string? activeTeacherName= selected?.TeacherName ?? newConv?.TeacherName;
-    string? activeInitials   = selected?.TeacherInitials ?? newConv?.TeacherInitials;
+    string? activeTeacherId = selected?.TeacherId ?? newConv?.TeacherId;
+    Guid? activeCourseId = selected?.CourseId ?? newConv?.CourseId;
+    string? activeTeacherName = selected?.TeacherName ?? newConv?.TeacherName;
+    string? activeInitials = selected?.TeacherInitials ?? newConv?.TeacherInitials;
     string? activeCourseName = selected?.CourseName ?? newConv?.CourseName;
-    string? activeLang       = selected?.CourseLanguage ?? newConv?.CourseLanguage;
-    string? activeLevel      = selected?.CourseLevel ?? newConv?.CourseLevel;
-    bool    hasActiveConv    = activeTeacherId != null && activeCourseId.HasValue;
+    string? activeLang = selected?.CourseLanguage ?? newConv?.CourseLanguage;
+    string? activeLevel = selected?.CourseLevel ?? newConv?.CourseLevel;
+    bool hasActiveConv = activeTeacherId != null && activeCourseId.HasValue;
 }
 
 @section Styles {
-<style>
-@@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+    <style>
+        @@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
 
-/* ── Root ─────────────────────────────────────────────────── */
-.msg-root {
-    font-family: 'Manrope', sans-serif;
-    height: calc(100vh - 66px);
-    display: flex;
-    background: #F2F0EB;
-    overflow: hidden;
-}
+        .msg-root {
+            font-family: 'Manrope', sans-serif;
+            height: calc(100vh - 66px);
+            display: flex;
+            background: #F2F0EB;
+            overflow: hidden;
+        }
 
-/* ── Sidebar ─────────────────────────────────────────────── */
-.msg-sidebar {
-    width: 320px;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    background: #1A1916;
-    height: 100%;
-}
+        .msg-sidebar {
+            width: 320px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            background: #1A1916;
+            height: 100%;
+        }
 
-.msg-sidebar-head {
-    padding: 1.5rem 1.25rem 1rem;
-    border-bottom: 1px solid rgba(255,255,255,.06);
-}
+        .msg-sidebar-head {
+            padding: 1.5rem 1.25rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,.06);
+        }
 
-.msg-sidebar-label {
-    font-size: .7rem;
-    font-weight: 800;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,.3);
-    margin-bottom: .6rem;
-}
+        .msg-sidebar-label {
+            font-size: .7rem;
+            font-weight: 800;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,.3);
+            margin-bottom: .6rem;
+        }
 
-.msg-search {
-    position: relative;
-}
-.msg-search-input {
-    width: 100%;
-    background: rgba(255,255,255,.06);
-    border: 1px solid rgba(255,255,255,.08);
-    border-radius: 10px;
-    padding: .55rem .85rem .55rem 2.2rem;
-    font-size: .82rem;
-    color: rgba(255,255,255,.8);
-    font-family: 'Manrope', sans-serif;
-    outline: none;
-    transition: border-color .2s;
-}
-.msg-search-input::placeholder { color: rgba(255,255,255,.25); }
-.msg-search-input:focus { border-color: rgba(255,255,255,.2); }
-.msg-search-icon {
-    position: absolute;
-    left: .75rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: rgba(255,255,255,.25);
-    font-size: .75rem;
-}
+        .msg-search {
+            position: relative;
+        }
 
-/* Conversation list */
-.msg-conv-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: .5rem 0;
-}
-.msg-conv-list::-webkit-scrollbar { width: 4px; }
-.msg-conv-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 4px; }
+        .msg-search-input {
+            width: 100%;
+            background: rgba(255,255,255,.06);
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 10px;
+            padding: .55rem .85rem .55rem 2.2rem;
+            font-size: .82rem;
+            color: rgba(255,255,255,.8);
+            font-family: 'Manrope', sans-serif;
+            outline: none;
+            transition: border-color .2s;
+        }
 
-.msg-conv-item {
-    display: flex;
-    align-items: center;
-    gap: .85rem;
-    padding: .85rem 1.25rem;
-    cursor: pointer;
-    text-decoration: none;
-    border-left: 3px solid transparent;
-    transition: background .15s;
-    position: relative;
-}
-.msg-conv-item:hover { background: rgba(255,255,255,.04); }
-.msg-conv-item.active {
-    background: rgba(255,255,255,.07);
-    border-left-color: #E8C97A;
-}
+            .msg-search-input::placeholder {
+                color: rgba(255,255,255,.25);
+            }
 
-.msg-conv-avatar {
-    width: 44px;
-    height: 44px;
-    border-radius: 14px;
-    background: linear-gradient(135deg, #4A3F2F, #7A6545);
-    color: #E8C97A;
-    font-weight: 800;
-    font-size: .85rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    position: relative;
-    letter-spacing: .02em;
-}
-.msg-conv-item.active .msg-conv-avatar {
-    background: linear-gradient(135deg, #7A6545, #C8A855);
-    color: #1A1916;
-}
+            .msg-search-input:focus {
+                border-color: rgba(255,255,255,.2);
+            }
 
-.msg-unread-dot {
-    position: absolute;
-    top: -3px; right: -3px;
-    width: 11px; height: 11px;
-    background: #E8C97A;
-    border-radius: 50%;
-    border: 2px solid #1A1916;
-}
+        .msg-search-icon {
+            position: absolute;
+            left: .75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255,255,255,.25);
+            font-size: .75rem;
+        }
 
-.msg-conv-body { flex: 1; min-width: 0; }
-.msg-conv-name {
-    font-weight: 700;
-    font-size: .85rem;
-    color: rgba(255,255,255,.9);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-bottom: .15rem;
-}
-.msg-conv-course {
-    font-size: .7rem;
-    color: rgba(255,255,255,.35);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-bottom: .15rem;
-}
-.msg-conv-item.active .msg-conv-course { color: rgba(232,201,122,.5); }
-.msg-conv-preview {
-    font-size: .72rem;
-    color: rgba(255,255,255,.35);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.msg-conv-item.active .msg-conv-preview { color: rgba(232,201,122,.6); }
+        .msg-conv-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: .5rem 0;
+        }
 
-.msg-conv-meta {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: .3rem;
-    flex-shrink: 0;
-}
-.msg-conv-time { font-size: .65rem; color: rgba(255,255,255,.25); }
-.msg-conv-badge {
-    background: #E8C97A;
-    color: #1A1916;
-    font-size: .6rem;
-    font-weight: 800;
-    padding: .1rem .42rem;
-    border-radius: 8px;
-}
+            .msg-conv-list::-webkit-scrollbar {
+                width: 4px;
+            }
 
-/* New conversation section */
-.msg-new-section {
-    border-top: 1px solid rgba(255,255,255,.06);
-    padding: .75rem 1.25rem;
-    max-height: 220px;
-    overflow-y: auto;
-}
-.msg-new-label {
-    font-size: .63rem;
-    font-weight: 800;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,.2);
-    margin-bottom: .5rem;
-}
-.msg-new-item {
-    display: flex;
-    align-items: center;
-    gap: .7rem;
-    padding: .6rem .75rem;
-    border-radius: 10px;
-    background: rgba(255,255,255,.04);
-    border: 1px solid rgba(255,255,255,.07);
-    text-decoration: none;
-    margin-bottom: .4rem;
-    transition: all .15s;
-}
-.msg-new-item:hover { background: rgba(255,255,255,.08); border-color: rgba(232,201,122,.2); }
-.msg-new-icon {
-    width: 30px; height: 30px;
-    border-radius: 8px;
-    background: rgba(232,201,122,.1);
-    color: #E8C97A;
-    display: flex; align-items: center; justify-content: center;
-    font-size: .7rem; flex-shrink: 0;
-}
-.msg-new-name { font-size: .78rem; font-weight: 700; color: rgba(255,255,255,.75); }
-.msg-new-course { font-size: .65rem; color: rgba(255,255,255,.3); }
-.msg-new-arrow { color: rgba(255,255,255,.2); font-size: .7rem; margin-left: auto; }
+            .msg-conv-list::-webkit-scrollbar-thumb {
+                background: rgba(255,255,255,.1);
+                border-radius: 4px;
+            }
 
-/* ── Chat area ───────────────────────────────────────────── */
-.msg-chat {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    min-width: 0;
-    background: #F2F0EB;
-}
+        .msg-conv-item {
+            display: flex;
+            align-items: center;
+            gap: .85rem;
+            padding: .85rem 1.25rem;
+            cursor: pointer;
+            text-decoration: none;
+            border-left: 3px solid transparent;
+            transition: background .15s;
+            position: relative;
+        }
 
-/* Chat header */
-.msg-chat-header {
-    background: #FDFCFA;
-    border-bottom: 1px solid #E8E5DE;
-    padding: 1rem 1.75rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-shrink: 0;
-}
-.msg-chat-avatar {
-    width: 42px; height: 42px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #4A3F2F, #7A6545);
-    color: #E8C97A;
-    font-weight: 800; font-size: .85rem;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-}
-.msg-chat-name { font-weight: 800; font-size: 1rem; color: #1A1916; }
-.msg-chat-subtitle {
-    font-size: .75rem;
-    color: #9C9484;
-    display: flex; align-items: center; gap: .4rem;
-}
-.msg-online-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: #3DC47E;
-    animation: onlinePulse 2s ease-in-out infinite;
-}
-@@keyframes onlinePulse {
-    0%, 100% { opacity: 1; } 50% { opacity: .4; }
-}
+            .msg-conv-item:hover {
+                background: rgba(255,255,255,.04);
+            }
 
-/* Messages area */
-.msg-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 1.5rem 1.75rem;
-    display: flex;
-    flex-direction: column;
-    gap: .5rem;
-}
-.msg-messages::-webkit-scrollbar { width: 4px; }
-.msg-messages::-webkit-scrollbar-thumb { background: #D8D4CB; border-radius: 4px; }
+            .msg-conv-item.active {
+                background: rgba(255,255,255,.07);
+                border-left-color: #E8C97A;
+            }
 
-/* Date separator */
-.msg-date-sep {
-    text-align: center; position: relative; margin: .75rem 0;
-}
-.msg-date-sep::before {
-    content: ''; position: absolute; left: 0; right: 0; top: 50%;
-    height: 1px; background: #E2DEDD;
-}
-.msg-date-sep span {
-    position: relative; background: #F2F0EB;
-    padding: 0 .75rem; font-size: .65rem; color: #B0A99E;
-    font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
-}
+        .msg-conv-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #4A3F2F, #7A6545);
+            color: #E8C97A;
+            font-weight: 800;
+            font-size: .85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            position: relative;
+            letter-spacing: .02em;
+        }
 
-/* Bubbles */
-.msg-row {
-    display: flex;
-    align-items: flex-end;
-    gap: .5rem;
-    max-width: 75%;
-}
-.msg-row.from-me {
-    flex-direction: row-reverse;
-    align-self: flex-end;
-    margin-left: auto;
-}
-.msg-row.from-them { align-self: flex-start; }
+        .msg-conv-item.active .msg-conv-avatar {
+            background: linear-gradient(135deg, #7A6545, #C8A855);
+            color: #1A1916;
+        }
 
-.msg-bubble-avatar {
-    width: 28px; height: 28px;
-    border-radius: 8px;
-    background: linear-gradient(135deg, #4A3F2F, #7A6545);
-    color: #E8C97A;
-    font-weight: 800; font-size: .6rem;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; margin-bottom: 2px;
-}
+        .msg-unread-dot {
+            position: absolute;
+            top: -3px;
+            right: -3px;
+            width: 11px;
+            height: 11px;
+            background: #E8C97A;
+            border-radius: 50%;
+            border: 2px solid #1A1916;
+        }
 
-.msg-bubble {
-    padding: .75rem 1rem;
-    border-radius: 18px;
-    font-size: .875rem;
-    line-height: 1.5;
-    word-break: break-word;
-    max-width: 100%;
-    position: relative;
-}
-.msg-row.from-them .msg-bubble {
-    background: #FDFCFA;
-    color: #1A1916;
-    border: 1px solid #E8E5DE;
-    border-bottom-left-radius: 4px;
-}
-.msg-row.from-me .msg-bubble {
-    background: #1A1916;
-    color: #F2F0EB;
-    border-bottom-right-radius: 4px;
-}
+        .msg-conv-body {
+            flex: 1;
+            min-width: 0;
+        }
 
-.msg-time {
-    font-size: .6rem;
-    color: #B0A99E;
-    margin-top: .25rem;
-    display: block;
-}
-.msg-row.from-me .msg-time { text-align: right; }
+        .msg-conv-name {
+            font-weight: 700;
+            font-size: .85rem;
+            color: rgba(255,255,255,.9);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: .15rem;
+        }
 
-/* Typing indicator */
-.msg-typing {
-    display: none;
-    align-items: center;
-    gap: .5rem;
-    padding: .5rem 0;
-}
-.msg-typing.visible { display: flex; }
-.msg-typing-dots {
-    display: flex; gap: 3px;
-    background: #FDFCFA;
-    border: 1px solid #E8E5DE;
-    border-radius: 14px;
-    padding: .55rem .85rem;
-}
-.msg-typing-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: #C8C0B6;
-    animation: typingBounce .8s ease-in-out infinite;
-}
-.msg-typing-dot:nth-child(2) { animation-delay: .15s; }
-.msg-typing-dot:nth-child(3) { animation-delay: .3s; }
-@@keyframes typingBounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
-}
+        .msg-conv-course {
+            font-size: .7rem;
+            color: rgba(255,255,255,.35);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: .15rem;
+        }
 
-/* Input area */
-.msg-input-area {
-    background: #FDFCFA;
-    border-top: 1px solid #E8E5DE;
-    padding: 1rem 1.75rem;
-    flex-shrink: 0;
-}
-.msg-input-wrap {
-    display: flex;
-    align-items: flex-end;
-    gap: .75rem;
-    background: #F2F0EB;
-    border: 1.5px solid #E2DEDD;
-    border-radius: 16px;
-    padding: .7rem 1rem;
-    transition: border-color .2s, box-shadow .2s;
-}
-.msg-input-wrap:focus-within {
-    border-color: #C8A855;
-    box-shadow: 0 0 0 3px rgba(200,168,85,.12);
-    background: #FDFCFA;
-}
-.msg-textarea {
-    flex: 1; border: none; background: transparent; outline: none;
-    resize: none; font-size: .9rem; font-family: 'Manrope', sans-serif;
-    color: #1A1916; max-height: 120px; line-height: 1.5; padding: 0;
-}
-.msg-textarea::placeholder { color: #B0A99E; }
-.msg-send-btn {
-    width: 36px; height: 36px;
-    border-radius: 10px;
-    background: #1A1916;
-    border: none; color: #E8C97A;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: all .2s; flex-shrink: 0; font-size: .85rem;
-}
-.msg-send-btn:hover:not(:disabled) {
-    background: #2D2820;
-    transform: scale(1.05);
-}
-.msg-send-btn:disabled { background: #E2DEDD; color: #B0A99E; cursor: not-allowed; transform: none; }
+        .msg-conv-item.active .msg-conv-course {
+            color: rgba(232,201,122,.5);
+        }
 
-/* Empty state */
-.msg-empty {
-    flex: 1; display: flex; align-items: center; justify-content: center;
-    flex-direction: column; gap: 1rem; text-align: center; padding: 2rem;
-}
-.msg-empty-icon {
-    font-size: 3rem; opacity: .15; color: #4A3F2F;
-    margin-bottom: .5rem;
-}
-.msg-empty h4 { font-weight: 800; color: #4A3F2F; margin: 0; }
-.msg-empty p { font-size: .9rem; color: #9C9484; margin: 0; }
+        .msg-conv-preview {
+            font-size: .72rem;
+            color: rgba(255,255,255,.35);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-/* Empty chat (new conversation) */
-.msg-new-chat-banner {
-    background: linear-gradient(135deg, #2D2820, #1A1916);
-    border-radius: 16px;
-    padding: 1.5rem 2rem;
-    margin: 1.5rem;
-    text-align: center;
-    border: 1px solid rgba(232,201,122,.15);
-}
-.msg-new-chat-banner .icon { font-size: 2rem; color: #E8C97A; margin-bottom: .75rem; display: block; }
-.msg-new-chat-banner h5 { color: #F2F0EB; font-weight: 800; margin-bottom: .3rem; }
-.msg-new-chat-banner p { color: rgba(255,255,255,.4); font-size: .85rem; margin: 0; }
+        .msg-conv-item.active .msg-conv-preview {
+            color: rgba(232,201,122,.6);
+        }
 
-/* Responsive */
-@@media (max-width: 768px) {
-    .msg-sidebar { width: 100%; height: 260px; border-bottom: 1px solid #E8E5DE; }
-    .msg-root { flex-direction: column; height: auto; }
-    .msg-chat { height: calc(100vh - 326px); }
-    .msg-new-section { display: none; }
-}
-</style>
+        .msg-conv-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: .3rem;
+            flex-shrink: 0;
+        }
+
+        .msg-conv-time {
+            font-size: .65rem;
+            color: rgba(255,255,255,.25);
+        }
+
+        .msg-conv-badge {
+            background: #E8C97A;
+            color: #1A1916;
+            font-size: .6rem;
+            font-weight: 800;
+            padding: .1rem .42rem;
+            border-radius: 8px;
+        }
+
+        .msg-new-section {
+            border-top: 1px solid rgba(255,255,255,.06);
+            padding: .75rem 1.25rem;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .msg-new-label {
+            font-size: .63rem;
+            font-weight: 800;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,.2);
+            margin-bottom: .5rem;
+        }
+
+        .msg-new-item {
+            display: flex;
+            align-items: center;
+            gap: .7rem;
+            padding: .6rem .75rem;
+            border-radius: 10px;
+            background: rgba(255,255,255,.04);
+            border: 1px solid rgba(255,255,255,.07);
+            text-decoration: none;
+            margin-bottom: .4rem;
+            transition: all .15s;
+        }
+
+            .msg-new-item:hover {
+                background: rgba(255,255,255,.08);
+                border-color: rgba(232,201,122,.2);
+            }
+
+        .msg-new-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            background: rgba(232,201,122,.1);
+            color: #E8C97A;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .7rem;
+            flex-shrink: 0;
+        }
+
+        .msg-new-name {
+            font-size: .78rem;
+            font-weight: 700;
+            color: rgba(255,255,255,.75);
+        }
+
+        .msg-new-course {
+            font-size: .65rem;
+            color: rgba(255,255,255,.3);
+        }
+
+        .msg-new-arrow {
+            color: rgba(255,255,255,.2);
+            font-size: .7rem;
+            margin-left: auto;
+        }
+
+        .msg-chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-width: 0;
+            background: #F2F0EB;
+        }
+
+        .msg-chat-header {
+            background: #FDFCFA;
+            border-bottom: 1px solid #E8E5DE;
+            padding: 1rem 1.75rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-shrink: 0;
+        }
+
+        .msg-chat-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #4A3F2F, #7A6545);
+            color: #E8C97A;
+            font-weight: 800;
+            font-size: .85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .msg-chat-name {
+            font-weight: 800;
+            font-size: 1rem;
+            color: #1A1916;
+        }
+
+        .msg-chat-subtitle {
+            font-size: .75rem;
+            color: #9C9484;
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+        }
+
+        .msg-online-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #3DC47E;
+            animation: onlinePulse 2s ease-in-out infinite;
+        }
+
+        @@keyframes onlinePulse {
+            0%, 100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: .4;
+            }
+        }
+
+        .msg-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem 1.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: .5rem;
+        }
+
+            .msg-messages::-webkit-scrollbar {
+                width: 4px;
+            }
+
+            .msg-messages::-webkit-scrollbar-thumb {
+                background: #D8D4CB;
+                border-radius: 4px;
+            }
+
+        .msg-date-sep {
+            text-align: center;
+            position: relative;
+            margin: .75rem 0;
+        }
+
+            .msg-date-sep::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                right: 0;
+                top: 50%;
+                height: 1px;
+                background: #E2DEDD;
+            }
+
+            .msg-date-sep span {
+                position: relative;
+                background: #F2F0EB;
+                padding: 0 .75rem;
+                font-size: .65rem;
+                color: #B0A99E;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: .06em;
+            }
+
+        .msg-row {
+            display: flex;
+            align-items: flex-end;
+            gap: .5rem;
+            max-width: 75%;
+        }
+
+            .msg-row.from-me {
+                flex-direction: row-reverse;
+                align-self: flex-end;
+                margin-left: auto;
+            }
+
+            .msg-row.from-them {
+                align-self: flex-start;
+            }
+
+        .msg-bubble-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #4A3F2F, #7A6545);
+            color: #E8C97A;
+            font-weight: 800;
+            font-size: .6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-bottom: 2px;
+        }
+
+        .msg-bubble {
+            padding: .75rem 1rem;
+            border-radius: 18px;
+            font-size: .875rem;
+            line-height: 1.5;
+            word-break: break-word;
+            max-width: 100%;
+        }
+
+        .msg-row.from-them .msg-bubble {
+            background: #FDFCFA;
+            color: #1A1916;
+            border: 1px solid #E8E5DE;
+            border-bottom-left-radius: 4px;
+        }
+
+        .msg-row.from-me .msg-bubble {
+            background: #1A1916;
+            color: #F2F0EB;
+            border-bottom-right-radius: 4px;
+        }
+
+        .msg-time {
+            font-size: .6rem;
+            color: #B0A99E;
+            margin-top: .25rem;
+            display: block;
+        }
+
+        .msg-row.from-me .msg-time {
+            text-align: right;
+        }
+
+        .msg-typing {
+            display: none;
+            align-items: center;
+            gap: .5rem;
+            padding: 0 1.75rem .25rem;
+        }
+
+            .msg-typing.visible {
+                display: flex;
+            }
+
+        .msg-typing-dots {
+            display: flex;
+            gap: 3px;
+            background: #FDFCFA;
+            border: 1px solid #E8E5DE;
+            border-radius: 14px;
+            padding: .55rem .85rem;
+        }
+
+        .msg-typing-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #C8C0B6;
+            animation: typingBounce .8s ease-in-out infinite;
+        }
+
+            .msg-typing-dot:nth-child(2) {
+                animation-delay: .15s;
+            }
+
+            .msg-typing-dot:nth-child(3) {
+                animation-delay: .3s;
+            }
+
+        @@keyframes typingBounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .msg-input-area {
+            background: #FDFCFA;
+            border-top: 1px solid #E8E5DE;
+            padding: 1rem 1.75rem;
+            flex-shrink: 0;
+        }
+
+        .msg-input-wrap {
+            display: flex;
+            align-items: flex-end;
+            gap: .75rem;
+            background: #F2F0EB;
+            border: 1.5px solid #E2DEDD;
+            border-radius: 16px;
+            padding: .7rem 1rem;
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+            .msg-input-wrap:focus-within {
+                border-color: #C8A855;
+                box-shadow: 0 0 0 3px rgba(200,168,85,.12);
+                background: #FDFCFA;
+            }
+
+        .msg-textarea {
+            flex: 1;
+            border: none;
+            background: transparent;
+            outline: none;
+            resize: none;
+            font-size: .9rem;
+            font-family: 'Manrope', sans-serif;
+            color: #1A1916;
+            max-height: 120px;
+            line-height: 1.5;
+            padding: 0;
+        }
+
+            .msg-textarea::placeholder {
+                color: #B0A99E;
+            }
+
+        .msg-send-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: #1A1916;
+            border: none;
+            color: #E8C97A;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all .2s;
+            flex-shrink: 0;
+            font-size: .85rem;
+        }
+
+            .msg-send-btn:hover:not(:disabled) {
+                background: #292524;
+                color: #E8C97A;
+                transform: scale(1.05);
+            }
+
+            .msg-send-btn:disabled {
+                background: #E2DEDD;
+                color: #B0A99E;
+                cursor: not-allowed;
+                transform: none;
+            }
+
+        .msg-empty {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .msg-empty-icon {
+            font-size: 3rem;
+            opacity: .15;
+            color: #4A3F2F;
+            margin-bottom: .5rem;
+        }
+
+        .msg-empty h4 {
+            font-weight: 800;
+            color: #4A3F2F;
+            margin: 0;
+        }
+
+        .msg-empty p {
+            font-size: .9rem;
+            color: #9C9484;
+            margin: 0;
+        }
+
+        .msg-new-chat-banner {
+            background: linear-gradient(135deg, #2D2820, #1A1916);
+            border-radius: 16px;
+            padding: 1.5rem 2rem;
+            margin: 1.5rem;
+            text-align: center;
+            border: 1px solid rgba(232,201,122,.15);
+        }
+
+            .msg-new-chat-banner .icon {
+                font-size: 2rem;
+                color: #E8C97A;
+                margin-bottom: .75rem;
+                display: block;
+            }
+
+            .msg-new-chat-banner h5 {
+                color: #F2F0EB;
+                font-weight: 800;
+                margin-bottom: .3rem;
+            }
+
+            .msg-new-chat-banner p {
+                color: rgba(255,255,255,.4);
+                font-size: .85rem;
+                margin: 0;
+            }
+
+        .msg-send-error {
+            font-size: .72rem;
+            color: #EF4444;
+            padding: .4rem 0;
+            text-align: right;
+            display: none;
+        }
+
+        @@media (max-width: 768px) {
+            .msg-sidebar {
+                width: 100%;
+                height: 260px;
+                border-bottom: 1px solid #E8E5DE;
+            }
+
+            .msg-root {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .msg-chat {
+                height: calc(100vh - 326px);
+            }
+
+            .msg-new-section {
+                display: none;
+            }
+        }
+    </style>
 }
 
 <div class="msg-root">
@@ -467,7 +678,6 @@
             </div>
         </div>
 
-        <!-- Existing conversations -->
         <div class="msg-conv-list" id="convList">
             @if (!conversations.Any() && !newConvOptions.Any())
             {
@@ -482,12 +692,12 @@
             @foreach (var conv in conversations)
             {
                 var isActive = conv.TeacherId == selectedTeacherId
-                            && conv.CourseId.ToString() == selectedCourseId;
-                var timeStr  = conv.LastMessageAt.Date == DateTime.Today
-                               ? conv.LastMessageAt.ToString("HH:mm")
-                               : conv.LastMessageAt.Date == DateTime.Today.AddDays(-1)
-                               ? "Yesterday"
-                               : conv.LastMessageAt.ToString("MMM d");
+                && conv.CourseId.ToString() == selectedCourseId;
+                var timeStr = conv.LastMessageAt.Date == DateTime.Today
+                ? conv.LastMessageAt.ToString("HH:mm")
+                : conv.LastMessageAt.Date == DateTime.Today.AddDays(-1)
+                ? "Yesterday"
+                : conv.LastMessageAt.ToString("MMM d");
 
                 <a href="@Url.Action("Index", "Messaging", new { teacherId = conv.TeacherId, courseId = conv.CourseId })"
                    class="msg-conv-item @(isActive ? "active" : "")"
@@ -515,7 +725,6 @@
             }
         </div>
 
-        <!-- Courses available to start a new conversation -->
         @if (newConvOptions.Any())
         {
             <div class="msg-new-section">
@@ -561,8 +770,8 @@
                 <a asp-controller="Courses" asp-action="Details"
                    asp-route-id="@activeCourseId"
                    style="font-size:.75rem;font-weight:700;color:#9C9484;text-decoration:none;
-                          padding:.4rem .85rem;border:1px solid #E8E5DE;border-radius:8px;
-                          background:#F2F0EB;transition:all .15s;"
+                              padding:.4rem .85rem;border:1px solid #E8E5DE;border-radius:8px;
+                              background:#F2F0EB;transition:all .15s;"
                    onmouseover="this.style.borderColor='#C8A855';this.style.color='#7A6545';"
                    onmouseout="this.style.borderColor='#E8E5DE';this.style.color='#9C9484';">
                     <i class="fas fa-arrow-up-right-from-square me-1"></i>Course
@@ -574,7 +783,6 @@
 
                 @if (newConv != null)
                 {
-                    <!-- New conversation - no messages yet -->
                     <div class="msg-new-chat-banner">
                         <span class="icon"><i class="fas fa-comment-dots"></i></span>
                         <h5>Start the conversation</h5>
@@ -591,8 +799,8 @@
                         if (lastDate == null || lastDate != msgDate)
                         {
                             var label = msgDate == DateTime.Today ? "Today"
-                                      : msgDate == DateTime.Today.AddDays(-1) ? "Yesterday"
-                                      : msgDate.ToString("MMMM d, yyyy");
+                            : msgDate == DateTime.Today.AddDays(-1) ? "Yesterday"
+                            : msgDate.ToString("MMMM d, yyyy");
                             <div class="msg-date-sep"><span>@label</span></div>
                             lastDate = msgDate;
                         }
@@ -601,7 +809,7 @@
                         <div class="msg-row @(fromMe ? "from-me" : "from-them")">
                             @if (!fromMe)
                             {
-                                <div class="msg-bubble-avatar">@selected.TeacherInitials</div>
+                                <div class="msg-bubble-avatar">@activeInitials</div>
                             }
                             <div>
                                 <div class="msg-bubble">@msg.Message</div>
@@ -626,17 +834,22 @@
             <div class="msg-input-area">
                 <div class="msg-input-wrap">
                     <textarea class="msg-textarea" id="msgInput" rows="1"
-                              placeholder="Message @activeTeacherName…"
-                              maxlength="2000"></textarea>
+                          placeholder="Message @activeTeacherName…"
+                          maxlength="2000"></textarea>
                     <button class="msg-send-btn" id="sendBtn" disabled title="Send (Enter)">
                         <i class="fas fa-paper-plane"></i>
                     </button>
                 </div>
-                <div style="font-size:.68rem;color:#B0A99E;margin-top:.4rem;text-align:right;">
-                    Press <kbd style="background:#E8E5DE;border-radius:4px;padding:.1rem .3rem;font-size:.68rem;">Enter</kbd>
-                    to send &nbsp;·&nbsp;
-                    <kbd style="background:#E8E5DE;border-radius:4px;padding:.1rem .3rem;font-size:.68rem;">Shift+Enter</kbd>
-                    for new line
+                <div style="display:flex;justify-content:space-between;margin-top:.4rem;">
+                    <span class="msg-send-error" id="sendError">
+                        <i class="fas fa-exclamation-circle me-1"></i>Failed to send. Retrying…
+                    </span>
+                    <span style="font-size:.68rem;color:#B0A99E;margin-left:auto;">
+                        Press <kbd style="background:#E8E5DE;border-radius:4px;padding:.1rem .3rem;font-size:.68rem;">Enter</kbd>
+                        to send &nbsp;·&nbsp;
+                        <kbd style="background:#E8E5DE;border-radius:4px;padding:.1rem .3rem;font-size:.68rem;">Shift+Enter</kbd>
+                        for new line
+                    </span>
                 </div>
             </div>
         }
@@ -660,7 +873,7 @@
                     <a asp-controller="Courses" asp-action="Index"
                        class="btn btn-sm mt-2"
                        style="background:#1A1916;color:#E8C97A;border-radius:10px;font-weight:700;
-                              padding:.65rem 1.5rem;text-decoration:none;font-size:.85rem;">
+                                      padding:.65rem 1.5rem;text-decoration:none;font-size:.85rem;">
                         <i class="fas fa-compass me-2"></i>Browse Courses
                     </a>
                 }
@@ -671,200 +884,250 @@
 </div>
 
 @section Scripts {
-<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
-<script>
-(function () {
-    // ── Config ──────────────────────────────────────────────────────
-    const TEACHER_ID  = '@(activeTeacherId ?? "")';
-    const STUDENT_ID  = '@studentId';
-    const COURSE_ID   = '@(activeCourseId?.ToString() ?? "")';
-    const TEACHER_INI = '@(Html.Raw(activeInitials ?? ""))';
-    const hasConv     = TEACHER_ID && STUDENT_ID && COURSE_ID;
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <script>
+        (function () {
+            // ── Config ──────────────────────────────────────────────────────
+            const TEACHER_ID  = '@Html.Raw(activeTeacherId ?? "")';
+            const STUDENT_ID  = '@Html.Raw(studentId)';
+            const COURSE_ID   = '@Html.Raw(activeCourseId?.ToString() ?? "")';
+            const TEACHER_INI = '@Html.Raw(activeInitials ?? "")';
+            const hasConv     = TEACHER_ID && STUDENT_ID && COURSE_ID;
 
-    // ── DOM refs ────────────────────────────────────────────────────
-    const messagesArea    = document.getElementById('messagesArea');
-    const msgInput        = document.getElementById('msgInput');
-    const sendBtn         = document.getElementById('sendBtn');
-    const typingIndicator = document.getElementById('typingIndicator');
+            // ── DOM refs ────────────────────────────────────────────────────
+            const messagesArea    = document.getElementById('messagesArea');
+            const msgInput        = document.getElementById('msgInput');
+            const sendBtn         = document.getElementById('sendBtn');
+            const typingIndicator = document.getElementById('typingIndicator');
+            const sendError       = document.getElementById('sendError');
 
-    // ── Scroll to bottom ────────────────────────────────────────────
-    function scrollBottom() {
-        if (messagesArea) messagesArea.scrollTop = messagesArea.scrollHeight;
-    }
-    scrollBottom();
-
-    if (!hasConv) return;
-
-    // ── SignalR connection ───────────────────────────────────────────
-    const conn = new signalR.HubConnectionBuilder()
-        .withUrl('/chatHub')
-        .withAutomaticReconnect([0, 2000, 5000, 10000])
-        .build();
-
-    // Receive a new message
-    conn.on('ReceiveMessage', function (payload) {
-        if (payload.teacherId !== TEACHER_ID ||
-            payload.studentId !== STUDENT_ID ||
-            payload.courseId  !== COURSE_ID) return;
-
-        appendBubble({
-            message       : payload.message,
-            isFromTeacher : payload.isFromTeacher,
-            sentAt        : payload.sentAt,
-            sentDate      : payload.sentDate
-        });
-        scrollBottom();
-    });
-
-    // Typing indicator
-    conn.on('UserTyping', function (data) {
-        if (!typingIndicator) return;
-        if (data.isTyping) {
-            typingIndicator.classList.add('visible');
-            scrollBottom();
-        } else {
-            typingIndicator.classList.remove('visible');
-        }
-    });
-
-    // Reconnect → re-join group
-    conn.onreconnected(async () => {
-        await conn.invoke('JoinConversation', TEACHER_ID, STUDENT_ID, COURSE_ID);
-    });
-
-    async function start() {
-        try {
-            await conn.start();
-            await conn.invoke('JoinConversation', TEACHER_ID, STUDENT_ID, COURSE_ID);
-        } catch (err) {
-            console.warn('SignalR start failed', err);
-            setTimeout(start, 5000);
-        }
-    }
-    start();
-
-    // ── Send message ────────────────────────────────────────────────
-    async function sendMessage() {
-        const text = (msgInput.value || '').trim();
-        if (!text || conn.state !== signalR.HubConnectionState.Connected) return;
-
-        msgInput.value = '';
-        msgInput.style.height = 'auto';
-        sendBtn.disabled = true;
-
-        // Optimistic UI
-        appendBubble({
-            message       : text,
-            isFromTeacher : false,
-            sentAt        : new Date().toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' }),
-            sentDate      : new Date().toISOString().slice(0,10),
-            optimistic    : true
-        });
-        scrollBottom();
-
-        try {
-            await conn.invoke('SendMessage', TEACHER_ID, STUDENT_ID, COURSE_ID, text);
-        } catch (err) {
-            console.error('Send failed', err);
-        }
-
-        // Stop typing indicator
-        stopTyping();
-    }
-
-    if (sendBtn) sendBtn.addEventListener('click', sendMessage);
-
-    // ── Input handling ───────────────────────────────────────────────
-    let typingTimer;
-    let isTyping = false;
-
-    function startTyping() {
-        if (!isTyping) {
-            isTyping = true;
-            conn.invoke('TypingStarted', TEACHER_ID, STUDENT_ID, COURSE_ID).catch(() => {});
-        }
-        clearTimeout(typingTimer);
-        typingTimer = setTimeout(stopTyping, 2000);
-    }
-
-    function stopTyping() {
-        if (isTyping) {
-            isTyping = false;
-            conn.invoke('TypingStopped', TEACHER_ID, STUDENT_ID, COURSE_ID).catch(() => {});
-        }
-        clearTimeout(typingTimer);
-    }
-
-    if (msgInput) {
-        msgInput.addEventListener('input', function () {
-            this.style.height = 'auto';
-            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
-            sendBtn.disabled = this.value.trim().length === 0;
-            if (this.value.trim()) startTyping();
-            else stopTyping();
-        });
-
-        msgInput.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
+            function scrollBottom() {
+                if (messagesArea) messagesArea.scrollTop = messagesArea.scrollHeight;
             }
-        });
-    }
+            scrollBottom();
 
-    // ── Append bubble ────────────────────────────────────────────────
-    let lastRenderedDate = null;
+            if (!hasConv) return;
 
-    function appendBubble({ message, isFromTeacher, sentAt, sentDate, optimistic }) {
-        if (!messagesArea) return;
+            // ── SignalR connection ───────────────────────────────────────────
+            const conn = new signalR.HubConnectionBuilder()
+                .withUrl('/chatHub')
+                .withAutomaticReconnect([0, 2000, 5000, 10000])
+                .build();
 
-        // Date separator if needed
-        if (sentDate && sentDate !== lastRenderedDate) {
-            lastRenderedDate = sentDate;
-            const today    = new Date().toISOString().slice(0,10);
-            const yest     = new Date(Date.now()-86400000).toISOString().slice(0,10);
-            const label    = sentDate === today    ? 'Today'
-                           : sentDate === yest     ? 'Yesterday'
-                           : new Date(sentDate).toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
-            const sep = document.createElement('div');
-            sep.className = 'msg-date-sep';
-            sep.innerHTML = `<span>${label}</span>`;
-            messagesArea.appendChild(sep);
-        }
+            // Receive a new message
+            conn.on('ReceiveMessage', function (payload) {
+                if (payload.teacherId !== TEACHER_ID ||
+                    payload.studentId !== STUDENT_ID ||
+                    payload.courseId  !== COURSE_ID) return;
 
-        const fromMe = !isFromTeacher;
-        const row    = document.createElement('div');
-        row.className = `msg-row ${fromMe ? 'from-me' : 'from-them'}`;
-        if (optimistic) row.style.opacity = '.8';
+                // Remove the optimistic copy (it will be replaced by the confirmed one)
+                const optimisticRows = messagesArea.querySelectorAll('.msg-row[data-optimistic]');
+                if (optimisticRows.length) optimisticRows[optimisticRows.length - 1].remove();
 
-        const avatarHtml = fromMe ? '' : `<div class="msg-bubble-avatar">${TEACHER_INI}</div>`;
-        row.innerHTML = `
-            ${avatarHtml}
-            <div>
-                <div class="msg-bubble">${escHtml(message)}</div>
-                <span class="msg-time">${sentAt}</span>
-            </div>`;
-        messagesArea.appendChild(row);
-    }
-
-    function escHtml(str) {
-        const d = document.createElement('div');
-        d.textContent = str;
-        return d.innerHTML;
-    }
-
-    // ── Sidebar search ────────────────────────────────────────────────
-    const searchInput = document.getElementById('convSearch');
-    if (searchInput) {
-        searchInput.addEventListener('input', function () {
-            const q = this.value.toLowerCase();
-            document.querySelectorAll('.msg-conv-item').forEach(item => {
-                const s = (item.dataset.search || '').toLowerCase();
-                item.style.display = s.includes(q) ? '' : 'none';
+                appendBubble({
+                    message       : payload.message,
+                    isFromTeacher : payload.isFromTeacher,
+                    sentAt        : payload.sentAt,
+                    sentDate      : payload.sentDate
+                });
+                scrollBottom();
             });
-        });
-    }
 
-})();
-</script>
+            // Typing indicator from the other side
+            conn.on('UserTyping', function (data) {
+                if (!typingIndicator) return;
+                if (data.isTyping) {
+                    typingIndicator.classList.add('visible');
+                    scrollBottom();
+                } else {
+                    typingIndicator.classList.remove('visible');
+                }
+            });
+
+            conn.onreconnected(async () => {
+                await conn.invoke('JoinConversation', TEACHER_ID, STUDENT_ID, COURSE_ID);
+            });
+
+            // ── Ensure the hub connection is alive before sending ───────────
+            async function ensureConnected() {
+                if (conn.state === signalR.HubConnectionState.Connected) return true;
+
+                if (conn.state === signalR.HubConnectionState.Disconnected) {
+                    try {
+                        await conn.start();
+                        await conn.invoke('JoinConversation', TEACHER_ID, STUDENT_ID, COURSE_ID);
+                        return true;
+                    } catch (e) {
+                        console.error('Could not connect to chat hub', e);
+                        return false;
+                    }
+                }
+
+                // Connecting state — poll for up to 5 s
+                for (let i = 0; i < 50; i++) {
+                    await new Promise(r => setTimeout(r, 100));
+                    if (conn.state === signalR.HubConnectionState.Connected) return true;
+                }
+
+                return false;
+            }
+
+            async function start() {
+                try {
+                    await conn.start();
+                    await conn.invoke('JoinConversation', TEACHER_ID, STUDENT_ID, COURSE_ID);
+                } catch (err) {
+                    console.warn('SignalR start failed, retrying…', err);
+                    setTimeout(start, 5000);
+                }
+            }
+            start();
+
+            // ── Send message ────────────────────────────────────────────────
+            async function sendMessage() {
+                if (!msgInput) return;
+                const text = msgInput.value.trim();
+                if (!text) return;
+
+                // Clear input immediately for snappy UX
+                msgInput.value = '';
+                msgInput.style.height = 'auto';
+                if (sendBtn) sendBtn.disabled = true;
+                if (sendError) sendError.style.display = 'none';
+
+                // Optimistic UI — show message right away
+                appendBubble({
+                    message       : text,
+                    isFromTeacher : false,
+                    sentAt        : new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+                    sentDate      : new Date().toISOString().slice(0, 10),
+                    optimistic    : true
+                });
+                scrollBottom();
+
+                // Attempt to send via SignalR (reconnecting if necessary)
+                try {
+                    const connected = await ensureConnected();
+                    if (connected) {
+                        await conn.invoke('SendMessage', TEACHER_ID, STUDENT_ID, COURSE_ID, text);
+                    } else {
+                        throw new Error('Could not establish connection');
+                    }
+                } catch (err) {
+                    console.error('Send failed', err);
+                    if (sendError) {
+                        sendError.style.display = 'block';
+                        setTimeout(() => { if (sendError) sendError.style.display = 'none'; }, 4000);
+                    }
+                }
+
+                stopTyping();
+            }
+
+            // ── Button click ────────────────────────────────────────────────
+            if (sendBtn) {
+                sendBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    sendMessage();
+                });
+            }
+
+            // ── Input change + Enter key ─────────────────────────────────────
+            let typingTimer, isTyping = false;
+
+            function startTyping() {
+                if (!isTyping) {
+                    isTyping = true;
+                    conn.invoke('TypingStarted', TEACHER_ID, STUDENT_ID, COURSE_ID).catch(() => {});
+                }
+                clearTimeout(typingTimer);
+                typingTimer = setTimeout(stopTyping, 2000);
+            }
+
+            function stopTyping() {
+                if (isTyping) {
+                    isTyping = false;
+                    conn.invoke('TypingStopped', TEACHER_ID, STUDENT_ID, COURSE_ID).catch(() => {});
+                }
+                clearTimeout(typingTimer);
+            }
+
+            if (msgInput) {
+                msgInput.addEventListener('input', function () {
+                    this.style.height = 'auto';
+                    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+                    if (sendBtn) sendBtn.disabled = this.value.trim().length === 0;
+                    if (this.value.trim()) startTyping(); else stopTyping();
+                });
+
+                msgInput.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendMessage();
+                    }
+                });
+            }
+
+            // ── Append a bubble to the messages list ─────────────────────────
+            let lastRenderedDate = null;
+
+            function appendBubble({ message, isFromTeacher, sentAt, sentDate, optimistic }) {
+                if (!messagesArea) return;
+
+                // Remove the "start conversation" banner on first message
+                const banner = messagesArea.querySelector('.msg-new-chat-banner');
+                if (banner) banner.remove();
+
+                // Date separator
+                if (sentDate && sentDate !== lastRenderedDate) {
+                    lastRenderedDate = sentDate;
+                    const today = new Date().toISOString().slice(0, 10);
+                    const yest  = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+                    const label = sentDate === today   ? 'Today'
+                                : sentDate === yest    ? 'Yesterday'
+                                : new Date(sentDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+                    const sep = document.createElement('div');
+                    sep.className = 'msg-date-sep';
+                    sep.innerHTML = `<span>${label}</span>`;
+                    messagesArea.appendChild(sep);
+                }
+
+                const fromMe = !isFromTeacher;
+                const row    = document.createElement('div');
+                row.className = `msg-row ${fromMe ? 'from-me' : 'from-them'}`;
+                if (optimistic) {
+                    row.dataset.optimistic = '1';
+                    row.style.opacity = '.75';
+                }
+
+                const avatarHtml = fromMe ? '' : `<div class="msg-bubble-avatar">${escHtml(TEACHER_INI)}</div>`;
+                row.innerHTML = `
+                    ${avatarHtml}
+                    <div>
+                        <div class="msg-bubble">${escHtml(message)}</div>
+                        <span class="msg-time">${sentAt}</span>
+                    </div>`;
+                messagesArea.appendChild(row);
+            }
+
+            function escHtml(str) {
+                const d = document.createElement('div');
+                d.textContent = str;
+                return d.innerHTML;
+            }
+
+            // ── Sidebar search ────────────────────────────────────────────────
+            const searchInput = document.getElementById('convSearch');
+            if (searchInput) {
+                searchInput.addEventListener('input', function () {
+                    const q = this.value.toLowerCase();
+                    document.querySelectorAll('.msg-conv-item').forEach(item => {
+                        const s = (item.dataset.search || '').toLowerCase();
+                        item.style.display = s.includes(q) ? '' : 'none';
+                    });
+                });
+            }
+
+        })();
+    </script>
 }

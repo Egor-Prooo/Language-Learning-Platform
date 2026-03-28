@@ -1,34 +1,22 @@
-﻿@* Teacher/Messages.cshtml — place this at Views/Teacher/Messages.cshtml *@
-@* The model is IEnumerable<TeacherCourseGroupViewModel> *@
-@* ViewBag.SelectedStudentId, ViewBag.SelectedCourseId, ViewBag.SelectedConv, ViewBag.TeacherId *@
+﻿@model IEnumerable<LanguageLearningPlatform.Web.Controllers.TeacherCourseGroupViewModel>
 
 @{
     ViewData["Title"] = "Student Messages";
 
-    // ── Retrieve viewbag data ──────────────────────────────────────────────
     var teacherId = ViewBag.TeacherId as string ?? "";
     var selectedStudentId = ViewBag.SelectedStudentId as string ?? "";
     var selectedCourseId = ViewBag.SelectedCourseId is Guid scg ? scg.ToString() : "";
 
-    // Selected conversation typed object
-    // (TeacherStudentItemViewModel or null)
-    dynamic? sel = ViewBag.SelectedConv;
+    var sel = ViewBag.SelectedConv as LanguageLearningPlatform.Web.Controllers.TeacherStudentItemViewModel;
 
     string? selStudentName = sel?.StudentName;
     string? selInitials = sel?.StudentInitials;
     string? selCourseName = null;
 
-    // Find course name from model
     if (sel != null)
     {
-        foreach (var cg in (IEnumerable<dynamic>)Model)
-        {
-            if (cg.CourseId.ToString() == selectedCourseId)
-            {
-                selCourseName = cg.CourseName;
-                break;
-            }
-        }
+        var matchedGroup = Model.FirstOrDefault(cg => cg.CourseId.ToString() == selectedCourseId);
+        selCourseName = matchedGroup?.CourseName;
     }
 }
 
@@ -103,7 +91,6 @@
             font-size: .72rem;
         }
 
-        /* Scroll area */
         .msg-sidebar-scroll {
             flex: 1;
             overflow-y: auto;
@@ -119,7 +106,7 @@
                 border-radius: 4px;
             }
 
-        /* ── Course group ─────────────────────────────────────── */
+        /* ── Course group ─────────────────────────────────────────── */
         .msg-course-group {
             margin-bottom: .25rem;
         }
@@ -189,7 +176,6 @@
             transform: rotate(90deg);
         }
 
-        /* Student list inside course group */
         .msg-student-list {
             display: none;
         }
@@ -297,13 +283,6 @@
             font-weight: 800;
             padding: .1rem .38rem;
             border-radius: 7px;
-        }
-
-        .msg-no-students {
-            padding: .5rem 1.25rem .5rem 2.8rem;
-            font-size: .72rem;
-            color: rgba(255,255,255,.2);
-            font-style: italic;
         }
 
         /* ── Chat area ───────────────────────────────────────────── */
@@ -480,7 +459,6 @@
             text-align: right;
         }
 
-        /* Typing indicator */
         .msg-typing {
             display: none;
             align-items: center;
@@ -527,7 +505,6 @@
             }
         }
 
-        /* Input area */
         .msg-input-area {
             background: #FDFCFA;
             border-top: 1px solid #E8E5DE;
@@ -598,7 +575,6 @@
                 transform: none;
             }
 
-        /* Empty states */
         .msg-empty {
             flex: 1;
             display: flex;
@@ -658,6 +634,17 @@
                 margin: 0;
             }
 
+        /* No-messages badge on student items */
+        .msg-new-badge {
+            font-size: .58rem;
+            font-weight: 700;
+            background: rgba(45,212,191,.12);
+            color: #2DD4BF;
+            padding: .1rem .4rem;
+            border-radius: 6px;
+            margin-left: auto;
+        }
+
         @@media (max-width: 768px) {
             .msg-sidebar {
                 width: 100%;
@@ -691,25 +678,7 @@
 
         <div class="msg-sidebar-scroll" id="sidebarScroll">
 
-            @{
-                bool anyConversations = false;
-                foreach (var cg in Model)
-                {
-                    // Count students with actual messages
-                    var studentsWithMsgs = ((IEnumerable<dynamic>)cg.Students)
-                    .Where(s => (bool)s.HasMessages).ToList();
-                    var totalUnread = (int)cg.TotalUnread;
-                    anyConversations = anyConversations || studentsWithMsgs.Any();
-
-                    // Determine if this group should start open
-                    bool isGroupOpen = ((IEnumerable<dynamic>)cg.Students)
-                    .Any(s => (string)s.StudentId == selectedStudentId
-                    && (string)s.CourseId.ToString() == selectedCourseId);
-                    if (!isGroupOpen && !studentsWithMsgs.Any()) continue; // hide empty courses
-                }
-            }
-
-            @if (!((IEnumerable<dynamic>)Model).Any())
+            @if (!Model.Any())
             {
                 <div style="text-align:center;padding:2.5rem 1.25rem;">
                     <i class="fas fa-chalkboard-teacher"
@@ -722,50 +691,41 @@
 
             @foreach (var cg in Model)
             {
-                var totalUnread = (int)cg.TotalUnread;
+                var students = cg.Students;
+                if (!students.Any()) continue;
 
-                // Determine if this course group has any students worth showing
-                var studentsInGroup = ((IEnumerable<dynamic>)cg.Students).ToList();
-                if (!studentsInGroup.Any()) continue;
-
-                // Open the group that contains the selected student
-                bool isOpen = studentsInGroup.Any(s =>
-                (string)s.StudentId == selectedStudentId &&
-                s.CourseId.ToString() == selectedCourseId);
-
-                if (!isOpen && !studentsInGroup.Any(s => (bool)s.HasMessages))
-                    isOpen = false; // collapse courses with no messages by default
+                // Open this group if the selected student is in it, otherwise open all by default
+                bool isOpen = !students.Any() ? false
+                : !string.IsNullOrEmpty(selectedStudentId)
+                ? students.Any(s => s.StudentId == selectedStudentId && s.CourseId.ToString() == selectedCourseId)
+                : true; // No selection yet — expand all groups so teachers can find students
 
                 <div class="msg-course-group @(isOpen ? "open" : "")"
                      data-course-id="@cg.CourseId">
                     <div class="msg-course-header" onclick="toggleGroup(this.parentElement)">
-                        <div class="msg-course-icon">
-                            <i class="fas fa-book"></i>
-                        </div>
-                        <div class="msg-course-name">@cg.CourseName</div>
-                        @if (totalUnread > 0)
+                        <div class="msg-course-icon"><i class="fas fa-book"></i></div>
+                        <div class="msg-course-name" title="@cg.CourseName">@cg.CourseName</div>
+                        @if (cg.TotalUnread > 0)
                         {
-                            <span class="msg-course-badge has-unread">@totalUnread</span>
+                            <span class="msg-course-badge has-unread">@cg.TotalUnread</span>
                         }
                         else
                         {
-                            <span class="msg-course-badge">@studentsInGroup.Count</span>
+                            <span class="msg-course-badge">@students.Count</span>
                         }
                         <i class="fas fa-chevron-right msg-course-chevron"></i>
                     </div>
 
                     <div class="msg-student-list">
-                        @foreach (var student in studentsInGroup)
+                        @foreach (var student in students)
                         {
-                            bool isActive = (string)student.StudentId == selectedStudentId
+                            bool isActive = student.StudentId == selectedStudentId
                             && student.CourseId.ToString() == selectedCourseId;
-                            bool hasMsg = (bool)student.HasMessages;
-                            int unread = (int)student.UnreadCount;
 
                             string timeStr = "";
-                            if (hasMsg && student.LastMessageAt != null)
+                            if (student.HasMessages && student.LastMessageAt.HasValue)
                             {
-                                var lat = (DateTime)student.LastMessageAt;
+                                var lat = student.LastMessageAt.Value;
                                 timeStr = lat.Date == DateTime.Today ? lat.ToString("HH:mm")
                                 : lat.Date == DateTime.Today.AddDays(-1) ? "Yesterday"
                                 : lat.ToString("MMM d");
@@ -773,35 +733,41 @@
 
                             <a href="@Url.Action("Messages", "Teacher", new { selectedStudentId = student.StudentId, selectedCourseId = student.CourseId })"
                                class="msg-student-item @(isActive ? "active" : "")"
-                               data-search="@((string)student.StudentName.ToLower()) @cg.CourseName.ToLower()">
+                               data-search="@student.StudentName.ToLower() @cg.CourseName.ToLower()">
                                 <div class="msg-student-avatar">
                                     @student.StudentInitials
-                                    @if (unread > 0)
+                                    @if (student.UnreadCount > 0)
                                     {
                                         <div class="msg-student-unread-dot"></div>
                                     }
                                 </div>
                                 <div class="msg-student-body">
                                     <div class="msg-student-name">@student.StudentName</div>
-                                    @if (hasMsg)
+                                    @if (student.HasMessages)
                                     {
                                         <div class="msg-student-preview">@student.LastMessage</div>
                                     }
                                     else
                                     {
-                                        <div class="msg-student-preview" style="font-style:italic;">No messages yet</div>
+                                        <div class="msg-student-preview" style="font-style:italic;color:rgba(255,255,255,.18);">
+                                            No messages yet
+                                        </div>
                                     }
                                 </div>
-                                @if (hasMsg)
-                                {
-                                    <div class="msg-student-meta">
+                                <div class="msg-student-meta">
+                                    @if (student.HasMessages)
+                                    {
                                         <span class="msg-student-time">@timeStr</span>
-                                        @if (unread > 0)
+                                        @if (student.UnreadCount > 0)
                                         {
-                                            <span class="msg-student-badge">@unread</span>
+                                            <span class="msg-student-badge">@student.UnreadCount</span>
                                         }
-                                    </div>
-                                }
+                                    }
+                                    else
+                                    {
+                                        <span class="msg-new-badge">New</span>
+                                    }
+                                </div>
                             </a>
                         }
                     </div>
@@ -826,7 +792,7 @@
                         @selCourseName
                     </div>
                 </div>
-                <a href="@Url.Action("StudentProgress", "Teacher", new { studentId = sel?.StudentId })"
+                <a href="@Url.Action("StudentProgress", "Teacher", new { studentId = sel.StudentId })"
                    style="font-size:.75rem;font-weight:700;color:#9C9484;text-decoration:none;
                               padding:.4rem .85rem;border:1px solid #E8E5DE;border-radius:8px;
                               background:#F2F0EB;transition:all .15s;"
@@ -838,11 +804,7 @@
 
             <!-- Messages area -->
             <div class="msg-messages" id="messagesArea">
-                @{
-                    bool hasMessages = sel != null && ((IEnumerable<dynamic>)sel.Messages).Any();
-                }
-
-                @if (!hasMessages)
+                @if (!sel.Messages.Any())
                 {
                     <div class="msg-new-chat-banner">
                         <span class="icon"><i class="fas fa-comment-dots"></i></span>
@@ -853,12 +815,9 @@
                 else
                 {
                     DateTime? lastDate2 = null;
-                    foreach (var msg in (IEnumerable<dynamic>)sel.Messages)
+                    foreach (var msg in sel.Messages)
                     {
-                        DateTime sentAt = msg.SentAt;
-                        bool fromTeacher = msg.IsFromTeacher;
-                        var msgDate = sentAt.Date;
-
+                        var msgDate = msg.SentAt.Date;
                         if (lastDate2 == null || lastDate2 != msgDate)
                         {
                             lastDate2 = msgDate;
@@ -868,15 +827,15 @@
                             <div class="msg-date-sep"><span>@lbl</span></div>
                         }
 
-                        bool fromMe = fromTeacher; // teacher is "me" on this view
-                                                   <div class="msg-row @(fromMe ? "from-me" : "from-them")">
+                        bool fromMe = msg.IsFromTeacher;
+                        <div class="msg-row @(fromMe ? "from-me" : "from-them")">
                             @if (!fromMe)
                             {
                                 <div class="msg-bubble-avatar">@selInitials</div>
                             }
                             <div>
                                 <div class="msg-bubble">@msg.Message</div>
-                                <span class="msg-time">@sentAt.ToString("HH:mm")</span>
+                                <span class="msg-time">@msg.SentAt.ToString("HH:mm")</span>
                             </div>
                         </div>
                     }
@@ -928,11 +887,11 @@
     <script>
         (function () {
             // ── Config ──────────────────────────────────────────────────────
-            const TEACHER_ID   = '@teacherId';
-            const STUDENT_ID   = '@Html.Raw(selectedStudentId)';
-            const COURSE_ID    = '@Html.Raw(selectedCourseId)';
-            const STUDENT_INI  = '@Html.Raw(selInitials ?? "")';
-            const hasConv      = TEACHER_ID && STUDENT_ID && COURSE_ID;
+            const TEACHER_ID  = '@teacherId';
+            const STUDENT_ID  = '@Html.Raw(selectedStudentId)';
+            const COURSE_ID   = '@Html.Raw(selectedCourseId)';
+            const STUDENT_INI = '@Html.Raw(selInitials ?? "")';
+            const hasConv     = TEACHER_ID && STUDENT_ID && COURSE_ID;
 
             // ── DOM refs ────────────────────────────────────────────────────
             const messagesArea    = document.getElementById('messagesArea');
@@ -957,7 +916,6 @@
                 if (payload.teacherId !== TEACHER_ID ||
                     payload.studentId !== STUDENT_ID ||
                     payload.courseId  !== COURSE_ID) return;
-
                 appendBubble({
                     message       : payload.message,
                     isFromTeacher : payload.isFromTeacher,
@@ -981,12 +939,32 @@
                 await conn.invoke('JoinConversation', TEACHER_ID, STUDENT_ID, COURSE_ID);
             });
 
+            async function ensureConnected() {
+                if (conn.state === signalR.HubConnectionState.Connected) return true;
+                if (conn.state === signalR.HubConnectionState.Disconnected) {
+                    try {
+                        await conn.start();
+                        await conn.invoke('JoinConversation', TEACHER_ID, STUDENT_ID, COURSE_ID);
+                        return true;
+                    } catch (e) {
+                        console.error('Reconnect failed', e);
+                        return false;
+                    }
+                }
+                // Connecting — wait up to 5 s
+                for (let i = 0; i < 50; i++) {
+                    await new Promise(r => setTimeout(r, 100));
+                    if (conn.state === signalR.HubConnectionState.Connected) return true;
+                }
+                return false;
+            }
+
             async function start() {
                 try {
                     await conn.start();
                     await conn.invoke('JoinConversation', TEACHER_ID, STUDENT_ID, COURSE_ID);
                 } catch (err) {
-                    console.warn('SignalR start failed', err);
+                    console.warn('SignalR start failed, retrying…', err);
                     setTimeout(start, 5000);
                 }
             }
@@ -995,27 +973,31 @@
             // ── Send ────────────────────────────────────────────────────────
             async function sendMessage() {
                 const text = (msgInput?.value || '').trim();
-                if (!text || conn.state !== signalR.HubConnectionState.Connected) return;
+                if (!text) return;
 
                 msgInput.value = '';
                 msgInput.style.height = 'auto';
                 sendBtn.disabled = true;
 
-                // Optimistic
+                // Optimistic UI
                 appendBubble({
                     message       : text,
                     isFromTeacher : true,
-                    sentAt        : new Date().toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' }),
-                    sentDate      : new Date().toISOString().slice(0,10),
+                    sentAt        : new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+                    sentDate      : new Date().toISOString().slice(0, 10),
                     optimistic    : true
                 });
                 scrollBottom();
 
                 try {
-                    await conn.invoke('SendMessage', TEACHER_ID, STUDENT_ID, COURSE_ID, text);
+                    const connected = await ensureConnected();
+                    if (connected) {
+                        await conn.invoke('SendMessage', TEACHER_ID, STUDENT_ID, COURSE_ID, text);
+                    }
                 } catch (err) {
                     console.error('Send failed', err);
                 }
+
                 stopTyping();
             }
 
@@ -1048,7 +1030,10 @@
                     if (this.value.trim()) startTyping(); else stopTyping();
                 });
                 msgInput.addEventListener('keydown', function (e) {
-                    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendMessage();
+                    }
                 });
             }
 
@@ -1058,20 +1043,24 @@
             function appendBubble({ message, isFromTeacher, sentAt, sentDate, optimistic }) {
                 if (!messagesArea) return;
 
+                // Remove "no messages" banner if present
+                const banner = messagesArea.querySelector('.msg-new-chat-banner');
+                if (banner) banner.remove();
+
                 if (sentDate && sentDate !== lastDate) {
                     lastDate = sentDate;
-                    const today = new Date().toISOString().slice(0,10);
-                    const yest  = new Date(Date.now()-86400000).toISOString().slice(0,10);
+                    const today = new Date().toISOString().slice(0, 10);
+                    const yest  = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
                     const label = sentDate === today ? 'Today'
                                 : sentDate === yest  ? 'Yesterday'
-                                : new Date(sentDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+                                : new Date(sentDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
                     const sep = document.createElement('div');
                     sep.className = 'msg-date-sep';
                     sep.innerHTML = `<span>${label}</span>`;
                     messagesArea.appendChild(sep);
                 }
 
-                const fromMe = isFromTeacher; // teacher perspective
+                const fromMe = isFromTeacher;
                 const row    = document.createElement('div');
                 row.className = `msg-row ${fromMe ? 'from-me' : 'from-them'}`;
                 if (optimistic) row.style.opacity = '.8';
@@ -1099,20 +1088,19 @@
                     const q = this.value.toLowerCase();
                     document.querySelectorAll('.msg-student-item').forEach(item => {
                         const s = (item.dataset.search || '').toLowerCase();
-                        const matches = s.includes(q);
-                        item.style.display = matches ? '' : 'none';
+                        item.style.display = s.includes(q) ? '' : 'none';
                     });
-                    // Auto-open groups with matches
+                    // Auto-expand groups that have visible matches
                     document.querySelectorAll('.msg-course-group').forEach(group => {
-                        const visible = group.querySelectorAll('.msg-student-item:not([style*="none"])');
-                        if (q && visible.length > 0) group.classList.add('open');
+                        const hasVisible = [...group.querySelectorAll('.msg-student-item')]
+                            .some(i => i.style.display !== 'none');
+                        if (q && hasVisible) group.classList.add('open');
                     });
                 });
             }
 
         })();
 
-        // ── Group toggle ────────────────────────────────────────────────────────────
         function toggleGroup(groupEl) {
             groupEl.classList.toggle('open');
         }

@@ -40,6 +40,7 @@ namespace LanguageLearningPlatform
 
             builder.Services.AddControllersWithViews();
             builder.Services.AddRazorPages();
+            builder.Services.AddSignalR();
 
             var app = builder.Build();
 
@@ -71,6 +72,8 @@ namespace LanguageLearningPlatform
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.MapHub<LanguageLearningPlatform.Web.Hubs.ChatHub>("/hubs/chat");
 
             app.MapControllerRoute(
                 name: "admin",

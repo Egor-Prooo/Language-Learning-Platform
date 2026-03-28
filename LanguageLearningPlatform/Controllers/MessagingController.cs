@@ -17,123 +17,150 @@ namespace LanguageLearningPlatform.Web.Controllers
             _context = context;
         }
 
-        // GET: /Messaging/MyMessages
-        public async Task<IActionResult> MyMessages(
-            string? selectedTeacherId = null,
-            Guid? selectedCourseId = null)
+        // ── Student Messenger ─────────────────────────────────────────────────
+
+        /// <summary>
+        /// Main student messaging page.
+        /// Left panel: list of teacher conversations (teacher name + course name).
+        /// Right panel: chat for the selected conversation.
+        /// </summary>
+        public async Task<IActionResult> Index(string? teacherId = null, Guid? courseId = null)
         {
             var studentId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
-            // All existing messages for this student
-            var allMessages = await _context.TeacherMessages
+            // ── Load existing conversations (grouped by teacher + course) ──────
+            var rawMessages = await _context.TeacherMessages
                 .Where(m => m.StudentId == studentId)
                 .Include(m => m.Teacher)
                 .Include(m => m.Course)
                 .OrderBy(m => m.SentAt)
                 .ToListAsync();
 
-            // Build conversations from messages
-            var conversations = allMessages
+            var conversations = rawMessages
                 .GroupBy(m => (m.TeacherId, m.CourseId))
-                .Select(g => new StudentConversationViewModel
+                .Select(g =>
                 {
-                    TeacherId = g.Key.TeacherId,
-                    CourseId = g.Key.CourseId,
-                    TeacherName = $"{g.First().Teacher?.FirstName} {g.First().Teacher?.LastName}".Trim(),
-                    CourseName = g.First().Course?.Title ?? "Unknown",
-                    CourseLanguage = g.First().Course?.Language ?? string.Empty,
-                    LastMessage = g.OrderByDescending(m => m.SentAt).First().Message,
-                    LastMessageAt = g.Max(m => m.SentAt),
-                    HasUnreadReplies = g.Any(m => m.IsFromTeacher && !m.IsRead),
-                    Messages = g.OrderBy(m => m.SentAt).ToList()
+                    var first = g.First();
+                    return new StudentConversationViewModel
+                    {
+                        TeacherId = g.Key.TeacherId,
+                        CourseId = g.Key.CourseId,
+                        TeacherName = $"{first.Teacher?.FirstName} {first.Teacher?.LastName}".Trim(),
+                        TeacherInitials = Initials(first.Teacher?.FirstName, first.Teacher?.LastName),
+                        CourseName = first.Course?.Title ?? "Unknown",
+                        CourseLanguage = first.Course?.Language ?? "",
+                        CourseLevel = first.Course?.Level ?? "",
+                        LastMessage = g.OrderByDescending(m => m.SentAt).First().Message,
+                        LastMessageAt = g.Max(m => m.SentAt),
+                        UnreadCount = g.Count(m => m.IsFromTeacher && !m.IsRead),
+                        Messages = g.OrderBy(m => m.SentAt).ToList()
+                    };
                 })
                 .OrderByDescending(c => c.LastMessageAt)
                 .ToList();
 
-            // Enrolled courses without active conversations → available to start new chat
-            var existingCourseIds = conversations.Select(c => c.CourseId).ToHashSet();
+            // ── Load courses where student can start a new conversation ────────
+            var existingKeys = conversations.Select(c => (c.TeacherId, c.CourseId)).ToHashSet();
 
-            var enrolledCourses = await _context.CourseEnrollments
-                .Where(e => e.UserId == studentId && e.IsActive && !existingCourseIds.Contains(e.CourseId))
-                .Include(e => e.Course)
-                    .ThenInclude(c => c.Creator)
+            var enrollments = await _context.CourseEnrollments
+                .Where(e => e.UserId == studentId && e.IsActive)
                 .Include(e => e.Course)
                     .ThenInclude(c => c.CourseTeachers)
                         .ThenInclude(ct => ct.Teacher)
+                .Include(e => e.Course)
+                    .ThenInclude(c => c.Creator)
                 .ToListAsync();
 
-            var availableCourses = enrolledCourses
-                .Where(e => e.Course != null)
+            var newConversationOptions = enrollments
                 .Select(e =>
                 {
-                    var primaryTeacher = e.Course.CourseTeachers
-                        .OrderByDescending(ct => ct.IsPrimary)
-                        .FirstOrDefault()?.Teacher ?? e.Course.Creator;
+                    var course = e.Course;
+                    var teacher = course?.CourseTeachers
+                                       .OrderByDescending(ct => ct.IsPrimary)
+                                       .FirstOrDefault()?.Teacher
+                                   ?? course?.Creator;
 
-                    return new AvailableCourseForMessaging
+                    if (teacher == null || course == null) return null;
+                    if (existingKeys.Contains((teacher.Id, course.Id))) return null;
+
+                    return new NewConversationOption
                     {
-                        CourseId = e.CourseId,
-                        CourseName = e.Course.Title,
-                        CourseLanguage = e.Course.Language,
-                        CourseLevel = e.Course.Level,
-                        TeacherName = primaryTeacher != null
-                            ? $"{primaryTeacher.FirstName} {primaryTeacher.LastName}".Trim()
-                            : "No teacher assigned",
-                        HasTeacher = primaryTeacher != null,
-                        TeacherId = primaryTeacher?.Id ?? string.Empty
+                        TeacherId = teacher.Id,
+                        TeacherName = $"{teacher.FirstName} {teacher.LastName}".Trim(),
+                        TeacherInitials = Initials(teacher.FirstName, teacher.LastName),
+                        CourseId = course.Id,
+                        CourseName = course.Title,
+                        CourseLanguage = course.Language,
+                        CourseLevel = course.Level
                     };
                 })
+                .Where(o => o != null)
+                .Cast<NewConversationOption>()
                 .ToList();
 
-            // Mark messages as read for selected conversation
-            if (!string.IsNullOrEmpty(selectedTeacherId) && selectedCourseId.HasValue)
+            // ── Auto-select first conversation if none specified ───────────────
+            if (string.IsNullOrEmpty(teacherId) && conversations.Any())
             {
-                var unreadMessages = await _context.TeacherMessages
+                teacherId = conversations.First().TeacherId;
+                courseId = conversations.First().CourseId;
+            }
+
+            // ── Mark incoming messages as read ────────────────────────────────
+            if (!string.IsNullOrEmpty(teacherId) && courseId.HasValue)
+            {
+                var unread = await _context.TeacherMessages
                     .Where(m => m.StudentId == studentId
-                             && m.TeacherId == selectedTeacherId
-                             && m.CourseId == selectedCourseId.Value
+                             && m.TeacherId == teacherId
+                             && m.CourseId == courseId.Value
                              && m.IsFromTeacher
                              && !m.IsRead)
                     .ToListAsync();
 
-                if (unreadMessages.Any())
+                if (unread.Any())
                 {
-                    unreadMessages.ForEach(m => m.IsRead = true);
+                    unread.ForEach(m => m.IsRead = true);
                     await _context.SaveChangesAsync();
                 }
             }
 
-            // Auto-select first conversation if none specified but conversations exist
-            if (string.IsNullOrEmpty(selectedTeacherId) && conversations.Any())
+            // ── Build selected-conversation data ──────────────────────────────
+            StudentConversationViewModel? selected = null;
+            NewConversationOption? newConv = null;
+
+            if (!string.IsNullOrEmpty(teacherId) && courseId.HasValue)
             {
-                selectedTeacherId = conversations.First().TeacherId;
-                selectedCourseId = conversations.First().CourseId;
+                selected = conversations.FirstOrDefault(
+                    c => c.TeacherId == teacherId && c.CourseId == courseId.Value);
+
+                if (selected == null)
+                    newConv = newConversationOptions.FirstOrDefault(
+                        o => o.TeacherId == teacherId && o.CourseId == courseId.Value);
             }
 
-            ViewBag.SelectedTeacherId = selectedTeacherId;
-            ViewBag.SelectedCourseId = selectedCourseId;
-            ViewBag.AvailableCourses = availableCourses;
+            ViewBag.SelectedTeacherId = teacherId;
+            ViewBag.SelectedCourseId = courseId;
+            ViewBag.Selected = selected;
+            ViewBag.NewConv = newConv;
+            ViewBag.StudentId = studentId;
+            ViewBag.NewConvOptions = newConversationOptions;
 
             return View(conversations);
         }
 
-        // GET: /Messaging/ContactTeacher/courseId
+        // ── Redirect from "Ask the Teacher" button on course page ─────────────
         public async Task<IActionResult> ContactTeacher(Guid courseId)
         {
-            // Just redirect to MyMessages — the new messenger UI handles everything
             var course = await _context.Courses
+                .Include(c => c.CourseTeachers).ThenInclude(ct => ct.Teacher)
                 .Include(c => c.Creator)
-                .Include(c => c.CourseTeachers)
-                    .ThenInclude(ct => ct.Teacher)
                 .FirstOrDefaultAsync(c => c.Id == courseId);
 
             if (course == null) return NotFound();
 
-            var courseTeacher = course.CourseTeachers
-                .OrderByDescending(ct => ct.IsPrimary)
-                .FirstOrDefault();
-
-            var teacher = courseTeacher?.Teacher ?? course.Creator;
+            var teacher = course.CourseTeachers
+                              .OrderByDescending(ct => ct.IsPrimary)
+                              .FirstOrDefault()?.Teacher
+                          ?? course.Creator;
 
             if (teacher == null)
             {
@@ -141,85 +168,68 @@ namespace LanguageLearningPlatform.Web.Controllers
                 return RedirectToAction("Details", "Courses", new { id = courseId });
             }
 
-            return RedirectToAction(nameof(MyMessages),
-                new { selectedTeacherId = teacher.Id, selectedCourseId = courseId });
+            return RedirectToAction(nameof(Index),
+                new { teacherId = teacher.Id, courseId });
         }
 
-        // POST: /Messaging/SendMessage
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SendMessage(Guid courseId, string message,
-            string? selectedTeacherId = null)
+        // ── JSON API: get paginated message history for a conversation ─────────
+        [HttpGet]
+        public async Task<IActionResult> GetMessages(string teacherId, Guid courseId)
         {
-            if (string.IsNullOrWhiteSpace(message))
-            {
-                TempData["ErrorMessage"] = "Message cannot be empty.";
-                return RedirectToAction(nameof(MyMessages),
-                    new { selectedTeacherId, selectedCourseId = courseId });
-            }
-
-            var course = await _context.Courses.FindAsync(courseId);
-            if (course == null)
-            {
-                TempData["ErrorMessage"] = "Course not found.";
-                return RedirectToAction("Details", "Courses", new { id = courseId });
-            }
-
-            var courseTeacher = await _context.CourseTeachers
-                .Where(ct => ct.CourseId == courseId)
-                .OrderByDescending(ct => ct.IsPrimary)
-                .FirstOrDefaultAsync();
-
-            var teacherId = courseTeacher?.TeacherId ?? course.CreatorId;
-
-            if (teacherId == null)
-            {
-                TempData["ErrorMessage"] = "No teacher found for this course.";
-                return RedirectToAction("Details", "Courses", new { id = courseId });
-            }
-
             var studentId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
-            _context.TeacherMessages.Add(new TeacherMessage
-            {
-                Id = Guid.NewGuid(),
-                TeacherId = teacherId,
-                StudentId = studentId,
-                CourseId = courseId,
-                Message = message,
-                IsFromTeacher = false,
-                SentAt = DateTime.UtcNow,
-                IsRead = false
-            });
+            var messages = await _context.TeacherMessages
+                .Where(m => m.StudentId == studentId
+                         && m.TeacherId == teacherId
+                         && m.CourseId == courseId)
+                .OrderBy(m => m.SentAt)
+                .Select(m => new
+                {
+                    id = m.Id.ToString(),
+                    message = m.Message,
+                    isFromTeacher = m.IsFromTeacher,
+                    sentAt = m.SentAt.ToString("HH:mm"),
+                    sentDate = m.SentAt.Date.ToString("yyyy-MM-dd")
+                })
+                .ToListAsync();
 
-            await _context.SaveChangesAsync();
+            return Json(messages);
+        }
 
-            return RedirectToAction(nameof(MyMessages),
-                new { selectedTeacherId = teacherId, selectedCourseId = courseId });
+        // ── Helpers ───────────────────────────────────────────────────────────
+        private static string Initials(string? first, string? last)
+        {
+            var f = first?.Length > 0 ? first[0].ToString().ToUpper() : "?";
+            var l = last?.Length > 0 ? last[0].ToString().ToUpper() : "";
+            return f + l;
         }
     }
+
+    // ── View-model types ──────────────────────────────────────────────────────
 
     public class StudentConversationViewModel
     {
-        public string TeacherId { get; set; } = string.Empty;
+        public string TeacherId { get; set; } = "";
         public Guid CourseId { get; set; }
-        public string TeacherName { get; set; } = string.Empty;
-        public string CourseName { get; set; } = string.Empty;
-        public string CourseLanguage { get; set; } = string.Empty;
-        public string LastMessage { get; set; } = string.Empty;
+        public string TeacherName { get; set; } = "";
+        public string TeacherInitials { get; set; } = "";
+        public string CourseName { get; set; } = "";
+        public string CourseLanguage { get; set; } = "";
+        public string CourseLevel { get; set; } = "";
+        public string LastMessage { get; set; } = "";
         public DateTime LastMessageAt { get; set; }
-        public bool HasUnreadReplies { get; set; }
+        public int UnreadCount { get; set; }
         public List<TeacherMessage> Messages { get; set; } = new();
     }
 
-    public class AvailableCourseForMessaging
+    public class NewConversationOption
     {
+        public string TeacherId { get; set; } = "";
+        public string TeacherName { get; set; } = "";
+        public string TeacherInitials { get; set; } = "";
         public Guid CourseId { get; set; }
-        public string CourseName { get; set; } = string.Empty;
-        public string CourseLanguage { get; set; } = string.Empty;
-        public string CourseLevel { get; set; } = string.Empty;
-        public string TeacherName { get; set; } = string.Empty;
-        public string TeacherId { get; set; } = string.Empty;
-        public bool HasTeacher { get; set; }
+        public string CourseName { get; set; } = "";
+        public string CourseLanguage { get; set; } = "";
+        public string CourseLevel { get; set; } = "";
     }
 }

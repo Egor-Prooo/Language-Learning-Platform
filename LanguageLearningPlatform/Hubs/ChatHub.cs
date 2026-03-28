@@ -16,87 +16,46 @@ namespace LanguageLearningPlatform.Web.Hubs
             _context = context;
         }
 
-        // Called automatically on connect — join the user's personal notification group
+        // ── Lifecycle ─────────────────────────────────────────────────────────
         public override async Task OnConnectedAsync()
         {
             var userId = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId != null)
                 await Groups.AddToGroupAsync(Context.ConnectionId, UserGroup(userId));
-
             await base.OnConnectedAsync();
         }
 
-        // Join a specific conversation room so ReceiveMessage only fires for the open chat
+        // ── Conversation room management ──────────────────────────────────────
         public async Task JoinConversation(string teacherId, string studentId, string courseId)
         {
-            await Groups.AddToGroupAsync(
-                Context.ConnectionId,
-                ConvGroup(teacherId, studentId, courseId));
+            await Groups.AddToGroupAsync(Context.ConnectionId, ConvGroup(teacherId, studentId, courseId));
         }
 
-        // Leave a conversation room (called when switching conversations)
         public async Task LeaveConversation(string teacherId, string studentId, string courseId)
         {
-            await Groups.RemoveFromGroupAsync(
-                Context.ConnectionId,
-                ConvGroup(teacherId, studentId, courseId));
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, ConvGroup(teacherId, studentId, courseId));
         }
 
-        // ── Student sends a message to a teacher ─────────────────────
-        public async Task StudentSend(string teacherId, string courseId, string message)
+        // ── Send a message ────────────────────────────────────────────────────
+        public async Task SendMessage(string teacherId, string studentId, string courseId, string message)
         {
             message = message?.Trim() ?? "";
             if (string.IsNullOrEmpty(message)) return;
 
-            var studentId = Context.User!.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            var senderId = Context.User!.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            var isFromTeacher = senderId == teacherId;
+
+            // Validate that sender is a participant
+            if (senderId != teacherId && senderId != studentId) return;
 
             if (!Guid.TryParse(courseId, out var courseGuid)) return;
 
-            var msg = await SaveMessage(teacherId, studentId, courseGuid, message, isFromTeacher: false);
-            var payload = BuildPayload(msg);
-
-            // Push into the conversation group (both parties see it if online in this chat)
-            await Clients.Group(ConvGroup(teacherId, studentId, courseId))
-                         .SendAsync("ReceiveMessage", payload);
-
-            // Notify the teacher's personal group (updates sidebar badge without page reload)
-            await Clients.Group(UserGroup(teacherId))
-                         .SendAsync("SidebarRefresh", payload);
-        }
-
-        // ── Teacher sends a reply ─────────────────────────────────────
-        public async Task TeacherSend(string studentId, string courseId, string message)
-        {
-            message = message?.Trim() ?? "";
-            if (string.IsNullOrEmpty(message)) return;
-
-            var teacherId = Context.User!.FindFirstValue(ClaimTypes.NameIdentifier)!;
-
-            if (!Guid.TryParse(courseId, out var courseGuid)) return;
-
-            var msg = await SaveMessage(teacherId, studentId, courseGuid, message, isFromTeacher: true);
-            var payload = BuildPayload(msg);
-
-            await Clients.Group(ConvGroup(teacherId, studentId, courseId))
-                         .SendAsync("ReceiveMessage", payload);
-
-            // Notify the student's personal group
-            await Clients.Group(UserGroup(studentId))
-                         .SendAsync("SidebarRefresh", payload);
-        }
-
-        // ── Helpers ───────────────────────────────────────────────────
-
-        private async Task<TeacherMessage> SaveMessage(
-            string teacherId, string studentId, Guid courseId,
-            string message, bool isFromTeacher)
-        {
             var msg = new TeacherMessage
             {
                 Id = Guid.NewGuid(),
                 TeacherId = teacherId,
                 StudentId = studentId,
-                CourseId = courseId,
+                CourseId = courseGuid,
                 Message = message,
                 IsFromTeacher = isFromTeacher,
                 SentAt = DateTime.UtcNow,
@@ -105,25 +64,51 @@ namespace LanguageLearningPlatform.Web.Hubs
 
             _context.TeacherMessages.Add(msg);
             await _context.SaveChangesAsync();
-            return msg;
+
+            var payload = BuildPayload(msg);
+
+            // Push to everyone in the conversation room (both participants if online)
+            await Clients.Group(ConvGroup(teacherId, studentId, courseId))
+                .SendAsync("ReceiveMessage", payload);
+
+            // Notify the other party's personal group (for sidebar badge updates)
+            var notifyUserId = isFromTeacher ? studentId : teacherId;
+            await Clients.Group(UserGroup(notifyUserId))
+                .SendAsync("NewMessageNotification", payload);
         }
 
+        // ── Typing indicator ──────────────────────────────────────────────────
+        public async Task TypingStarted(string teacherId, string studentId, string courseId)
+        {
+            var senderId = Context.User!.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            await Clients.OthersInGroup(ConvGroup(teacherId, studentId, courseId))
+                .SendAsync("UserTyping", new { senderId, isTyping = true });
+        }
+
+        public async Task TypingStopped(string teacherId, string studentId, string courseId)
+        {
+            var senderId = Context.User!.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            await Clients.OthersInGroup(ConvGroup(teacherId, studentId, courseId))
+                .SendAsync("UserTyping", new { senderId, isTyping = false });
+        }
+
+        // ── Helpers ───────────────────────────────────────────────────────────
         private static object BuildPayload(TeacherMessage m) => new
         {
-            id = m.Id,
+            id = m.Id.ToString(),
             message = m.Message,
             isFromTeacher = m.IsFromTeacher,
             sentAt = m.SentAt.ToString("HH:mm"),
+            sentDate = m.SentAt.Date.ToString("yyyy-MM-dd"),
             teacherId = m.TeacherId,
             studentId = m.StudentId,
             courseId = m.CourseId.ToString()
         };
 
-        // Stable, deterministic group-name helpers (public so views can construct them)
         public static string ConvGroup(string teacherId, string studentId, string courseId)
-            => $"conv|{teacherId}|{studentId}|{courseId}";
+            => $"conv:{teacherId}:{studentId}:{courseId}";
 
         public static string UserGroup(string userId)
-            => $"user|{userId}";
+            => $"user:{userId}";
     }
 }

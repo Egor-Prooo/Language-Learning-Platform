@@ -1,82 +1,232 @@
-﻿@using LanguageLearningPlatform.Web.Controllers
-@model IEnumerable<TeacherConversationViewModel>
+﻿@* Teacher/Messages.cshtml — place this at Views/Teacher/Messages.cshtml *@
+@* The model is IEnumerable<TeacherCourseGroupViewModel> *@
+@* ViewBag.SelectedStudentId, ViewBag.SelectedCourseId, ViewBag.SelectedConv, ViewBag.TeacherId *@
 
 @{
     ViewData["Title"] = "Student Messages";
+
+    // ── Retrieve viewbag data ──────────────────────────────────────────────
+    var teacherId = ViewBag.TeacherId as string ?? "";
     var selectedStudentId = ViewBag.SelectedStudentId as string ?? "";
-    var selectedCourseId = ViewBag.SelectedCourseId as Guid? ?? Guid.Empty;
-    var allConvs = Model.ToList();
-    var selected = allConvs.FirstOrDefault(c =>
-        c.StudentId == selectedStudentId && c.CourseId == selectedCourseId);
+    var selectedCourseId = ViewBag.SelectedCourseId is Guid scg ? scg.ToString() : "";
+
+    // Selected conversation typed object
+    // (TeacherStudentItemViewModel or null)
+    dynamic? sel = ViewBag.SelectedConv;
+
+    string? selStudentName = sel?.StudentName;
+    string? selInitials = sel?.StudentInitials;
+    string? selCourseName = null;
+
+    // Find course name from model
+    if (sel != null)
+    {
+        foreach (var cg in (IEnumerable<dynamic>)Model)
+        {
+            if (cg.CourseId.ToString() == selectedCourseId)
+            {
+                selCourseName = cg.CourseName;
+                break;
+            }
+        }
+    }
 }
 
 @section Styles {
     <style>
+        @@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
         .msg-root {
-            font-family: 'Plus Jakarta Sans',sans-serif;
-            background: #F7F6F2;
-            height: calc(100vh - 70px);
+            font-family: 'Manrope', sans-serif;
+            height: calc(100vh - 66px);
             display: flex;
+            background: #F2F0EB;
             overflow: hidden;
         }
 
+        /* ── Sidebar ─────────────────────────────────────────────── */
         .msg-sidebar {
-            width: 300px;
+            width: 340px;
             flex-shrink: 0;
-            background: #fff;
-            border-right: 1.5px solid #EDECEA;
             display: flex;
             flex-direction: column;
+            background: #141210;
             height: 100%;
         }
 
-        .msg-sidebar-header {
-            padding: 1.25rem 1.5rem 1rem;
-            border-bottom: 1px solid #EDECEA;
+        .msg-sidebar-head {
+            padding: 1.5rem 1.25rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,.05);
+            flex-shrink: 0;
         }
 
-        .msg-sidebar-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #1C1917;
-            margin-bottom: 0;
+        .msg-sidebar-label {
+            font-size: .68rem;
+            font-weight: 800;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,.25);
+            margin-bottom: .6rem;
         }
 
-        .msg-conv-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: .5rem 0;
-        }
-
-        .msg-conv-item {
-            display: flex;
-            align-items: center;
-            gap: .9rem;
-            padding: .85rem 1.5rem;
-            cursor: pointer;
-            transition: background .15s;
-            text-decoration: none;
-            border-left: 3px solid transparent;
+        .msg-search {
             position: relative;
         }
 
-            .msg-conv-item:hover {
-                background: #F7F6F2;
+        .msg-search-input {
+            width: 100%;
+            background: rgba(255,255,255,.05);
+            border: 1px solid rgba(255,255,255,.07);
+            border-radius: 10px;
+            padding: .55rem .85rem .55rem 2.2rem;
+            font-size: .8rem;
+            color: rgba(255,255,255,.8);
+            font-family: 'Manrope', sans-serif;
+            outline: none;
+            transition: border-color .2s;
+        }
+
+            .msg-search-input::placeholder {
+                color: rgba(255,255,255,.2);
             }
 
-            .msg-conv-item.active {
-                background: #F5F3FF;
-                border-left-color: #7C3AED;
+            .msg-search-input:focus {
+                border-color: rgba(255,255,255,.15);
             }
 
-        .msg-conv-avatar {
-            width: 44px;
-            height: 44px;
-            border-radius: 14px;
-            background: linear-gradient(135deg,#1D4ED8,#60A5FA);
-            color: white;
+        .msg-search-icon {
+            position: absolute;
+            left: .75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255,255,255,.2);
+            font-size: .72rem;
+        }
+
+        /* Scroll area */
+        .msg-sidebar-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: .5rem 0 1rem;
+        }
+
+            .msg-sidebar-scroll::-webkit-scrollbar {
+                width: 4px;
+            }
+
+            .msg-sidebar-scroll::-webkit-scrollbar-thumb {
+                background: rgba(255,255,255,.08);
+                border-radius: 4px;
+            }
+
+        /* ── Course group ─────────────────────────────────────── */
+        .msg-course-group {
+            margin-bottom: .25rem;
+        }
+
+        .msg-course-header {
+            display: flex;
+            align-items: center;
+            gap: .65rem;
+            padding: .65rem 1.25rem;
+            cursor: pointer;
+            user-select: none;
+            position: sticky;
+            top: 0;
+            background: #141210;
+            z-index: 1;
+        }
+
+            .msg-course-header:hover {
+                background: rgba(255,255,255,.03);
+            }
+
+        .msg-course-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: rgba(255,255,255,.06);
+            color: rgba(255,255,255,.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .65rem;
+            flex-shrink: 0;
+        }
+
+        .msg-course-name {
+            flex: 1;
+            font-size: .78rem;
             font-weight: 700;
-            font-size: .88rem;
+            color: rgba(255,255,255,.55);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .msg-course-badge {
+            background: rgba(255,255,255,.08);
+            color: rgba(255,255,255,.3);
+            font-size: .6rem;
+            font-weight: 800;
+            padding: .1rem .45rem;
+            border-radius: 7px;
+        }
+
+            .msg-course-badge.has-unread {
+                background: rgba(232,201,122,.15);
+                color: #C8A855;
+            }
+
+        .msg-course-chevron {
+            color: rgba(255,255,255,.2);
+            font-size: .65rem;
+            transition: transform .2s;
+            flex-shrink: 0;
+        }
+
+        .msg-course-group.open .msg-course-chevron {
+            transform: rotate(90deg);
+        }
+
+        /* Student list inside course group */
+        .msg-student-list {
+            display: none;
+        }
+
+        .msg-course-group.open .msg-student-list {
+            display: block;
+        }
+
+        .msg-student-item {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            padding: .7rem 1.25rem .7rem 2.2rem;
+            cursor: pointer;
+            text-decoration: none;
+            border-left: 3px solid transparent;
+            transition: background .12s;
+            position: relative;
+        }
+
+            .msg-student-item:hover {
+                background: rgba(255,255,255,.04);
+            }
+
+            .msg-student-item.active {
+                background: rgba(232,201,122,.07);
+                border-left-color: #E8C97A;
+            }
+
+        .msg-student-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: rgba(255,255,255,.08);
+            color: rgba(255,255,255,.5);
+            font-weight: 800;
+            font-size: .72rem;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -84,86 +234,91 @@
             position: relative;
         }
 
-        .msg-unread-dot {
-            position: absolute;
-            top: -3px;
-            right: -3px;
-            width: 11px;
-            height: 11px;
-            background: #EF4444;
-            border-radius: 50%;
-            border: 2px solid white;
+        .msg-student-item.active .msg-student-avatar {
+            background: rgba(232,201,122,.12);
+            color: #E8C97A;
         }
 
-        .msg-conv-info {
+        .msg-student-unread-dot {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 9px;
+            height: 9px;
+            background: #E8C97A;
+            border-radius: 50%;
+            border: 2px solid #141210;
+        }
+
+        .msg-student-body {
             flex: 1;
             min-width: 0;
         }
 
-        .msg-conv-name {
+        .msg-student-name {
+            font-size: .8rem;
             font-weight: 700;
-            font-size: .87rem;
-            color: #1C1917;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-bottom: .1rem;
-        }
-
-        .msg-conv-item.active .msg-conv-name {
-            color: #5B21B6;
-        }
-
-        .msg-conv-course {
-            font-size: .7rem;
-            color: #A8A29E;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-bottom: .15rem;
-        }
-
-        .msg-conv-preview {
-            font-size: .74rem;
-            color: #78716C;
+            color: rgba(255,255,255,.7);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        .msg-conv-meta {
+        .msg-student-item.active .msg-student-name {
+            color: #E8C97A;
+        }
+
+        .msg-student-preview {
+            font-size: .68rem;
+            color: rgba(255,255,255,.25);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: .1rem;
+        }
+
+        .msg-student-meta {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
-            gap: .25rem;
+            gap: .2rem;
             flex-shrink: 0;
         }
 
-        .msg-conv-time {
-            font-size: .67rem;
-            color: #A8A29E;
+        .msg-student-time {
+            font-size: .6rem;
+            color: rgba(255,255,255,.2);
         }
 
-        .msg-conv-badge {
-            background: #7C3AED;
-            color: white;
-            font-size: .62rem;
-            font-weight: 700;
-            padding: .1rem .42rem;
-            border-radius: 10px;
+        .msg-student-badge {
+            background: #E8C97A;
+            color: #141210;
+            font-size: .58rem;
+            font-weight: 800;
+            padding: .1rem .38rem;
+            border-radius: 7px;
         }
 
+        .msg-no-students {
+            padding: .5rem 1.25rem .5rem 2.8rem;
+            font-size: .72rem;
+            color: rgba(255,255,255,.2);
+            font-style: italic;
+        }
+
+        /* ── Chat area ───────────────────────────────────────────── */
         .msg-chat {
             flex: 1;
             display: flex;
             flex-direction: column;
             height: 100%;
             min-width: 0;
+            background: #F2F0EB;
         }
 
         .msg-chat-header {
-            background: white;
-            border-bottom: 1.5px solid #EDECEA;
+            background: #FDFCFA;
+            border-bottom: 1px solid #E8E5DE;
             padding: 1rem 1.75rem;
             display: flex;
             align-items: center;
@@ -171,29 +326,49 @@
             flex-shrink: 0;
         }
 
-        .msg-chat-header-avatar {
+        .msg-chat-avatar {
             width: 42px;
             height: 42px;
             border-radius: 12px;
-            background: linear-gradient(135deg,#1D4ED8,#60A5FA);
-            color: white;
-            font-weight: 700;
-            font-size: .88rem;
+            background: linear-gradient(135deg, #2D2820, #4A3F2F);
+            color: #E8C97A;
+            font-weight: 800;
+            font-size: .85rem;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
         }
 
-        .msg-chat-header-name {
-            font-weight: 700;
+        .msg-chat-name {
+            font-weight: 800;
             font-size: 1rem;
-            color: #1C1917;
+            color: #1A1916;
         }
 
-        .msg-chat-header-course {
-            font-size: .74rem;
-            color: #A8A29E;
+        .msg-chat-subtitle {
+            font-size: .75rem;
+            color: #9C9484;
+        }
+
+        .msg-online-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #3DC47E;
+            margin-right: .35rem;
+            animation: onlinePulse 2s ease-in-out infinite;
+        }
+
+        @@keyframes onlinePulse {
+            0%, 100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .4
+            }
         }
 
         .msg-messages {
@@ -202,13 +377,22 @@
             padding: 1.5rem 1.75rem;
             display: flex;
             flex-direction: column;
-            gap: .75rem;
+            gap: .5rem;
         }
+
+            .msg-messages::-webkit-scrollbar {
+                width: 4px;
+            }
+
+            .msg-messages::-webkit-scrollbar-thumb {
+                background: #D8D4CB;
+                border-radius: 4px;
+            }
 
         .msg-date-sep {
             text-align: center;
             position: relative;
-            margin: .5rem 0;
+            margin: .75rem 0;
         }
 
             .msg-date-sep::before {
@@ -218,82 +402,135 @@
                 right: 0;
                 top: 50%;
                 height: 1px;
-                background: #EDECEA;
+                background: #E2DEDD;
             }
 
             .msg-date-sep span {
                 position: relative;
-                background: #F7F6F2;
+                background: #F2F0EB;
                 padding: 0 .75rem;
-                font-size: .67rem;
-                color: #A8A29E;
-                font-weight: 600;
+                font-size: .65rem;
+                color: #B0A99E;
+                font-weight: 700;
                 text-transform: uppercase;
-                letter-spacing: .04em;
+                letter-spacing: .06em;
             }
 
-        .msg-bubble-row {
+        .msg-row {
             display: flex;
-            gap: .6rem;
             align-items: flex-end;
+            gap: .5rem;
+            max-width: 75%;
         }
 
-            .msg-bubble-row.from-me {
+            .msg-row.from-me {
                 flex-direction: row-reverse;
+                align-self: flex-end;
+                margin-left: auto;
+            }
+
+            .msg-row.from-them {
+                align-self: flex-start;
             }
 
         .msg-bubble-avatar {
             width: 28px;
             height: 28px;
-            border-radius: 9px;
-            background: linear-gradient(135deg,#1D4ED8,#60A5FA);
-            color: white;
-            font-weight: 700;
-            font-size: .62rem;
+            border-radius: 8px;
+            background: rgba(200,168,85,.15);
+            color: #C8A855;
+            font-weight: 800;
+            font-size: .6rem;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+            margin-bottom: 2px;
         }
 
         .msg-bubble {
-            max-width: 68%;
-            padding: .75rem 1.1rem;
+            padding: .75rem 1rem;
             border-radius: 18px;
             font-size: .875rem;
-            line-height: 1.55;
+            line-height: 1.5;
             word-break: break-word;
         }
 
-        .msg-bubble-row:not(.from-me) .msg-bubble {
-            background: white;
-            color: #1C1917;
-            border: 1.5px solid #EDECEA;
+        .msg-row.from-them .msg-bubble {
+            background: #FDFCFA;
+            color: #1A1916;
+            border: 1px solid #E8E5DE;
             border-bottom-left-radius: 4px;
         }
 
-        .msg-bubble-row.from-me .msg-bubble {
-            background: linear-gradient(135deg,#1D4ED8,#1E40AF);
-            color: white;
+        .msg-row.from-me .msg-bubble {
+            background: #1A1916;
+            color: #F2F0EB;
             border-bottom-right-radius: 4px;
-            box-shadow: 0 4px 16px rgba(29,78,216,.25);
         }
 
-        .msg-bubble-time {
-            font-size: .62rem;
-            color: #A8A29E;
-            margin-top: .28rem;
+        .msg-time {
+            font-size: .6rem;
+            color: #B0A99E;
+            margin-top: .25rem;
             display: block;
         }
 
-        .msg-bubble-row.from-me .msg-bubble-time {
+        .msg-row.from-me .msg-time {
             text-align: right;
-            color: #C4B5D0;
         }
 
+        /* Typing indicator */
+        .msg-typing {
+            display: none;
+            align-items: center;
+            gap: .5rem;
+            padding: 0 1.75rem .25rem;
+        }
+
+            .msg-typing.visible {
+                display: flex;
+            }
+
+        .msg-typing-dots {
+            display: flex;
+            gap: 3px;
+            background: #FDFCFA;
+            border: 1px solid #E8E5DE;
+            border-radius: 14px;
+            padding: .55rem .85rem;
+        }
+
+        .msg-typing-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #C8C0B6;
+            animation: typingBounce .8s ease-in-out infinite;
+        }
+
+            .msg-typing-dot:nth-child(2) {
+                animation-delay: .15s;
+            }
+
+            .msg-typing-dot:nth-child(3) {
+                animation-delay: .3s;
+            }
+
+        @@keyframes typingBounce {
+            0%, 100% {
+                transform: translateY(0)
+            }
+
+            50% {
+                transform: translateY(-5px)
+            }
+        }
+
+        /* Input area */
         .msg-input-area {
-            background: white;
-            border-top: 1.5px solid #EDECEA;
+            background: #FDFCFA;
+            border-top: 1px solid #E8E5DE;
             padding: 1rem 1.75rem;
             flex-shrink: 0;
         }
@@ -302,17 +539,17 @@
             display: flex;
             align-items: flex-end;
             gap: .75rem;
-            background: #F7F6F2;
-            border: 1.5px solid #EDECEA;
-            border-radius: 18px;
-            padding: .65rem 1rem;
-            transition: border-color .2s;
+            background: #F2F0EB;
+            border: 1.5px solid #E2DEDD;
+            border-radius: 16px;
+            padding: .7rem 1rem;
+            transition: border-color .2s, box-shadow .2s;
         }
 
             .msg-input-wrap:focus-within {
-                border-color: #60A5FA;
-                background: white;
-                box-shadow: 0 0 0 3px rgba(96,165,250,.12);
+                border-color: #C8A855;
+                box-shadow: 0 0 0 3px rgba(200,168,85,.12);
+                background: #FDFCFA;
             }
 
         .msg-textarea {
@@ -322,43 +559,46 @@
             outline: none;
             resize: none;
             font-size: .9rem;
-            font-family: inherit;
-            color: #1C1917;
+            font-family: 'Manrope', sans-serif;
+            color: #1A1916;
             max-height: 120px;
             line-height: 1.5;
             padding: 0;
         }
 
             .msg-textarea::placeholder {
-                color: #A8A29E;
+                color: #B0A99E;
             }
 
         .msg-send-btn {
-            width: 38px;
-            height: 38px;
-            border-radius: 11px;
-            background: #1D4ED8;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: #1A1916;
             border: none;
-            color: white;
+            color: #E8C97A;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: all .2s;
             flex-shrink: 0;
+            font-size: .85rem;
         }
 
-            .msg-send-btn:hover {
-                background: #1E40AF;
+            .msg-send-btn:hover:not(:disabled) {
+                background: #2D2820;
                 transform: scale(1.05);
             }
 
             .msg-send-btn:disabled {
-                background: #E7E5E0;
+                background: #E2DEDD;
+                color: #B0A99E;
                 cursor: not-allowed;
                 transform: none;
             }
 
+        /* Empty states */
         .msg-empty {
             flex: 1;
             display: flex;
@@ -366,274 +606,515 @@
             justify-content: center;
             flex-direction: column;
             gap: 1rem;
-            color: #A8A29E;
             text-align: center;
             padding: 2rem;
         }
 
-            .msg-empty i {
-                font-size: 3rem;
-                opacity: .2;
+        .msg-empty-icon {
+            font-size: 3rem;
+            opacity: .12;
+            color: #4A3F2F;
+            margin-bottom: .5rem;
+        }
+
+        .msg-empty h4 {
+            font-weight: 800;
+            color: #4A3F2F;
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .msg-empty p {
+            font-size: .9rem;
+            color: #9C9484;
+            margin: 0;
+        }
+
+        .msg-new-chat-banner {
+            background: linear-gradient(135deg, #2D2820, #1A1916);
+            border-radius: 16px;
+            padding: 1.5rem 2rem;
+            margin: 1.5rem;
+            text-align: center;
+            border: 1px solid rgba(232,201,122,.15);
+        }
+
+            .msg-new-chat-banner .icon {
+                font-size: 2rem;
+                color: #E8C97A;
+                margin-bottom: .75rem;
+                display: block;
             }
 
-        .live-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: .4rem;
-            font-size: .68rem;
-            color: #10B981;
-            font-weight: 600;
-        }
+            .msg-new-chat-banner h5 {
+                color: #F2F0EB;
+                font-weight: 800;
+                margin-bottom: .3rem;
+            }
 
-        .live-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: #10B981;
-            animation: livePulse 1.5s ease-in-out infinite;
-        }
-        @@keyframes livePulse {
-            0%,100%
+            .msg-new-chat-banner p {
+                color: rgba(255,255,255,.4);
+                font-size: .85rem;
+                margin: 0;
+            }
 
-        {
-            opacity: 1
-        }
+        @@media (max-width: 768px) {
+            .msg-sidebar {
+                width: 100%;
+                height: 280px;
+            }
 
-        50% {
-            opacity: .4
-        }
+            .msg-root {
+                flex-direction: column;
+                height: auto;
+            }
 
-        }
-        @@media(max - width:768px) {
-            .msg-sidebar
-
-        {
-            width: 100%;
-            height: 260px;
-            border-right: none;
-            border-bottom: 1.5px solid #EDECEA;
-        }
-
-        .msg-chat {
-            height: calc(100vh - 340px);
-        }
-
+            .msg-chat {
+                height: calc(100vh - 346px);
+            }
         }
     </style>
 }
 
 <div class="msg-root">
-    <!-- SIDEBAR -->
+
+    <!-- ═══════════════════ SIDEBAR ═══════════════════ -->
     <div class="msg-sidebar">
-        <div class="msg-sidebar-header">
-            <div class="d-flex justify-content-between align-items-center">
-                <div class="msg-sidebar-title"><i class="fas fa-inbox me-2" style="color:#1D4ED8;font-size:.9rem;"></i>Inbox</div>
-                <span class="badge rounded-pill" style="background:#EFF6FF;color:#1D4ED8;font-size:.7rem;">@allConvs.Count conversations</span>
+        <div class="msg-sidebar-head">
+            <div class="msg-sidebar-label">Inbox — Teacher View</div>
+            <div class="msg-search">
+                <i class="fas fa-search msg-search-icon"></i>
+                <input class="msg-search-input" type="text" id="convSearch"
+                       placeholder="Search students or courses…" autocomplete="off" />
             </div>
         </div>
-        <div class="msg-conv-list">
-            @if (!allConvs.Any())
+
+        <div class="msg-sidebar-scroll" id="sidebarScroll">
+
+            @{
+                bool anyConversations = false;
+                foreach (var cg in Model)
+                {
+                    // Count students with actual messages
+                    var studentsWithMsgs = ((IEnumerable<dynamic>)cg.Students)
+                    .Where(s => (bool)s.HasMessages).ToList();
+                    var totalUnread = (int)cg.TotalUnread;
+                    anyConversations = anyConversations || studentsWithMsgs.Any();
+
+                    // Determine if this group should start open
+                    bool isGroupOpen = ((IEnumerable<dynamic>)cg.Students)
+                    .Any(s => (string)s.StudentId == selectedStudentId
+                    && (string)s.CourseId.ToString() == selectedCourseId);
+                    if (!isGroupOpen && !studentsWithMsgs.Any()) continue; // hide empty courses
+                }
+            }
+
+            @if (!((IEnumerable<dynamic>)Model).Any())
             {
-                <div class="text-center py-4 px-3">
-                    <i class="fas fa-inbox text-muted d-block mb-2" style="font-size:2rem;opacity:.3;"></i>
-                    <p class="text-muted small mb-0">No messages from students yet.</p>
+                <div style="text-align:center;padding:2.5rem 1.25rem;">
+                    <i class="fas fa-chalkboard-teacher"
+                       style="font-size:2.5rem;color:rgba(255,255,255,.08);display:block;margin-bottom:.75rem;"></i>
+                    <p style="font-size:.78rem;color:rgba(255,255,255,.2);margin:0;">
+                        No enrolled students yet
+                    </p>
                 </div>
             }
-            @foreach (var conv in allConvs)
+
+            @foreach (var cg in Model)
             {
-                var isActive = conv.StudentId == selectedStudentId && conv.CourseId == selectedCourseId;
-                var initials = string.Concat(conv.StudentName.Split(' ').Take(2).Select(p => p.Length > 0 ? p[0].ToString() : ""));
-                var timeStr = conv.LastMessageAt.Date == DateTime.Today ? conv.LastMessageAt.ToString("HH:mm")
-                : conv.LastMessageAt.Date == DateTime.Today.AddDays(-1) ? "Yesterday"
-                : conv.LastMessageAt.ToString("MMM dd");
-                <a href="@Url.Action("Messages", "Teacher", new { selectedStudentId = conv.StudentId, selectedCourseId = conv.CourseId })"
-                   class="msg-conv-item @(isActive ? "active" : "")">
-                    <div class="msg-conv-avatar">
-                        @initials
-                        @if (conv.UnreadCount > 0)
+                var totalUnread = (int)cg.TotalUnread;
+
+                // Determine if this course group has any students worth showing
+                var studentsInGroup = ((IEnumerable<dynamic>)cg.Students).ToList();
+                if (!studentsInGroup.Any()) continue;
+
+                // Open the group that contains the selected student
+                bool isOpen = studentsInGroup.Any(s =>
+                (string)s.StudentId == selectedStudentId &&
+                s.CourseId.ToString() == selectedCourseId);
+
+                if (!isOpen && !studentsInGroup.Any(s => (bool)s.HasMessages))
+                    isOpen = false; // collapse courses with no messages by default
+
+                <div class="msg-course-group @(isOpen ? "open" : "")"
+                     data-course-id="@cg.CourseId">
+                    <div class="msg-course-header" onclick="toggleGroup(this.parentElement)">
+                        <div class="msg-course-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <div class="msg-course-name">@cg.CourseName</div>
+                        @if (totalUnread > 0)
                         {
-                            <div class="msg-unread-dot"></div>
+                            <span class="msg-course-badge has-unread">@totalUnread</span>
+                        }
+                        else
+                        {
+                            <span class="msg-course-badge">@studentsInGroup.Count</span>
+                        }
+                        <i class="fas fa-chevron-right msg-course-chevron"></i>
+                    </div>
+
+                    <div class="msg-student-list">
+                        @foreach (var student in studentsInGroup)
+                        {
+                            bool isActive = (string)student.StudentId == selectedStudentId
+                            && student.CourseId.ToString() == selectedCourseId;
+                            bool hasMsg = (bool)student.HasMessages;
+                            int unread = (int)student.UnreadCount;
+
+                            string timeStr = "";
+                            if (hasMsg && student.LastMessageAt != null)
+                            {
+                                var lat = (DateTime)student.LastMessageAt;
+                                timeStr = lat.Date == DateTime.Today ? lat.ToString("HH:mm")
+                                : lat.Date == DateTime.Today.AddDays(-1) ? "Yesterday"
+                                : lat.ToString("MMM d");
+                            }
+
+                            <a href="@Url.Action("Messages", "Teacher", new { selectedStudentId = student.StudentId, selectedCourseId = student.CourseId })"
+                               class="msg-student-item @(isActive ? "active" : "")"
+                               data-search="@((string)student.StudentName.ToLower()) @cg.CourseName.ToLower()">
+                                <div class="msg-student-avatar">
+                                    @student.StudentInitials
+                                    @if (unread > 0)
+                                    {
+                                        <div class="msg-student-unread-dot"></div>
+                                    }
+                                </div>
+                                <div class="msg-student-body">
+                                    <div class="msg-student-name">@student.StudentName</div>
+                                    @if (hasMsg)
+                                    {
+                                        <div class="msg-student-preview">@student.LastMessage</div>
+                                    }
+                                    else
+                                    {
+                                        <div class="msg-student-preview" style="font-style:italic;">No messages yet</div>
+                                    }
+                                </div>
+                                @if (hasMsg)
+                                {
+                                    <div class="msg-student-meta">
+                                        <span class="msg-student-time">@timeStr</span>
+                                        @if (unread > 0)
+                                        {
+                                            <span class="msg-student-badge">@unread</span>
+                                        }
+                                    </div>
+                                }
+                            </a>
                         }
                     </div>
-                    <div class="msg-conv-info">
-                        <div class="msg-conv-name">@conv.StudentName</div>
-                        <div class="msg-conv-course"><i class="fas fa-book" style="font-size:.58rem;"></i> @conv.CourseName</div>
-                        <div class="msg-conv-preview">@conv.LastMessage</div>
-                    </div>
-                    <div class="msg-conv-meta">
-                        <span class="msg-conv-time">@timeStr</span>
-                        @if (conv.UnreadCount > 0)
-                        {
-                            <span class="msg-conv-badge">@conv.UnreadCount</span>
-                        }
-                    </div>
-                </a>
+                </div>
             }
+
         </div>
     </div>
 
-    <!-- CHAT PANEL -->
+    <!-- ═══════════════════ CHAT PANEL ════════════════ -->
     <div class="msg-chat">
-        @if (selected != null)
+
+        @if (sel != null)
         {
-            var studentInitials = string.Concat(selected.StudentName.Split(' ').Take(2).Select(p => p.Length > 0 ? p[0].ToString() : ""));
+            <!-- Chat header -->
             <div class="msg-chat-header">
-                <div class="msg-chat-header-avatar">@studentInitials</div>
+                <div class="msg-chat-avatar">@selInitials</div>
                 <div style="flex:1;min-width:0;">
-                    <div class="msg-chat-header-name">@selected.StudentName</div>
-                    <div class="msg-chat-header-course">
-                        <i class="fas fa-book me-1"></i>@selected.CourseName
-                        &nbsp;·&nbsp;
-                        <span class="live-indicator"><span class="live-dot"></span>Live</span>
+                    <div class="msg-chat-name">@selStudentName</div>
+                    <div class="msg-chat-subtitle">
+                        <span class="msg-online-dot"></span>
+                        @selCourseName
                     </div>
                 </div>
-                <a asp-controller="Courses" asp-action="Details" asp-route-id="@selected.CourseId"
-                   class="btn btn-sm" style="background:#EFF6FF;color:#1D4ED8;border-radius:9px;font-size:.74rem;font-weight:600;border:none;text-decoration:none;">
-                    <i class="fas fa-external-link-alt me-1"></i>Course
+                <a href="@Url.Action("StudentProgress", "Teacher", new { studentId = sel?.StudentId })"
+                   style="font-size:.75rem;font-weight:700;color:#9C9484;text-decoration:none;
+                              padding:.4rem .85rem;border:1px solid #E8E5DE;border-radius:8px;
+                              background:#F2F0EB;transition:all .15s;"
+                   onmouseover="this.style.borderColor='#C8A855';this.style.color='#7A6545';"
+                   onmouseout="this.style.borderColor='#E8E5DE';this.style.color='#9C9484';">
+                    <i class="fas fa-chart-bar me-1"></i>Progress
                 </a>
             </div>
 
-            <!-- Messages -->
+            <!-- Messages area -->
             <div class="msg-messages" id="messagesArea">
                 @{
-                    DateTime? lastDate = null;
-                    foreach (var msg in selected.Messages)
+                    bool hasMessages = sel != null && ((IEnumerable<dynamic>)sel.Messages).Any();
+                }
+
+                @if (!hasMessages)
+                {
+                    <div class="msg-new-chat-banner">
+                        <span class="icon"><i class="fas fa-comment-dots"></i></span>
+                        <h5>Start the conversation</h5>
+                        <p>Send your first message to @selStudentName</p>
+                    </div>
+                }
+                else
+                {
+                    DateTime? lastDate2 = null;
+                    foreach (var msg in (IEnumerable<dynamic>)sel.Messages)
                     {
-                        var msgDate = msg.SentAt.Date;
-                        if (lastDate == null || lastDate != msgDate)
+                        DateTime sentAt = msg.SentAt;
+                        bool fromTeacher = msg.IsFromTeacher;
+                        var msgDate = sentAt.Date;
+
+                        if (lastDate2 == null || lastDate2 != msgDate)
                         {
-                            var dateLbl = msgDate == DateTime.Today ? "Today"
+                            lastDate2 = msgDate;
+                            var lbl = msgDate == DateTime.Today ? "Today"
                             : msgDate == DateTime.Today.AddDays(-1) ? "Yesterday"
                             : msgDate.ToString("MMMM d, yyyy");
-                            <div class="msg-date-sep"><span>@dateLbl</span></div>
-                            lastDate = msgDate;
+                            <div class="msg-date-sep"><span>@lbl</span></div>
                         }
-                        var fromMe = msg.IsFromTeacher;
-                        var bubbleInitials = fromMe ? "Me" : studentInitials;
-                        <div class="msg-bubble-row @(fromMe ? "from-me" : "")" data-msg-id="@msg.Id">
+
+                        bool fromMe = fromTeacher; // teacher is "me" on this view
+                                                   <div class="msg-row @(fromMe ? "from-me" : "from-them")">
                             @if (!fromMe)
                             {
-                                <div class="msg-bubble-avatar">@bubbleInitials</div>
+                                <div class="msg-bubble-avatar">@selInitials</div>
                             }
                             <div>
                                 <div class="msg-bubble">@msg.Message</div>
-                                <span class="msg-bubble-time">@msg.SentAt.ToString("HH:mm")</span>
+                                <span class="msg-time">@sentAt.ToString("HH:mm")</span>
                             </div>
                         </div>
                     }
                 }
             </div>
 
-            <!-- Input -->
-            <div class="msg-input-area">
-                <form asp-action="ReplyMessage" asp-controller="Teacher" method="post" id="replyForm">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="studentId" value="@selected.StudentId" />
-                    <input type="hidden" name="courseId" value="@selected.CourseId" />
-                    <div class="msg-input-wrap">
-                        <textarea class="msg-textarea" name="message" id="msgTextarea" rows="1"
-                              placeholder="Reply to @selected.StudentName…" required></textarea>
-                        <button type="submit" class="msg-send-btn" id="sendBtn" disabled>
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
-                    </div>
-                </form>
+            <!-- Typing indicator -->
+            <div class="msg-typing" id="typingIndicator">
+                <div class="msg-bubble-avatar">@selInitials</div>
+                <div class="msg-typing-dots">
+                    <div class="msg-typing-dot"></div>
+                    <div class="msg-typing-dot"></div>
+                    <div class="msg-typing-dot"></div>
+                </div>
             </div>
-        }
-        else if (!allConvs.Any())
-        {
-            <div class="msg-empty">
-                <i class="fas fa-comment-slash"></i>
-                <h5>No messages yet</h5>
-                <p class="small">Students will appear here when they message you about your courses.</p>
+
+            <!-- Input area -->
+            <div class="msg-input-area">
+                <div class="msg-input-wrap">
+                    <textarea class="msg-textarea" id="msgInput" rows="1"
+                          placeholder="Message @selStudentName…"
+                          maxlength="2000"></textarea>
+                    <button class="msg-send-btn" id="sendBtn" disabled title="Send (Enter)">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+                <div style="font-size:.68rem;color:#B0A99E;margin-top:.4rem;text-align:right;">
+                    <kbd style="background:#E8E5DE;border-radius:4px;padding:.1rem .3rem;font-size:.68rem;">Enter</kbd>
+                    send &nbsp;·&nbsp;
+                    <kbd style="background:#E8E5DE;border-radius:4px;padding:.1rem .3rem;font-size:.68rem;">Shift+Enter</kbd>
+                    new line
+                </div>
             </div>
         }
         else
         {
             <div class="msg-empty">
-                <i class="fas fa-hand-point-left"></i>
-                <h5>Select a conversation</h5>
-                <p class="small">Choose a student from the sidebar.</p>
+                <div class="msg-empty-icon"><i class="fas fa-inbox"></i></div>
+                <h4>Select a conversation</h4>
+                <p>Choose a student from the course groups on the left.</p>
             </div>
         }
+
     </div>
 </div>
 
 @section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Scroll messages to bottom
-            const area = document.getElementById('messagesArea');
-            if (area) area.scrollTop = area.scrollHeight;
+        (function () {
+            // ── Config ──────────────────────────────────────────────────────
+            const TEACHER_ID   = '@teacherId';
+            const STUDENT_ID   = '@Html.Raw(selectedStudentId)';
+            const COURSE_ID    = '@Html.Raw(selectedCourseId)';
+            const STUDENT_INI  = '@Html.Raw(selInitials ?? "")';
+            const hasConv      = TEACHER_ID && STUDENT_ID && COURSE_ID;
 
-            // Auto-resize textarea
-            const textarea = document.getElementById('msgTextarea');
-            const sendBtn = document.getElementById('sendBtn');
-            if (textarea) {
-                textarea.addEventListener('input', () => {
-                    textarea.style.height = 'auto';
-                    textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
-                    if (sendBtn) sendBtn.disabled = textarea.value.trim().length === 0;
+            // ── DOM refs ────────────────────────────────────────────────────
+            const messagesArea    = document.getElementById('messagesArea');
+            const msgInput        = document.getElementById('msgInput');
+            const sendBtn         = document.getElementById('sendBtn');
+            const typingIndicator = document.getElementById('typingIndicator');
+
+            function scrollBottom() {
+                if (messagesArea) messagesArea.scrollTop = messagesArea.scrollHeight;
+            }
+            scrollBottom();
+
+            if (!hasConv) return;
+
+            // ── SignalR ──────────────────────────────────────────────────────
+            const conn = new signalR.HubConnectionBuilder()
+                .withUrl('/chatHub')
+                .withAutomaticReconnect([0, 2000, 5000, 10000])
+                .build();
+
+            conn.on('ReceiveMessage', function (payload) {
+                if (payload.teacherId !== TEACHER_ID ||
+                    payload.studentId !== STUDENT_ID ||
+                    payload.courseId  !== COURSE_ID) return;
+
+                appendBubble({
+                    message       : payload.message,
+                    isFromTeacher : payload.isFromTeacher,
+                    sentAt        : payload.sentAt,
+                    sentDate      : payload.sentDate
                 });
-                textarea.addEventListener('keydown', e => {
-                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                        e.preventDefault();
-                        if (textarea.value.trim()) document.getElementById('replyForm')?.submit();
-                    }
+                scrollBottom();
+            });
+
+            conn.on('UserTyping', function (data) {
+                if (!typingIndicator) return;
+                if (data.isTyping && data.senderId !== TEACHER_ID) {
+                    typingIndicator.classList.add('visible');
+                    scrollBottom();
+                } else {
+                    typingIndicator.classList.remove('visible');
+                }
+            });
+
+            conn.onreconnected(async () => {
+                await conn.invoke('JoinConversation', TEACHER_ID, STUDENT_ID, COURSE_ID);
+            });
+
+            async function start() {
+                try {
+                    await conn.start();
+                    await conn.invoke('JoinConversation', TEACHER_ID, STUDENT_ID, COURSE_ID);
+                } catch (err) {
+                    console.warn('SignalR start failed', err);
+                    setTimeout(start, 5000);
+                }
+            }
+            start();
+
+            // ── Send ────────────────────────────────────────────────────────
+            async function sendMessage() {
+                const text = (msgInput?.value || '').trim();
+                if (!text || conn.state !== signalR.HubConnectionState.Connected) return;
+
+                msgInput.value = '';
+                msgInput.style.height = 'auto';
+                sendBtn.disabled = true;
+
+                // Optimistic
+                appendBubble({
+                    message       : text,
+                    isFromTeacher : true,
+                    sentAt        : new Date().toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' }),
+                    sentDate      : new Date().toISOString().slice(0,10),
+                    optimistic    : true
+                });
+                scrollBottom();
+
+                try {
+                    await conn.invoke('SendMessage', TEACHER_ID, STUDENT_ID, COURSE_ID, text);
+                } catch (err) {
+                    console.error('Send failed', err);
+                }
+                stopTyping();
+            }
+
+            if (sendBtn) sendBtn.addEventListener('click', sendMessage);
+
+            // ── Input / typing ───────────────────────────────────────────────
+            let typingTimer, isTyping = false;
+
+            function startTyping() {
+                if (!isTyping) {
+                    isTyping = true;
+                    conn.invoke('TypingStarted', TEACHER_ID, STUDENT_ID, COURSE_ID).catch(() => {});
+                }
+                clearTimeout(typingTimer);
+                typingTimer = setTimeout(stopTyping, 2000);
+            }
+            function stopTyping() {
+                if (isTyping) {
+                    isTyping = false;
+                    conn.invoke('TypingStopped', TEACHER_ID, STUDENT_ID, COURSE_ID).catch(() => {});
+                }
+                clearTimeout(typingTimer);
+            }
+
+            if (msgInput) {
+                msgInput.addEventListener('input', function () {
+                    this.style.height = 'auto';
+                    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+                    sendBtn.disabled = this.value.trim().length === 0;
+                    if (this.value.trim()) startTyping(); else stopTyping();
+                });
+                msgInput.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
                 });
             }
 
-            // ── Live polling: check for new messages every 5 seconds ──
-            @if (selected != null)
-            {
-                    <text>
-                    const STUDENT_ID = '@selected.StudentId';
-                    const COURSE_ID  = '@selected.CourseId';
-                    let lastMsgId = null;
+            // ── Append bubble ────────────────────────────────────────────────
+            let lastDate = null;
 
-                    // Collect existing message IDs
-                    document.querySelectorAll('[data-msg-id]').forEach(el => { lastMsgId = el.dataset.msgId; });
+            function appendBubble({ message, isFromTeacher, sentAt, sentDate, optimistic }) {
+                if (!messagesArea) return;
 
-                    async function pollMessages() {
-                        try {
-                            const resp = await fetch(`/Teacher/PollMessages?studentId=${STUDENT_ID}&courseId=${COURSE_ID}&after=${encodeURIComponent(lastMsgId || '')}`, {
-                                credentials: 'include'
-                            });
-                            if (!resp.ok) return;
-                            const data = await resp.json();
-                            if (data.messages && data.messages.length > 0) {
-                                const area = document.getElementById('messagesArea');
-                                data.messages.forEach(msg => {
-                                    lastMsgId = msg.id;
-                                    const row = document.createElement('div');
-                                    row.className = `msg-bubble-row${msg.isFromTeacher ? ' from-me' : ''}`;
-                                    row.dataset.msgId = msg.id;
-                                    if (!msg.isFromTeacher) {
-                                        const av = document.createElement('div');
-                                        av.className = 'msg-bubble-avatar';
-                                        av.textContent = '@@studentInitials';
-                                        row.appendChild(av);
-                                    }
-                                    const inner = document.createElement('div');
-                                    inner.innerHTML = `<div class="msg-bubble">${escapeHtml(msg.message)}</div><span class="msg-bubble-time">${msg.sentAt}</span>`;
-                                    row.appendChild(inner);
-                                    area.appendChild(row);
-                                });
-                                area.scrollTop = area.scrollHeight;
-                            }
-                        } catch(e) { /* silent */ }
-                    }
+                if (sentDate && sentDate !== lastDate) {
+                    lastDate = sentDate;
+                    const today = new Date().toISOString().slice(0,10);
+                    const yest  = new Date(Date.now()-86400000).toISOString().slice(0,10);
+                    const label = sentDate === today ? 'Today'
+                                : sentDate === yest  ? 'Yesterday'
+                                : new Date(sentDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+                    const sep = document.createElement('div');
+                    sep.className = 'msg-date-sep';
+                    sep.innerHTML = `<span>${label}</span>`;
+                    messagesArea.appendChild(sep);
+                }
 
-                    function escapeHtml(str) {
-                        const d = document.createElement('div');
-                        d.appendChild(document.createTextNode(str));
-                        return d.innerHTML;
-                    }
+                const fromMe = isFromTeacher; // teacher perspective
+                const row    = document.createElement('div');
+                row.className = `msg-row ${fromMe ? 'from-me' : 'from-them'}`;
+                if (optimistic) row.style.opacity = '.8';
 
-                    // Poll every 5 seconds
-                    setInterval(pollMessages, 5000);
-                    </text>
+                const avatarHtml = fromMe ? '' : `<div class="msg-bubble-avatar">${STUDENT_INI}</div>`;
+                row.innerHTML = `
+                    ${avatarHtml}
+                    <div>
+                        <div class="msg-bubble">${escHtml(message)}</div>
+                        <span class="msg-time">${sentAt}</span>
+                    </div>`;
+                messagesArea.appendChild(row);
             }
-        });
+
+            function escHtml(str) {
+                const d = document.createElement('div');
+                d.textContent = str;
+                return d.innerHTML;
+            }
+
+            // ── Sidebar search ────────────────────────────────────────────────
+            const searchInput = document.getElementById('convSearch');
+            if (searchInput) {
+                searchInput.addEventListener('input', function () {
+                    const q = this.value.toLowerCase();
+                    document.querySelectorAll('.msg-student-item').forEach(item => {
+                        const s = (item.dataset.search || '').toLowerCase();
+                        const matches = s.includes(q);
+                        item.style.display = matches ? '' : 'none';
+                    });
+                    // Auto-open groups with matches
+                    document.querySelectorAll('.msg-course-group').forEach(group => {
+                        const visible = group.querySelectorAll('.msg-student-item:not([style*="none"])');
+                        if (q && visible.length > 0) group.classList.add('open');
+                    });
+                });
+            }
+
+        })();
+
+        // ── Group toggle ────────────────────────────────────────────────────────────
+        function toggleGroup(groupEl) {
+            groupEl.classList.toggle('open');
+        }
     </script>
 }

@@ -56,15 +56,18 @@ namespace LanguageLearningPlatform.Web.Controllers
             ViewBag.PublishedCourses = teacherCourses.Count(c => c.IsPublished);
             ViewBag.TotalCourses = teacherCourses.Count;
 
-            var recentMessages = await _context.TeacherMessages
-                .Where(m => m.TeacherId == teacherId && !m.IsRead)
+            // Unread messages — just count + a few previews to show badge
+            var unreadMessages = await _context.TeacherMessages
+                .Where(m => m.TeacherId == teacherId && !m.IsRead && !m.IsFromTeacher)
                 .Include(m => m.Student)
+                .Include(m => m.Course)
                 .OrderByDescending(m => m.SentAt)
                 .Take(5)
                 .ToListAsync();
 
-            ViewBag.UnreadMessages = recentMessages.Count;
-            ViewBag.RecentMessages = recentMessages;
+            ViewBag.UnreadMessages = await _context.TeacherMessages
+                .CountAsync(m => m.TeacherId == teacherId && !m.IsRead && !m.IsFromTeacher);
+            ViewBag.RecentMessages = unreadMessages;
 
             return View(teacherCourses);
         }
@@ -226,78 +229,156 @@ namespace LanguageLearningPlatform.Web.Controllers
 
         // ── Messaging ─────────────────────────────────────────────────
 
+        // GET: /Teacher/Messages
         public async Task<IActionResult> Messages(string? selectedStudentId = null, Guid? selectedCourseId = null)
         {
             var teacherId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            var allCourseIds = await GetAllTeacherCourseIdsAsync(teacherId);
 
-            var messages = await _context.TeacherMessages
-                .Where(m => m.TeacherId == teacherId)
+            // ── Load ALL enrolled students for each course ────────────────────────
+            var enrollments = await _context.CourseEnrollments
+                .Where(e => allCourseIds.Contains(e.CourseId) && e.IsActive)
+                .Include(e => e.User)
+                .Include(e => e.Course)
+                .ToListAsync();
+
+            // ── Load all messages ──────────────────────────────────────────────────
+            var allMessages = await _context.TeacherMessages
+                .Where(m => m.TeacherId == teacherId && allCourseIds.Contains(m.CourseId))
                 .Include(m => m.Student)
                 .Include(m => m.Course)
                 .OrderBy(m => m.SentAt)
                 .ToListAsync();
 
-            // Mark teacher-received messages (from students) as read for selected conversation
-            if (!string.IsNullOrEmpty(selectedStudentId) && selectedCourseId.HasValue)
-            {
-                var unread = messages
-                    .Where(m => m.StudentId == selectedStudentId && m.CourseId == selectedCourseId.Value && !m.IsFromTeacher && !m.IsRead)
-                    .ToList();
-                unread.ForEach(m => m.IsRead = true);
-                if (unread.Any()) await _context.SaveChangesAsync();
-            }
+            // ── Group by course ────────────────────────────────────────────────────
+            var msgByCourseAndStudent = allMessages
+                .GroupBy(m => (m.CourseId, m.StudentId))
+                .ToDictionary(g => g.Key, g => g.ToList());
 
-            var conversations = messages
-                .GroupBy(m => (m.StudentId, m.CourseId))
-                .Select(g => new TeacherConversationViewModel
+            // ── Build course groups ────────────────────────────────────────────────
+            var courseGroups = enrollments
+                .GroupBy(e => e.CourseId)
+                .Select(cg =>
                 {
-                    StudentId = g.Key.StudentId,
-                    CourseId = g.Key.CourseId,
-                    StudentName = $"{g.First().Student?.FirstName} {g.First().Student?.LastName}".Trim(),
-                    CourseName = g.First().Course?.Title ?? "Unknown",
-                    LastMessage = g.OrderByDescending(m => m.SentAt).First().Message,
-                    LastMessageAt = g.Max(m => m.SentAt),
-                    UnreadCount = g.Count(m => !m.IsFromTeacher && !m.IsRead),
-                    Messages = g.OrderBy(m => m.SentAt).ToList()
+                    var firstEnrollment = cg.First();
+                    return new TeacherCourseGroupViewModel
+                    {
+                        CourseId = cg.Key,
+                        CourseName = firstEnrollment.Course?.Title ?? "Unknown",
+                        CourseLanguage = firstEnrollment.Course?.Language ?? "",
+                        CourseLevel = firstEnrollment.Course?.Level ?? "",
+                        Students = cg.Select(e =>
+                        {
+                            var convKey = (cg.Key, e.UserId);
+                            var msgs = msgByCourseAndStudent.GetValueOrDefault(convKey) ?? new List<TeacherMessage>();
+                            var lastMsg = msgs.OrderByDescending(m => m.SentAt).FirstOrDefault();
+                            return new TeacherStudentItemViewModel
+                            {
+                                StudentId = e.UserId,
+                                StudentName = $"{e.User?.FirstName} {e.User?.LastName}".Trim(),
+                                StudentInitials = GetInitialsStatic(e.User?.FirstName, e.User?.LastName),
+                                CourseId = cg.Key,
+                                HasMessages = msgs.Any(),
+                                LastMessage = lastMsg?.Message ?? "",
+                                LastMessageAt = lastMsg?.SentAt,
+                                UnreadCount = msgs.Count(m => !m.IsFromTeacher && !m.IsRead),
+                                Messages = msgs.OrderBy(m => m.SentAt).ToList()
+                            };
+                        })
+                        .OrderByDescending(s => s.LastMessageAt)
+                        .ThenBy(s => s.StudentName)
+                        .ToList()
+                    };
                 })
-                .OrderByDescending(c => c.LastMessageAt)
+                .OrderBy(cg => cg.CourseName)
                 .ToList();
 
-            // Auto-select first if none specified
-            if (string.IsNullOrEmpty(selectedStudentId) && conversations.Any())
+            // ── Auto-select first conversation with messages ───────────────────────
+            if (string.IsNullOrEmpty(selectedStudentId))
             {
-                selectedStudentId = conversations.First().StudentId;
-                selectedCourseId = conversations.First().CourseId;
+                var firstWithMsg = courseGroups
+                    .SelectMany(cg => cg.Students)
+                    .Where(s => s.HasMessages)
+                    .OrderByDescending(s => s.LastMessageAt)
+                    .FirstOrDefault();
+
+                if (firstWithMsg != null)
+                {
+                    selectedStudentId = firstWithMsg.StudentId;
+                    selectedCourseId = firstWithMsg.CourseId;
+                }
+            }
+
+            // ── Mark as read for selected conversation ─────────────────────────────
+            if (!string.IsNullOrEmpty(selectedStudentId) && selectedCourseId.HasValue)
+            {
+                var unread = await _context.TeacherMessages
+                    .Where(m => m.TeacherId == teacherId
+                             && m.StudentId == selectedStudentId
+                             && m.CourseId == selectedCourseId.Value
+                             && !m.IsFromTeacher
+                             && !m.IsRead)
+                    .ToListAsync();
+
+                if (unread.Any())
+                {
+                    unread.ForEach(m => m.IsRead = true);
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+            // ── Resolve selected conversation details for right panel ──────────────
+            TeacherStudentItemViewModel? selectedConv = null;
+            if (!string.IsNullOrEmpty(selectedStudentId) && selectedCourseId.HasValue)
+            {
+                selectedConv = courseGroups
+                    .SelectMany(cg => cg.Students)
+                    .FirstOrDefault(s => s.StudentId == selectedStudentId && s.CourseId == selectedCourseId.Value);
             }
 
             ViewBag.SelectedStudentId = selectedStudentId;
             ViewBag.SelectedCourseId = selectedCourseId;
+            ViewBag.SelectedConv = selectedConv;
+            ViewBag.TeacherId = teacherId;
 
-            return View(conversations);
+            return View(courseGroups);
         }
 
-        // Also update ReplyMessage to redirect to the correct conversation:
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ReplyMessage(string studentId, Guid courseId, string message)
+         //── ADD GetStudentMessages JSON API action ────────────────────────────────────
+         [HttpGet]
+        public async Task<IActionResult> GetStudentMessages(string studentId, Guid courseId)
         {
             var teacherId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            var messages = await _context.TeacherMessages
+                .Where(m => m.TeacherId == teacherId
+                         && m.StudentId == studentId
+                         && m.CourseId == courseId)
+                .OrderBy(m => m.SentAt)
+                .Select(m => new
+                {
+                    id = m.Id.ToString(),
+                    message = m.Message,
+                    isFromTeacher = m.IsFromTeacher,
+                    sentAt = m.SentAt.ToString("HH:mm"),
+                    sentDate = m.SentAt.Date.ToString("yyyy-MM-dd")
+                })
+                .ToListAsync();
+            return Json(messages);
+        }
 
-            _context.TeacherMessages.Add(new TeacherMessage
-            {
-                Id = Guid.NewGuid(),
-                TeacherId = teacherId,
-                StudentId = studentId,
-                CourseId = courseId,
-                Message = message,
-                IsFromTeacher = true,
-                SentAt = DateTime.UtcNow,
-                IsRead = false
-            });
+         //── REPLACE existing ReplyMessage() action with this ─────────────────────────
+         //(Remove existing ReplyMessage - hub handles sending now.Keep empty stub if needed.)
+         [HttpPost, ValidateAntiForgeryToken]
+        public IActionResult ReplyMessage(string studentId, Guid courseId, string message)
+             => RedirectToAction(nameof(Messages), new { selectedStudentId = studentId, selectedCourseId = courseId });
 
-            await _context.SaveChangesAsync();
+         //── ADD these static helper ───────────────────────────────────────────────────
 
-            return RedirectToAction(nameof(Messages), new { selectedStudentId = studentId, selectedCourseId = courseId });
+         private static string GetInitialsStatic(string? first, string? last)
+        {
+            var f = first?.Length > 0 ? first[0].ToString().ToUpper() : "?";
+            var l = last?.Length > 0 ? last[0].ToString().ToUpper() : "";
+            return f + l;
         }
 
         // ── Student progress ──────────────────────────────────────────
@@ -396,12 +477,9 @@ namespace LanguageLearningPlatform.Web.Controllers
             Guid lessonId, string title, string type, string content,
             string correctAnswer, string? hint, string? explanation,
             int points, int difficultyLevel,
-            // Multiple choice options
             string? opt1, string? opt2, string? opt3, string? opt4,
-            // Matching pairs
             string? leftA, string? rightA, string? leftB, string? rightB,
             string? leftC, string? rightC, string? leftD, string? rightD,
-            // Audio / image
             string? audioUrl, string? imageUrl)
         {
             var teacherId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -414,7 +492,6 @@ namespace LanguageLearningPlatform.Web.Controllers
             if (lesson == null) return NotFound();
             if (!await IsTeacherOfCourseAsync(teacherId, lesson.CourseId)) return NotFound();
 
-            // Build options JSON
             string? optionsJson = null;
 
             if (type == "MultipleChoice")
@@ -427,7 +504,6 @@ namespace LanguageLearningPlatform.Web.Controllers
             }
             else if (type == "FillInBlank" || type == "FillInTheBlank")
             {
-                // Word bank: reuse opt1-opt4 as word bank items
                 var words = new[] { opt1, opt2, opt3, opt4 }
                     .Where(o => !string.IsNullOrWhiteSpace(o))
                     .ToList();
@@ -445,11 +521,8 @@ namespace LanguageLearningPlatform.Web.Controllers
                     pairs.Add(new { Left = leftC, Right = rightC, PairId = Guid.NewGuid() });
                 if (!string.IsNullOrWhiteSpace(leftD) && !string.IsNullOrWhiteSpace(rightD))
                     pairs.Add(new { Left = leftD, Right = rightD, PairId = Guid.NewGuid() });
-
                 if (pairs.Any())
                     optionsJson = System.Text.Json.JsonSerializer.Serialize(pairs);
-
-                // Matching exercises always have this placeholder as the correct answer
                 correctAnswer = "matched";
             }
 
@@ -502,6 +575,8 @@ namespace LanguageLearningPlatform.Web.Controllers
         }
     }
 
+    // ── View Models ────────────────────────────────────────────────────────
+
     public class TeacherConversationViewModel
     {
         public string StudentId { get; set; } = string.Empty;
@@ -512,5 +587,42 @@ namespace LanguageLearningPlatform.Web.Controllers
         public DateTime LastMessageAt { get; set; }
         public int UnreadCount { get; set; }
         public List<TeacherMessage> Messages { get; set; } = new();
+    }
+
+    public class TeacherCourseGroupViewModel
+    {
+        public Guid CourseId { get; set; }
+        public string CourseName { get; set; } = "";
+        public string CourseLanguage { get; set; } = "";
+        public string CourseLevel { get; set; } = "";
+        public List<TeacherStudentItemViewModel> Students { get; set; } = new();
+
+        public int TotalUnread => Students.Sum(s => s.UnreadCount);
+    }
+
+    public class TeacherStudentItemViewModel
+    {
+        public string StudentId { get; set; } = "";
+        public string StudentName { get; set; } = "";
+        public string StudentInitials { get; set; } = "";
+        public Guid CourseId { get; set; }
+        public bool HasMessages { get; set; }
+        public string LastMessage { get; set; } = "";
+        public DateTime? LastMessageAt { get; set; }
+        public int UnreadCount { get; set; }
+        public List<TeacherMessage> Messages { get; set; } = new();
+    }
+
+    /// <summary>
+    /// Represents an enrolled student who doesn't yet have an active conversation
+    /// with this teacher — shown in the "Start New Conversation" sidebar section.
+    /// </summary>
+    public class AvailableStudentForMessaging
+    {
+        public string StudentId { get; set; } = string.Empty;
+        public string StudentName { get; set; } = string.Empty;
+        public Guid CourseId { get; set; }
+        public string CourseName { get; set; } = string.Empty;
+        public string CourseLanguage { get; set; } = string.Empty;
     }
 }

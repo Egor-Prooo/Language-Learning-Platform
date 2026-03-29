@@ -27,7 +27,6 @@
 
             <!-- Post Card -->
             <div class="forum-post-detail">
-                <!-- Post Header -->
                 <div class="fpd-header">
                     <div class="d-flex align-items-start gap-3">
                         <div class="forum-avatar-lg">@Model.AuthorInitials</div>
@@ -52,7 +51,7 @@
                                 <span><i class="fas fa-user me-1"></i><strong>@Model.AuthorName</strong></span>
                                 <span><i class="fas fa-calendar me-1"></i>@Model.CreatedAt.ToString("MMM dd, yyyy · HH:mm")</span>
                                 <span><i class="fas fa-eye me-1"></i>@Model.Views views</span>
-                                <span><i class="fas fa-comment me-1"></i>@Model.CommentCount replies</span>
+                                <span><i class="fas fa-comment me-1"></i><span id="reply-count">@Model.CommentCount</span> replies</span>
                             </div>
                         </div>
 
@@ -94,36 +93,82 @@
                 <div class="fpd-body">
                     @Html.Raw(Model.Content.Replace("\n", "<br/>"))
                 </div>
+
+                <!-- Post-level like button -->
+                <div class="fpd-footer d-flex align-items-center gap-3 px-4 pb-4">
+                    @if (isAuth)
+                    {
+                        <button class="btn-like"
+                                onclick="likePost('@Model.Id', this)"
+                                title="Like this post">
+                            <i class="fas fa-heart me-1"></i>
+                            <span class="like-count" id="post-likes">@Model.Likes</span>
+                        </button>
+                    }
+                    else
+                    {
+                        <span class="text-muted small">
+                            <i class="fas fa-heart me-1 text-danger"></i>
+                            <span id="post-likes">@Model.Likes</span> likes
+                        </span>
+                    }
+
+                    <!-- Live indicator -->
+                    <span id="live-indicator" class="ms-auto" style="font-size:.72rem;color:#9CA3AF;display:none;">
+                        <span style="display:inline-block;width:6px;height:6px;border-radius:50%;
+                                     background:#10B981;margin-right:.4rem;
+                                     animation:livePulse 2s ease-in-out infinite;"></span>
+                        Live
+                    </span>
+                </div>
             </div>
 
             <!-- Replies -->
             <div class="mt-4">
                 <h4 class="mb-3">
                     <i class="fas fa-comments me-2 text-primary"></i>
-                    @Model.CommentCount @(Model.CommentCount == 1 ? "Reply" : "Replies")
+                    <span id="reply-heading">@Model.CommentCount @(Model.CommentCount == 1 ? "Reply" : "Replies")</span>
                 </h4>
 
                 @if (!Model.Comments.Any())
                 {
-                    <div class="forum-no-replies">
+                    <div class="forum-no-replies" id="no-replies-placeholder">
                         <i class="fas fa-comment-dots me-2"></i>
                         No replies yet. Be the first to respond!
                     </div>
                 }
-                else
-                {
-                    <div class="forum-comments">
-                        @foreach (var comment in Model.Comments)
-                        {
-                            <div class="forum-comment" id="comment-@comment.Id">
-                                <div class="forum-avatar-sm">@comment.AuthorInitials</div>
-                                <div class="forum-comment-body flex-grow-1">
-                                    <div class="forum-comment-header">
-                                        <strong class="forum-comment-author">@comment.AuthorName</strong>
-                                        <span class="forum-comment-time">@comment.CreatedAt.ToString("MMM dd, yyyy · HH:mm")</span>
+
+                <div class="forum-comments" id="comments-container">
+                    @foreach (var comment in Model.Comments)
+                    {
+                        <div class="forum-comment" id="comment-@comment.Id" data-comment-id="@comment.Id">
+                            <div class="forum-avatar-sm">@comment.AuthorInitials</div>
+                            <div class="forum-comment-body flex-grow-1">
+                                <div class="forum-comment-header">
+                                    <strong class="forum-comment-author">@comment.AuthorName</strong>
+                                    <span class="forum-comment-time">@comment.CreatedAt.ToString("MMM dd, yyyy · HH:mm")</span>
+
+                                    <div class="ms-auto d-flex align-items-center gap-2">
+                                        @if (isAuth)
+                                        {
+                                            <button class="btn-like btn-like-sm"
+                                                    onclick="likeComment('@comment.Id', this)"
+                                                    title="Like">
+                                                <i class="fas fa-heart"></i>
+                                                <span class="like-count">@comment.Likes</span>
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted" style="font-size:0.75rem;">
+                                                <i class="fas fa-heart text-danger me-1"></i>
+                                                <span class="comment-like-count-@comment.Id">@comment.Likes</span>
+                                            </span>
+                                        }
+
                                         @if (comment.AuthorId == currentUserId || isAdmin)
                                         {
-                                            <form asp-action="DeleteComment" method="post" class="d-inline ms-auto">
+                                            <form asp-action="DeleteComment" method="post" class="d-inline">
                                                 @Html.AntiForgeryToken()
                                                 <input type="hidden" name="commentId" value="@comment.Id" />
                                                 <input type="hidden" name="postId" value="@Model.Id" />
@@ -134,14 +179,14 @@
                                             </form>
                                         }
                                     </div>
-                                    <div class="forum-comment-content">
-                                        @Html.Raw(comment.Content.Replace("\n", "<br/>"))
-                                    </div>
+                                </div>
+                                <div class="forum-comment-content">
+                                    @Html.Raw(comment.Content.Replace("\n", "<br/>"))
                                 </div>
                             </div>
-                        }
-                    </div>
-                }
+                        </div>
+                    }
+                </div>
             </div>
 
             <!-- Reply Box -->
@@ -149,16 +194,16 @@
             {
                 <div class="forum-reply-box mt-4">
                     <h5 class="mb-3"><i class="fas fa-reply me-2 text-primary"></i>Write a Reply</h5>
-                    <form asp-action="Comment" method="post">
+                    <form asp-action="Comment" method="post" id="comment-form">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="postId" value="@Model.Id" />
-                        <textarea name="content" class="form-control forum-textarea" rows="5"
+                        <textarea name="content" id="comment-textarea" class="form-control forum-textarea" rows="5"
                               placeholder="Share your thoughts, ask a question, or help others..." required></textarea>
                         <div class="d-flex justify-content-between align-items-center mt-3">
                             <span class="text-muted small">
                                 <i class="fas fa-info-circle me-1"></i>Be respectful and helpful
                             </span>
-                            <button type="submit" class="btn btn-primary px-4">
+                            <button type="submit" class="btn btn-primary px-4" id="submit-comment-btn">
                                 <i class="fas fa-paper-plane me-2"></i>Post Reply
                             </button>
                         </div>
@@ -187,7 +232,8 @@
                 <div class="fsw-row"><span>Category</span><strong>@Model.Category</strong></div>
                 <div class="fsw-row"><span>Posted</span><strong>@Model.CreatedAt.ToString("MMM dd, yyyy")</strong></div>
                 <div class="fsw-row"><span>Views</span><strong>@Model.Views</strong></div>
-                <div class="fsw-row"><span>Replies</span><strong>@Model.CommentCount</strong></div>
+                <div class="fsw-row"><span>Replies</span><strong id="sidebar-reply-count">@Model.CommentCount</strong></div>
+                <div class="fsw-row"><span>Likes</span><strong id="sidebar-post-likes">@Model.Likes</strong></div>
                 <div class="fsw-row">
                     <span>Status</span>
                     <strong>
@@ -197,7 +243,6 @@
                         }
                         else
                         {
-
                             <span class="text-success">Open</span>
                         }
                     </strong>
@@ -266,6 +311,11 @@
         line-height: 1.8;
     }
 
+    .fpd-footer {
+        border-top: 1px solid #F3F4F6;
+        padding-top: 1rem;
+    }
+
     .fpd-actions {
         display: flex;
         gap: 0.4rem;
@@ -323,11 +373,39 @@
         padding: 1.25rem;
         border: 2px solid #F3F4F6;
         transition: border-color 0.2s;
+        animation: commentSlideIn 0.35s ease;
     }
 
         .forum-comment:hover {
             border-color: #E0E7FF;
         }
+
+    @@keyframes commentSlideIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+    @@keyframes livePulse {
+        0%, 100%
+
+    {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.4;
+    }
+
+    }
 
     .forum-comment-header {
         display: flex;
@@ -351,6 +429,42 @@
         color: #374151;
         font-size: 0.92rem;
         line-height: 1.7;
+    }
+
+    /* Like buttons */
+    .btn-like {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: #FEE2E2;
+        color: #DC2626;
+        border: 1.5px solid #FECACA;
+        border-radius: 20px;
+        padding: 0.4rem 0.9rem;
+        font-weight: 700;
+        font-size: 0.82rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        outline: none;
+    }
+
+        .btn-like:hover {
+            background: #EF4444;
+            color: white;
+            border-color: #EF4444;
+            transform: scale(1.05);
+        }
+
+        .btn-like.liked {
+            background: #EF4444;
+            color: white;
+            border-color: #EF4444;
+        }
+
+    .btn-like-sm {
+        padding: 0.2rem 0.6rem;
+        font-size: 0.75rem;
+        border-radius: 12px;
     }
 
     .forum-reply-box {
@@ -439,4 +553,244 @@
         padding: 0.2rem 0.6rem;
         border-radius: 6px;
     }
+
+    /* New comment toast */
+    .new-comment-toast {
+        position: fixed;
+        bottom: 1.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #4F46E5;
+        color: white;
+        padding: .65rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: .85rem;
+        box-shadow: 0 4px 20px rgba(79,70,229,.4);
+        z-index: 9999;
+        animation: toastIn .3s ease;
+    }
+    @@keyframes toastIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translate(-50%, 20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+
+    }
 </style>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <script>
+        (function () {
+            const POST_ID      = '@Model.Id';
+            const CURRENT_USER = '@Html.Raw(currentUserId ?? "")';
+            const IS_AUTH      = @(isAuth ? "true" : "false");
+            const IS_ADMIN     = @(isAdmin ? "true" : "false");
+
+            // ── SignalR connection ────────────────────────────────────────────
+            const conn = new signalR.HubConnectionBuilder()
+                .withUrl('/forumHub')
+                .withAutomaticReconnect([0, 2000, 5000, 10000])
+                .build();
+
+            conn.on('ReceiveComment', function (comment) {
+                // Don't double-render if the page already reloaded after form submit
+                if (document.getElementById('comment-' + comment.id)) return;
+
+                appendComment(comment);
+                incrementReplyCount();
+                if (comment.authorId !== CURRENT_USER) {
+                    showToast('💬 New reply from ' + comment.authorName);
+                }
+            });
+
+            conn.on('CommentLikeUpdated', function (data) {
+                // Update like button counts on this page for the relevant comment
+                const el = document.querySelector(`[data-comment-id="${data.commentId}"] .like-count`);
+                if (el) el.textContent = data.likes;
+                // Also update unauthenticated static span if present
+                const staticEl = document.querySelector(`.comment-like-count-${data.commentId}`);
+                if (staticEl) staticEl.textContent = data.likes;
+            });
+
+            conn.on('PostLikeUpdated', function (data) {
+                if (data.postId !== POST_ID) return;
+                document.getElementById('post-likes')?.textContent != null &&
+                    (document.getElementById('post-likes').textContent = data.likes);
+                const sidebar = document.getElementById('sidebar-post-likes');
+                if (sidebar) sidebar.textContent = data.likes;
+            });
+
+            conn.on('CommentDeleted', function (commentId) {
+                const el = document.getElementById('comment-' + commentId);
+                if (el) {
+                    el.style.transition = 'opacity .3s, transform .3s';
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateX(20px)';
+                    setTimeout(() => {
+                        el.remove();
+                        decrementReplyCount();
+                    }, 300);
+                }
+            });
+
+            async function start() {
+                try {
+                    await conn.start();
+                    await conn.invoke('JoinPost', POST_ID);
+                    document.getElementById('live-indicator').style.display = 'inline-flex';
+                } catch (err) {
+                    console.warn('ForumHub connect failed, retrying…', err);
+                    setTimeout(start, 5000);
+                }
+            }
+            start();
+
+            // ── Reply count helpers ───────────────────────────────────────────
+            let replyCount = @Model.CommentCount;
+
+            function incrementReplyCount() {
+                replyCount++;
+                updateReplyCountUI();
+            }
+            function decrementReplyCount() {
+                replyCount = Math.max(0, replyCount - 1);
+                updateReplyCountUI();
+            }
+            function updateReplyCountUI() {
+                const label = replyCount === 1 ? 'Reply' : 'Replies';
+                const heading = document.getElementById('reply-heading');
+                if (heading) heading.textContent = `${replyCount} ${label}`;
+                const inlineCount = document.getElementById('reply-count');
+                if (inlineCount) inlineCount.textContent = replyCount;
+                const sidebarCount = document.getElementById('sidebar-reply-count');
+                if (sidebarCount) sidebarCount.textContent = replyCount;
+            }
+
+            // ── Append a new comment card ─────────────────────────────────────
+            function appendComment(comment) {
+                const placeholder = document.getElementById('no-replies-placeholder');
+                if (placeholder) placeholder.remove();
+
+                const container = document.getElementById('comments-container');
+                if (!container) return;
+
+                // Build initials from authorName as fallback
+                const initials = comment.authorInitials ||
+                    comment.authorName.split(' ').slice(0, 2).map(w => w[0].toUpperCase()).join('');
+
+                const canDelete = IS_AUTH && (comment.authorId === CURRENT_USER || IS_ADMIN);
+                const deleteHtml = canDelete
+                    ? `<form action="/Forum/DeleteComment" method="post" class="d-inline"
+                           onsubmit="return confirm('Delete this reply?')">
+                           <input type="hidden" name="commentId" value="${comment.id}" />
+                           <input type="hidden" name="postId"    value="${POST_ID}" />
+                           <input type="hidden" name="__RequestVerificationToken"
+                                  value="${getAntiForgeryToken()}" />
+                           <button type="submit" class="btn btn-xs btn-link text-danger p-0" title="Delete">
+                               <i class="fas fa-times"></i>
+                           </button>
+                       </form>`
+                    : '';
+
+                const likeHtml = IS_AUTH
+                    ? `<button class="btn-like btn-like-sm"
+                               onclick="likeComment('${comment.id}', this)" title="Like">
+                           <i class="fas fa-heart"></i>
+                           <span class="like-count">${comment.likes}</span>
+                       </button>`
+                    : `<span class="text-muted" style="font-size:0.75rem;">
+                           <i class="fas fa-heart text-danger me-1"></i>
+                           <span class="comment-like-count-${comment.id}">${comment.likes}</span>
+                       </span>`;
+
+                const div = document.createElement('div');
+                div.className = 'forum-comment';
+                div.id = 'comment-' + comment.id;
+                div.dataset.commentId = comment.id;
+                div.innerHTML = `
+                    <div class="forum-avatar-sm">${escHtml(initials)}</div>
+                    <div class="forum-comment-body flex-grow-1">
+                        <div class="forum-comment-header">
+                            <strong class="forum-comment-author">${escHtml(comment.authorName)}</strong>
+                            <span class="forum-comment-time">${escHtml(comment.createdAt)}</span>
+                            <div class="ms-auto d-flex align-items-center gap-2">
+                                ${likeHtml}
+                                ${deleteHtml}
+                            </div>
+                        </div>
+                        <div class="forum-comment-content">${escHtml(comment.content).replace(/\n/g, '<br/>')}</div>
+                    </div>`;
+                container.appendChild(div);
+            }
+
+            // ── Toast ─────────────────────────────────────────────────────────
+            function showToast(message) {
+                const t = document.createElement('div');
+                t.className = 'new-comment-toast';
+                t.textContent = message;
+                document.body.appendChild(t);
+                setTimeout(() => {
+                    t.style.transition = 'opacity .4s, transform .4s';
+                    t.style.opacity = '0';
+                    t.style.transform = 'translate(-50%, 16px)';
+                    setTimeout(() => t.remove(), 400);
+                }, 3000);
+            }
+
+            // ── Helpers ───────────────────────────────────────────────────────
+            function escHtml(str) {
+                const d = document.createElement('div');
+                d.textContent = str || '';
+                return d.innerHTML;
+            }
+            function getAntiForgeryToken() {
+                return document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '';
+            }
+
+        })();
+
+        // ── Like helpers (called from inline onclick) ─────────────────────────
+        async function likeComment(commentId, btn) {
+            try {
+                const res = await fetch('/Forum/LikeComment', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ commentId })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    btn.querySelector('.like-count').textContent = data.likes;
+                    btn.classList.add('liked');
+                    btn.disabled = true;
+                }
+            } catch (e) { console.error('Like comment failed', e); }
+        }
+
+        async function likePost(postId, btn) {
+            try {
+                const res = await fetch('/Forum/LikePost', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ postId })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    btn.querySelector('.like-count').textContent = data.likes;
+                    btn.classList.add('liked');
+                    btn.disabled = true;
+                }
+            } catch (e) { console.error('Like post failed', e); }
+        }
+    </script>
+}

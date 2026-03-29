@@ -1,6 +1,8 @@
 ﻿using LanguageLearningPlatform.Services.Contracts;
+using LanguageLearningPlatform.Web.Hubs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 
 namespace LanguageLearningPlatform.Web.Controllers
@@ -8,10 +10,12 @@ namespace LanguageLearningPlatform.Web.Controllers
     public class ForumController : Controller
     {
         private readonly IForumService _forumService;
+        private readonly IHubContext<ForumHub> _hub;
 
-        public ForumController(IForumService forumService)
+        public ForumController(IForumService forumService, IHubContext<ForumHub> hub)
         {
             _forumService = forumService;
+            _hub = hub;
         }
 
         // GET: /Forum
@@ -82,7 +86,38 @@ namespace LanguageLearningPlatform.Web.Controllers
             }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-            await _forumService.AddCommentAsync(userId, postId, content);
+            var comment = await _forumService.AddCommentAsync(userId, postId, content);
+
+            // Reload the saved comment with author info via GetPostByIdAsync
+            // (AddCommentAsync returns a bare ForumComment; we broadcast the minimal
+            //  payload the client needs rather than re-fetching the full post).
+            var firstName = User.Identity?.Name ?? "";
+            var userFullName = $"{User.FindFirstValue("FirstName") ?? ""} {User.FindFirstValue("LastName") ?? ""}".Trim();
+            if (string.IsNullOrWhiteSpace(userFullName))
+                userFullName = User.Identity?.Name ?? "User";
+
+            // Build initials from claims that the Identity cookie carries
+            // (FirstName / LastName custom claims added in Program.cs via ClaimsTransformation
+            //  or ApplicationUser principal). Fall back to the comment author name gracefully.
+            var initials = userFullName.Length > 0
+                ? string.Concat(userFullName.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                    .Take(2)
+                    .Select(w => char.ToUpper(w[0]).ToString()))
+                : "?";
+
+            // Broadcast the new comment to everyone currently viewing this post
+            await _hub.Clients
+                .Group(ForumHub.PostGroup(postId.ToString()))
+                .SendAsync("ReceiveComment", new
+                {
+                    id = comment.Id.ToString(),
+                    content = content,
+                    authorName = userFullName,
+                    authorInitials = initials,
+                    authorId = userId,
+                    createdAt = comment.CreatedAt.ToString("MMM dd, yyyy · HH:mm"),
+                    likes = 0
+                });
 
             TempData["SuccessMessage"] = "Reply posted!";
             return RedirectToAction(nameof(Post), new { id = postId });
@@ -95,6 +130,16 @@ namespace LanguageLearningPlatform.Web.Controllers
         public async Task<IActionResult> LikeComment(Guid commentId)
         {
             var newCount = await _forumService.LikeCommentAsync(commentId);
+
+            // Broadcast the updated like count so other viewers see it immediately.
+            // We don't know the postId from this endpoint, so we broadcast to all
+            // clients and let each client ignore updates for comments it doesn't own.
+            await _hub.Clients.All.SendAsync("CommentLikeUpdated", new
+            {
+                commentId = commentId.ToString(),
+                likes = newCount
+            });
+
             return Json(new { success = true, likes = newCount });
         }
 
@@ -105,6 +150,15 @@ namespace LanguageLearningPlatform.Web.Controllers
         public async Task<IActionResult> LikePost(Guid postId)
         {
             var newCount = await _forumService.LikePostAsync(postId);
+
+            await _hub.Clients
+                .Group(ForumHub.PostGroup(postId.ToString()))
+                .SendAsync("PostLikeUpdated", new
+                {
+                    postId = postId.ToString(),
+                    likes = newCount
+                });
+
             return Json(new { success = true, likes = newCount });
         }
 
@@ -133,6 +187,11 @@ namespace LanguageLearningPlatform.Web.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
             var isAdmin = User.IsInRole("Admin");
             await _forumService.DeleteCommentAsync(commentId, userId, isAdmin);
+
+            // Notify viewers to remove the comment from the UI
+            await _hub.Clients
+                .Group(ForumHub.PostGroup(postId.ToString()))
+                .SendAsync("CommentDeleted", commentId.ToString());
 
             return RedirectToAction(nameof(Post), new { id = postId });
         }

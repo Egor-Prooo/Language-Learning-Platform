@@ -73,7 +73,7 @@ namespace LanguageLearningPlatform
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.MapHub<LanguageLearningPlatform.Web.Hubs.ChatHub>("/hubs/chat");
+            app.MapHub<LanguageLearningPlatform.Web.Hubs.ChatHub>("/chatHub");
 
             app.MapControllerRoute(
                 name: "admin",

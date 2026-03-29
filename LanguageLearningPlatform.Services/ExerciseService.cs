@@ -167,25 +167,15 @@ namespace LanguageLearningPlatform.Services
 
             var normalized = answer.ToLowerInvariant()
                 .Trim()
-                .Replace("á", "a")
-                .Replace("à", "a")
-                .Replace("ä", "a")
-                .Replace("é", "e")
-                .Replace("è", "e")
-                .Replace("ë", "e")
-                .Replace("í", "i")
-                .Replace("ì", "i")
-                .Replace("ï", "i")
-                .Replace("ó", "o")
-                .Replace("ò", "o")
-                .Replace("ö", "o")
-                .Replace("ú", "u")
-                .Replace("ù", "u")
-                .Replace("ü", "u")
+                .Replace("á", "a").Replace("à", "a").Replace("ä", "a")
+                .Replace("é", "e").Replace("è", "e").Replace("ë", "e")
+                .Replace("í", "i").Replace("ì", "i").Replace("ï", "i")
+                .Replace("ó", "o").Replace("ò", "o").Replace("ö", "o")
+                .Replace("ú", "u").Replace("ù", "u").Replace("ü", "u")
                 .Replace("ñ", "n")
-                .Replace("ç", "c");
+                .Replace("ç", "c")
+                .Replace("ß", "ss"); 
 
-            // Normalise number words → digits so "three cats" and "3 cats" compare equal
             return NormalizeNumbers(normalized);
         }
 
@@ -194,6 +184,7 @@ namespace LanguageLearningPlatform.Services
         private static readonly Dictionary<string, string> WordToDigit =
             new(StringComparer.OrdinalIgnoreCase)
             {
+                // ── English ──────────────────────────────────────────
                 ["zero"] = "0",
                 ["one"] = "1",
                 ["two"] = "2",
@@ -224,6 +215,123 @@ namespace LanguageLearningPlatform.Services
                 ["ninety"] = "90",
                 ["hundred"] = "100",
                 ["thousand"] = "1000",
+
+                // ── Spanish ──────────────────────────────────────────
+                // Accented chars (á, é, etc.) are already stripped above,
+                // so "dieciséis" arrives as "dieciseis" here.
+                ["cero"] = "0",
+                ["uno"] = "1",
+                ["una"] = "1",
+                ["dos"] = "2",
+                ["tres"] = "3",
+                ["cuatro"] = "4",
+                ["cinco"] = "5",
+                ["seis"] = "6",
+                ["siete"] = "7",
+                ["ocho"] = "8",
+                ["nueve"] = "9",
+                ["diez"] = "10",
+                ["once"] = "11",
+                ["doce"] = "12",
+                ["trece"] = "13",
+                ["catorce"] = "14",
+                ["quince"] = "15",
+                ["dieciseis"] = "16",
+                ["diecisiete"] = "17",
+                ["dieciocho"] = "18",
+                ["diecinueve"] = "19",
+                ["veinte"] = "20",
+                ["treinta"] = "30",
+                ["cuarenta"] = "40",
+                ["cincuenta"] = "50",
+                ["sesenta"] = "60",
+                ["setenta"] = "70",
+                ["ochenta"] = "80",
+                ["noventa"] = "90",
+                ["cien"] = "100",
+                ["ciento"] = "100",
+                ["mil"] = "1000",
+
+                // ── French ───────────────────────────────────────────
+                // "six" and "neuf" collide with Italian/Spanish but map to
+                // the same digit, so it's safe.
+                ["un"] = "1",
+                ["deux"] = "2",
+                ["quatre"] = "4",
+                ["cinq"] = "5",
+                ["sept"] = "7",
+                ["huit"] = "8",
+                ["neuf"] = "9",
+                ["dix"] = "10",
+                ["onze"] = "11",
+                ["douze"] = "12",
+                ["treize"] = "13",
+                ["quatorze"] = "14",
+                ["quinze"] = "15",
+                ["seize"] = "16",
+                ["vingt"] = "20",
+                ["trente"] = "30",
+                ["quarante"] = "40",
+                ["soixante"] = "60",
+                ["cent"] = "100",
+                ["mille"] = "1000",
+
+                // ── German ───────────────────────────────────────────
+                // ü → u, ö → o, ß → ss all done in NormalizeAnswer above.
+                ["null"] = "0",
+                ["ein"] = "1",
+                ["eine"] = "1",
+                ["einen"] = "1",
+                ["zwei"] = "2",
+                ["drei"] = "3",
+                ["vier"] = "4",
+                ["funf"] = "5",   // fünf after ü→u
+                ["sechs"] = "6",
+                ["sieben"] = "7",
+                ["acht"] = "8",
+                ["neun"] = "9",
+                ["zehn"] = "10",
+                ["elf"] = "11",
+                ["zwolf"] = "12",  // zwölf after ö→o
+                ["dreizehn"] = "13",
+                ["vierzehn"] = "14",
+                ["funfzehn"] = "15",
+                ["sechzehn"] = "16",
+                ["siebzehn"] = "17",
+                ["achtzehn"] = "18",
+                ["neunzehn"] = "19",
+                ["zwanzig"] = "20",
+                ["dreissig"] = "30",  // dreißig after ß→ss
+                ["vierzig"] = "40",
+                ["sechzig"] = "60",
+                ["siebzig"] = "70",
+                ["achtzig"] = "80",
+                ["neunzig"] = "90",
+                ["hundert"] = "100",
+                ["tausend"] = "1000",
+
+                // ── Italian ──────────────────────────────────────────
+                ["due"] = "2",
+                ["sei"] = "6",
+                ["sette"] = "7",
+                ["otto"] = "8",
+                ["nove"] = "9",
+                ["undici"] = "11",
+                ["dodici"] = "12",
+                ["tredici"] = "13",
+                ["quattordici"] = "14",
+                ["quindici"] = "15",
+                ["sedici"] = "16",
+                ["diciassette"] = "17",
+                ["diciotto"] = "18",
+                ["diciannove"] = "19",
+                ["venti"] = "20",
+                ["trenta"] = "30",
+                ["sessanta"] = "60",
+                ["settanta"] = "70",
+                ["ottanta"] = "80",
+                ["novanta"] = "90",
+                ["cento"] = "100",
             };
 
         private static string NormalizeNumbers(string input)

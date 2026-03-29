@@ -1253,13 +1253,49 @@
 
         function calcAccuracy(spoken, target) {
             const numberWords = {
-                'zero':'0','one':'1','two':'2','three':'3','four':'4','five':'5',
-                'six':'6','seven':'7','eight':'8','nine':'9','ten':'10',
-                'eleven':'11','twelve':'12','thirteen':'13','fourteen':'14',
-                'fifteen':'15','sixteen':'16','seventeen':'17','eighteen':'18',
-                'nineteen':'19','twenty':'20','thirty':'30','forty':'40',
-                'fifty':'50','sixty':'60','seventy':'70','eighty':'80',
-                'ninety':'90','hundred':'100','thousand':'1000'
+                // English
+                'zero':'0','one':'1','two':'2','three':'3','four':'4',
+                'five':'5','six':'6','seven':'7','eight':'8','nine':'9',
+                'ten':'10','eleven':'11','twelve':'12','thirteen':'13',
+                'fourteen':'14','fifteen':'15','sixteen':'16',
+                'seventeen':'17','eighteen':'18','nineteen':'19',
+                'twenty':'20','thirty':'30','forty':'40','fifty':'50',
+                'sixty':'60','seventy':'70','eighty':'80','ninety':'90',
+                'hundred':'100','thousand':'1000',
+                // Spanish
+                'cero':'0','uno':'1','una':'1','dos':'2','tres':'3',
+                'cuatro':'4','cinco':'5','seis':'6','siete':'7',
+                'ocho':'8','nueve':'9','diez':'10','once':'11',
+                'doce':'12','trece':'13','catorce':'14','quince':'15',
+                'dieciseis':'16','diecisiete':'17','dieciocho':'18',
+                'diecinueve':'19','veinte':'20','treinta':'30',
+                'cuarenta':'40','cincuenta':'50','sesenta':'60',
+                'setenta':'70','ochenta':'80','noventa':'90',
+                'cien':'100','ciento':'100','mil':'1000',
+                // French
+                'un':'1','deux':'2','quatre':'4','cinq':'5',
+                'sept':'7','huit':'8','neuf':'9','dix':'10',
+                'onze':'11','douze':'12','treize':'13','quatorze':'14',
+                'quinze':'15','seize':'16','vingt':'20','trente':'30',
+                'quarante':'40','soixante':'60','cent':'100','mille':'1000',
+                // German (umlauts stripped in normalise below)
+                'null':'0','ein':'1','eine':'1','einen':'1','zwei':'2',
+                'drei':'3','vier':'4','funf':'5','sechs':'6',
+                'sieben':'7','acht':'8','zehn':'10','elf':'11',
+                'zwolf':'12','dreizehn':'13','vierzehn':'14',
+                'funfzehn':'15','sechzehn':'16','siebzehn':'17',
+                'achtzehn':'18','neunzehn':'19','zwanzig':'20',
+                'dreissig':'30','vierzig':'40','sechzig':'60',
+                'siebzig':'70','achtzig':'80','neunzig':'90',
+                'hundert':'100','tausend':'1000',
+                // Italian
+                'due':'2','sei':'6','sette':'7','otto':'8','nove':'9',
+                'undici':'11','dodici':'12','tredici':'13',
+                'quattordici':'14','quindici':'15','sedici':'16',
+                'diciassette':'17','diciotto':'18','diciannove':'19',
+                'venti':'20','trenta':'30','sessanta':'60',
+                'settanta':'70','ottanta':'80','novanta':'90',
+                'cento':'100'
             };
 
             var norm = function (s) {

@@ -20,6 +20,86 @@ class InteractiveExerciseHandler {
         this.initializeSoundEffects();
         this.initMatchingExercises();
         this.renderFinishButton();
+        this.loadCompletedExercises(); // restore previously-done exercises on page load
+    }
+
+    // ── Load already-completed exercises from server on page load ──────────
+    async loadCompletedExercises() {
+        try {
+            const container = document.getElementById('finish-lesson-container');
+            const courseId = container?.dataset.courseId;
+            const url = courseId
+                ? `/api/exercises/history?courseId=${courseId}`
+                : '/api/exercises/history';
+
+            const response = await fetch(url, { credentials: 'include' });
+            if (!response.ok) return;
+
+            const history = await response.json();
+
+            // Build a map: exerciseId -> best result (prefer correct over incorrect)
+            const resultMap = new Map();
+            for (const result of history) {
+                // The API returns UserExerciseResult; camelCase: exerciseId, isCorrect, userAnswer, explanation
+                const exId = result.exerciseId;
+                if (!exId) continue;
+                if (!resultMap.has(exId) || result.isCorrect) {
+                    resultMap.set(exId, result);
+                }
+            }
+
+            // For each exercise card on the page, check if it was already attempted
+            this.exercises.forEach(ex => {
+                const result = resultMap.get(ex.id);
+                if (!result) return;
+
+                if (result.isCorrect) {
+                    // Correctly answered previously — lock and show review state
+                    this.restoreCompletedExercise(ex.element, ex.id, result);
+                }
+                // If incorrect previously, leave it interactive so the user can retry
+            });
+
+        } catch (e) {
+            console.warn('Could not load exercise history:', e);
+        }
+    }
+
+    // ── Restore a previously-completed exercise into its locked "review" state ──
+    restoreCompletedExercise(exItem, exId, result) {
+        if (exItem.classList.contains('exercise-completed')) return;
+
+        // Show the completed feedback banner
+        this.showFeedback(
+            exItem,
+            true,
+            '✓ Already completed — great job!',
+            result.explanation ? `<strong>Explanation:</strong> ${result.explanation}` : null
+        );
+
+        // For multiple-choice: highlight the option they chose
+        exItem.querySelectorAll('.exercise-option').forEach(opt => {
+            if (opt.dataset.value === result.userAnswer) {
+                opt.classList.add('selected');
+            }
+        });
+
+        // For text inputs: pre-fill with their previous answer so they can review it
+        const textInput = exItem.querySelector(
+            '.exercise-input:not([type="hidden"]):not([id^="speakingAnswer-"]):not([id^="matching-answer-"])'
+        );
+        if (textInput && result.userAnswer) {
+            textInput.value = result.userAnswer;
+        }
+
+        this.disableExercise(exItem);
+        this.completedExercises.add(exId);
+        this.updateProgress();
+        // Don't call updateFinishButton here for every restored exercise;
+        // we'll do one final call after all are restored via the async loop completing.
+        // Instead, queue a deferred update:
+        clearTimeout(this._finishBtnTimer);
+        this._finishBtnTimer = setTimeout(() => this.updateFinishButton(), 0);
     }
 
     loadExercises() {
@@ -444,7 +524,6 @@ class InteractiveExerciseHandler {
         container.innerHTML = '';
 
         if (allAttempted) {
-            // All exercises have been answered or skipped — show the finish button
             const skippedNote = skipped > 0
                 ? `<p class="mb-3" style="font-size:.9rem;color:#6B7280;">
                        <i class="fas fa-info-circle me-1 text-primary"></i>
@@ -477,7 +556,6 @@ class InteractiveExerciseHandler {
                 .addEventListener('click', () => finishLesson());
 
         } else if (done > 0 || skipped > 0) {
-            // Partially through — show a status hint
             container.innerHTML = `
                 <div style="text-align:center;padding:1.5rem;color:#6B7280;font-size:.9rem;">
                     <i class="fas fa-hourglass-half me-2 text-primary"></i>
@@ -493,7 +571,7 @@ class InteractiveExerciseHandler {
 
         const payload = {
             exerciseId: exId,
-            userAnswer: '',           // blank → will be marked incorrect by the server
+            userAnswer: '',
             timeSpentSeconds: 0,
             attemptsCount: parseInt(exItem.dataset.attempts || '1')
         };
@@ -698,10 +776,8 @@ async function finishLesson() {
 
     // 2. Show the appropriate completion UI.
     if (reviews.length > 0) {
-        // There were skipped exercises — show the review modal with correct answers.
         handler.showReviewModal(reviews, courseUrl);
     } else {
-        // All exercises were answered correctly — show the standard completion modal.
         handler.showCompletionModal(courseUrl);
     }
 }

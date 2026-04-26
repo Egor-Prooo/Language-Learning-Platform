@@ -20,7 +20,7 @@ namespace LanguageLearningPlatform.Web.Controllers
         private readonly ILessonProgressService _lessonProgressService;
         private readonly IAchievementService _achievementService;
 
-        public ExercisesController(ApplicationDbContext context, IExerciseService exerciseService, 
+        public ExercisesController(ApplicationDbContext context, IExerciseService exerciseService,
             ILessonProgressService lessonProgressService, IAchievementService achievementService)
         {
             _context = context;
@@ -75,11 +75,9 @@ namespace LanguageLearningPlatform.Web.Controllers
             await _context.SaveChangesAsync();
 
             // ── Try to complete the parent lesson ─────────────────────────────────
-            // This also triggers achievement/level checks internally when the lesson completes.
             if (exercise.LessonId.HasValue)
                 await _lessonProgressService.TryCompleteLessonAsync(userId, exercise.LessonId.Value);
             else
-                // No lesson context – still check achievements (points may have changed)
                 await _achievementService.CheckAndAwardAsync(userId);
 
             // ── Build response ────────────────────────────────────────────────────
@@ -98,10 +96,9 @@ namespace LanguageLearningPlatform.Web.Controllers
                 CorrectAnswer = validationResult.IsCorrect ? null : validationResult.CorrectAnswer,
                 Explanation = validationResult.IsCorrect ? validationResult.Explanation : null,
                 Streak = stats.CurrentStreak,
-                LevelUp = false   // Could be wired up in future
+                LevelUp = false
             });
         }
-
 
         [HttpGet("lesson/{lessonId}")]
         [Authorize]
@@ -116,11 +113,7 @@ namespace LanguageLearningPlatform.Web.Controllers
         public async Task<IActionResult> GetUserStats()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized();
-            }
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
             var stats = await _exerciseService.GetUserExerciseStatsAsync(userId);
             return Ok(stats);
@@ -131,14 +124,35 @@ namespace LanguageLearningPlatform.Web.Controllers
         public async Task<IActionResult> GetExerciseHistory([FromQuery] Guid? courseId = null)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-            if (string.IsNullOrEmpty(userId))
+            var query = _context.UserExerciseResults
+                .Include(r => r.Exercise)
+                    .ThenInclude(e => e.Course)
+                .Where(r => r.UserId == userId);
+
+            if (courseId.HasValue)
+                query = query.Where(r => r.Exercise.CourseId == courseId.Value);
+
+            var results = await query
+                .OrderByDescending(r => r.CompletedAt)
+                .Take(200)
+                .ToListAsync();
+
+            // Project to a slim DTO so the exerciseId is always present and camelCased
+            // correctly regardless of the global serialiser configuration.
+            var dto = results.Select(r => new
             {
-                return Unauthorized();
-            }
+                exerciseId = r.ExerciseId,
+                isCorrect = r.IsCorrect,
+                userAnswer = r.UserAnswer,
+                pointsEarned = r.PointsEarned,
+                completedAt = r.CompletedAt,
+                feedback = r.Feedback,
+                explanation = r.Exercise?.Explanation,
+            });
 
-            var history = await _exerciseService.GetUserExerciseHistoryAsync(userId, courseId);
-            return Ok(history);
+            return Ok(dto);
         }
 
         [HttpPost("hint/{exerciseId}")]
@@ -146,11 +160,7 @@ namespace LanguageLearningPlatform.Web.Controllers
         public async Task<IActionResult> GetHint(Guid exerciseId)
         {
             var exercise = await _exerciseService.GetExerciseByIdAsync(exerciseId);
-
-            if (exercise == null)
-            {
-                return NotFound();
-            }
+            if (exercise == null) return NotFound();
 
             return Ok(new { hint = exercise.Hint });
         }

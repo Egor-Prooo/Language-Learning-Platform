@@ -4,6 +4,7 @@
     ViewData["Title"] = Model.Title;
     var isEnrolled = ViewBag.IsEnrolled as bool? ?? false;
     var progress = ViewBag.Progress as LanguageLearningPlatform.Data.Models.Progress;
+    var completedLessonIds = ViewBag.CompletedLessonIds as HashSet<Guid> ?? new HashSet<Guid>();
 }
 
 <div class="container my-4">
@@ -94,13 +95,23 @@
                     <div class="d-flex flex-column gap-2">
                         @foreach (var lesson in Model.Lessons.OrderBy(l => l.OrderIndex))
                         {
+                            var isCompleted = completedLessonIds.Contains(lesson.Id);
                             <div class="d-flex align-items-center gap-3 p-3 rounded-3"
-                                 style="background: var(--background-color); border: 1px solid var(--border-color);">
+                                 style="background: var(--background-color); border: 1px solid @(isCompleted ? "#10B981" : "var(--border-color)");
+                        @(isCompleted ? "background: linear-gradient(135deg, #F0FFF4, var(--background-color));" : "")">
 
                                 <!-- Number bubble -->
                                 <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0"
-                                     style="width: 38px; height: 38px; background: white; border: 2px solid var(--primary-color);">
-                                    <strong class="text-primary" style="font-size: 0.85rem;">@lesson.OrderIndex</strong>
+                                     style="width: 38px; height: 38px; background: @(isCompleted ? "#10B981" : "white");
+                            border: 2px solid @(isCompleted ? "#10B981" : "var(--primary-color)");">
+                                    @if (isCompleted)
+                                    {
+                                        <i class="fas fa-check" style="color: white; font-size: 0.8rem;"></i>
+                                    }
+                                    else
+                                    {
+                                        <strong class="text-primary" style="font-size: 0.85rem;">@lesson.OrderIndex</strong>
+                                    }
                                 </div>
 
                                 <!-- Info -->
@@ -117,6 +128,12 @@
                                                 <i class="fas fa-dumbbell me-1"></i>@lesson.Exercises.Count exercises
                                             </span>
                                         }
+                                        @if (isCompleted)
+                                        {
+                                            <span class="badge" style="background: #D1FAE5; color: #065F46; font-size: 0.75rem;">
+                                                <i class="fas fa-check-circle me-1"></i>Completed
+                                            </span>
+                                        }
                                         @if (lesson.IsLocked && !isEnrolled)
                                         {
                                             <span class="badge bg-warning text-dark" style="font-size: 0.75rem;">
@@ -130,8 +147,9 @@
                                 @if (isEnrolled && !lesson.IsLocked)
                                 {
                                     <a asp-controller="Lessons" asp-action="Details" asp-route-id="@lesson.Id"
-                                       class="btn btn-sm btn-enroll flex-shrink-0">
-                                        <i class="fas fa-play me-1"></i>Start
+                                       class="btn btn-sm flex-shrink-0 @(isCompleted ? "btn-outline-success" : "btn-enroll")">
+                                        <i class="fas fa-@(isCompleted ? "redo" : "play") me-1"></i>
+                                        @(isCompleted ? "Review" : "Start")
                                     </a>
                                 }
                                 else if (!isEnrolled)

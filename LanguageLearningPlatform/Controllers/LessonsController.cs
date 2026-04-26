@@ -47,8 +47,15 @@ namespace LanguageLearningPlatform.Web.Controllers
                 .OrderBy(l => l.OrderIndex)
                 .ToListAsync();
 
+            var lessonIds = courseLessons.Select(l => l.Id).ToList();
+            var completedLessonIds = (await _context.UserLessonProgresses
+                .Where(p => p.UserId == userId && p.IsCompleted && lessonIds.Contains(p.LessonId))
+                .Select(p => p.LessonId)
+                .ToListAsync()).ToHashSet();
+
             var videos = await _videoLessonService.GetLessonVideosAsync(id, userId);
 
+            ViewBag.CompletedLessonIds = completedLessonIds;
             ViewBag.CourseLessons = courseLessons;
             ViewBag.CurrentLessonIndex = courseLessons.FindIndex(l => l.Id == id);
             ViewBag.Videos = videos;

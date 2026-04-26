@@ -283,16 +283,25 @@
                 @if (courseLessons != null && courseLessons.Any())
                 {
                     <div class="d-flex flex-column">
+                        @{
+                            var completedIds = ViewBag.CompletedLessonIds as HashSet<Guid> ?? new HashSet<Guid>();
+                        }
                         @for (int i = 0; i < courseLessons.Count; i++)
                         {
                             var lesson = courseLessons[i];
                             var isActive = i == currentIndex;
+                            var isDone = completedIds.Contains(lesson.Id);
                             <a asp-action="Details" asp-route-id="@lesson.Id"
                                class="lesson-nav-item @(isActive ? "active" : "")">
-                                <div class="lesson-nav-num">
+                                <div class="lesson-nav-num"
+                                     style="@(isDone && !isActive ? "background: #10B981; border-color: #10B981; color: white;" : "")">
                                     @if (isActive)
                                     {
                                         <i class="fas fa-play" style="font-size: 0.65rem;"></i>
+                                    }
+                                    else if (isDone)
+                                    {
+                                        <i class="fas fa-check" style="font-size: 0.65rem;"></i>
                                     }
                                     else
                                     {
@@ -303,6 +312,10 @@
                                     <div class="text-truncate">@lesson.Title</div>
                                     <div class="text-secondary" style="font-size: 0.75rem;">
                                         @lesson.DurationMinutes min
+                                        @if (isDone)
+                                        {
+                                            <span class="ms-1" style="color: #10B981; font-weight: 600;">✓ Done</span>
+                                        }
                                         @if (lesson.IsLocked)
                                         {
                                             <i class="fas fa-lock ms-1"></i>

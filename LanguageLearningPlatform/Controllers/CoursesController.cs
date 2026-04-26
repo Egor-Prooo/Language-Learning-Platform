@@ -1,6 +1,8 @@
-﻿using LanguageLearningPlatform.Services.Contracts;
+﻿using LanguageLearningPlatform.Data;
+using LanguageLearningPlatform.Services.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace LanguageLearningPlatform.Web.Controllers
@@ -9,11 +11,13 @@ namespace LanguageLearningPlatform.Web.Controllers
     {
         private readonly ICourseService _courseService;
         private readonly IProgressService _progressService;
+        private readonly ApplicationDbContext _context;
 
-        public CoursesController(ICourseService courseService, IProgressService progressService)
+        public CoursesController(ICourseService courseService, IProgressService progressService, ApplicationDbContext context)
         {
             _courseService = courseService;
             _progressService = progressService;
+            _context = context;
         }
 
         // GET: Courses
@@ -44,6 +48,13 @@ namespace LanguageLearningPlatform.Web.Controllers
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 ViewBag.IsEnrolled = await _courseService.IsUserEnrolledAsync(userId!, id);
                 ViewBag.Progress = await _progressService.GetUserCourseProgressAsync(userId!, id);
+
+                var lessonIds = course.Lessons.Select(l => l.Id).ToList();
+                var completedLessonIds = (await _context.UserLessonProgresses
+                    .Where(p => p.UserId == userId && p.IsCompleted && lessonIds.Contains(p.LessonId))
+                    .Select(p => p.LessonId)
+                    .ToListAsync()).ToHashSet();
+                ViewBag.CompletedLessonIds = completedLessonIds;
             }
 
             return View(course);

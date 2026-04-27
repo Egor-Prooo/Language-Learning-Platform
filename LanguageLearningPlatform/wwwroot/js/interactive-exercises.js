@@ -9,7 +9,6 @@ class InteractiveExerciseHandler {
         this.skippedExercises = new Map();     // exerciseId -> { element, title } skipped exercises
         this.totalPoints = 0;
         this.streak = 0;
-        this.hearts = 5;
         this.init();
     }
 
@@ -348,15 +347,12 @@ class InteractiveExerciseHandler {
     }
 
     handleIncorrectAnswer(result, exItem) {
-        this.hearts = Math.max(0, this.hearts - 1);
-        this.updateHeartsDisplay();
         this.playSound('incorrect');
         exItem.classList.add('exercise-error');
         setTimeout(() => exItem.classList.remove('exercise-error'), 600);
         this.showFeedback(exItem, false, result.feedback, result.correctAnswer
             ? `Correct answer: <strong>${result.correctAnswer}</strong>` : null);
         exItem.dataset.attempts = (parseInt(exItem.dataset.attempts || '1') + 1).toString();
-        if (this.hearts === 0) this.showGameOver();
     }
 
     showFeedback(exItem, isCorrect, message, extraInfo) {
@@ -430,19 +426,6 @@ class InteractiveExerciseHandler {
             }
         }
         this.streak = streak;
-    }
-
-    updateHeartsDisplay() {
-        const c = document.getElementById('hearts-container');
-        if (!c) return;
-        c.innerHTML = '';
-        for (let i = 0; i < 5; i++) {
-            const h = document.createElement('i');
-            h.className = i < this.hearts ? 'fas fa-heart' : 'far fa-heart';
-            h.style.color = i < this.hearts ? '#EF4444' : '#D1D5DB';
-            h.style.fontSize = '1.4rem';
-            c.appendChild(h);
-        }
     }
 
     updateProgress() {
@@ -686,7 +669,6 @@ class InteractiveExerciseHandler {
 
     initializeProgressBar() {
         this.updateProgress();
-        this.updateHeartsDisplay();
         this.updateFinishButton();
     }
 
@@ -724,23 +706,6 @@ class InteractiveExerciseHandler {
         document.body.appendChild(modal);
         setTimeout(() => modal.classList.add('show'), 10);
         setTimeout(() => { modal.classList.remove('show'); setTimeout(() => modal.remove(), 300); }, 3500);
-    }
-
-    showGameOver() {
-        const modal = document.createElement('div');
-        modal.className = 'completion-modal';
-        modal.innerHTML = `
-            <div class="completion-content">
-                <div class="game-over-icon"><i class="fas fa-heart-broken"></i></div>
-                <h2>Out of Hearts!</h2>
-                <p>Don't worry — review the material and try again.</p>
-                <div class="completion-actions">
-                    <button class="btn btn-enroll" onclick="location.reload()"><i class="fas fa-redo me-2"></i>Try Again</button>
-                    <button class="btn btn-outline-primary" onclick="window.location.href='/courses/mycourses'">Back to Courses</button>
-                </div>
-            </div>`;
-        document.body.appendChild(modal);
-        setTimeout(() => modal.classList.add('show'), 10);
     }
 
     showError(exItem, message) {

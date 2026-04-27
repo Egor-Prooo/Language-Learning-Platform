@@ -184,13 +184,14 @@
             overflow: hidden;
             margin: .85rem 0 .4rem;
         }
+
+        .completed-card .mc-bar-fill { background: linear-gradient(90deg, #10B981, #34D399); }
+
         .mc-bar-fill {
             height: 100%;
             border-radius: 10px;
             background: linear-gradient(90deg, #4F46E5, #7C3AED);
-            transition: width .8s cubic-bezier(.4,0,.2,1);
         }
-        .completed-card .mc-bar-fill { background: linear-gradient(90deg, #10B981, #34D399); }
 
         .mc-bar-pct {
             font-weight: 800;
@@ -439,7 +440,7 @@
                                         <span class="mc-bar-pct">@pct.ToString("F0")%</span>
                                     </div>
                                     <div class="mc-bar-track">
-                                        <div class="mc-bar-fill" style="width:@pct%"></div>
+                                        <div class="mc-bar-fill" style="width:@(pct.ToString("F0"))%"></div>
                                     </div>
 
                                     <div class="d-flex align-items-center gap-2 mb-2">
@@ -654,7 +655,6 @@
 
 @section Scripts {
     <script>
-        // ── Tab switching ──
         function switchTab(tabName, btn) {
             document.querySelectorAll('.mc-tab-panel').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.mc-tab-btn').forEach(b => b.classList.remove('active'));
@@ -662,27 +662,17 @@
             if (btn) btn.classList.add('active');
         }
 
-        // ── Progress bar animation ──
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('.mc-bar-fill').forEach(bar => {
-                const w = bar.style.width;
-                bar.style.width = '0';
-                setTimeout(() => { bar.style.width = w; }, 150);
-            });
-
-            // ── Unenroll modal population ──
-            const unenrollModal = document.getElementById('unenrollModal');
-            unenrollModal?.addEventListener('show.bs.modal', e => {
-                const btn = e.relatedTarget;
-                document.getElementById('unenroll-course-id').value = btn.dataset.courseId;
-                document.getElementById('unenroll-course-name').textContent = btn.dataset.courseName;
-            });
-
-            // ── Auto-switch to completed tab if URL has #completed ──
-            if (window.location.hash === '#completed') {
-                const btn = document.querySelectorAll('.mc-tab-btn')[1];
-                switchTab('completed', btn);
-            }
+        const unenrollModal = document.getElementById('unenrollModal');
+        unenrollModal?.addEventListener('show.bs.modal', e => {
+            const btn = e.relatedTarget;
+            document.getElementById('unenroll-course-id').value = btn.dataset.courseId;
+            document.getElementById('unenroll-course-name').textContent = btn.dataset.courseName;
         });
+
+        if (window.location.hash === '#completed') {
+            const btn = document.querySelectorAll('.mc-tab-btn')[1];
+            switchTab('completed', btn);
+        }
     </script>
+}
 }

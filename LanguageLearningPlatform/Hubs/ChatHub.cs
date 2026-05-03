@@ -77,7 +77,6 @@ namespace LanguageLearningPlatform.Web.Hubs
                 .SendAsync("NewMessageNotification", payload);
         }
 
-        // ── Typing indicator ──────────────────────────────────────────────────
         public async Task TypingStarted(string teacherId, string studentId, string courseId)
         {
             var senderId = Context.User!.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -92,7 +91,6 @@ namespace LanguageLearningPlatform.Web.Hubs
                 .SendAsync("UserTyping", new { senderId, isTyping = false });
         }
 
-        // ── Helpers ───────────────────────────────────────────────────────────
         private static object BuildPayload(TeacherMessage m) => new
         {
             id = m.Id.ToString(),

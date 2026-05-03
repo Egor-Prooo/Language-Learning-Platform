@@ -20,7 +20,7 @@ namespace LanguageLearningPlatform.Data.Models
         [MaxLength(1000)]
         public string Description { get; set; } = string.Empty;
 
-        public string Content { get; set; } = string.Empty; // Rich text/HTML content
+        public string Content { get; set; } = string.Empty; 
 
         public int OrderIndex { get; set; } 
 

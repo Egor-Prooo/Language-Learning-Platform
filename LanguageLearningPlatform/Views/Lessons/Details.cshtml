@@ -328,13 +328,20 @@
                     <hr class="my-3" />
                 }
 
+                @{
+                    var completedIds2 = ViewBag.CompletedLessonIds as HashSet<Guid> ?? new HashSet<Guid>();
+                    var completedCount = completedIds2.Count;
+                    var totalCount = courseLessons?.Count ?? 1;
+                    var completedPct = totalCount > 0 ? Math.Round((double)completedCount / totalCount * 100) : 0;
+                }
+
                 <div class="d-flex justify-content-between small text-secondary">
-                    <span>Lesson @(currentIndex + 1) of @courseLessons?.Count</span>
-                    <span>@(Math.Round((currentIndex + 1.0) / (courseLessons?.Count ?? 1) * 100))% through</span>
+                    <span>Lesson @(currentIndex + 1) of @totalCount</span>
+                    <span>@completedCount / @totalCount completed</span>
                 </div>
                 <div class="progress-custom mt-2">
                     <div class="progress-bar-custom"
-                         style="width: @(Math.Round((currentIndex + 1.0) / (courseLessons?.Count ?? 1) * 100))%">
+                         style="width: @completedPct%">
                     </div>
                 </div>
 

@@ -15,6 +15,7 @@ namespace LanguageLearningPlatform.Data.Seeding
             await new AchievementSeeder().SeedAsync(context);
             await new UserLevelSeeder().SeedAsync(context);
             await new LessonAndExerciseSeeder().SeedAsync(context);
+            await new AdditionalLessonSeeder().SeedAsync(context);
         }
     }
 }

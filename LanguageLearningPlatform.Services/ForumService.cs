@@ -106,18 +106,6 @@ namespace LanguageLearningPlatform.Services
 
         public async Task<int> LikePostAsync(Guid postId)
         {
-            // Post-level likes are stored on the post's own first comment, 
-            // or we can track them via the Views field incremented separately.
-            // Since ForumPost doesn't have a Likes column we add a synthetic
-            // "like" comment owned by the system, or we simply count comments
-            // that start with "[LIKE]". Cleaner: we just add a Likes column to
-            // the ForumPost migration. For now we use an EF shadow approach —
-            // increment a dedicated field if present, otherwise use Views as proxy.
-            //
-            // The cleanest path without a migration is to store likes as special
-            // ForumComment records. We do that here:
-
-            // Check if a likes-comment placeholder exists
             const string LikesMarker = "[SYSTEM:LIKES]";
 
             var likesComment = await _context.ForumComments
@@ -125,7 +113,6 @@ namespace LanguageLearningPlatform.Services
 
             if (likesComment == null)
             {
-                // First like — create the placeholder
                 var post = await _context.ForumPosts.FindAsync(postId);
                 if (post == null) return 0;
 
@@ -133,7 +120,7 @@ namespace LanguageLearningPlatform.Services
                 {
                     Id = Guid.NewGuid(),
                     PostId = postId,
-                    UserId = post.UserId, // system marker owned by author
+                    UserId = post.UserId, 
                     Content = LikesMarker,
                     CreatedAt = DateTime.UtcNow,
                     Likes = 1
@@ -206,8 +193,6 @@ namespace LanguageLearningPlatform.Services
             return true;
         }
 
-        // ── Helpers ──────────────────────────────────────────────────────────
-
         private const string LikesMarkerConst = "[SYSTEM:LIKES]";
 
         private ForumPostViewModel MapToViewModel(ForumPost post)
@@ -216,7 +201,6 @@ namespace LanguageLearningPlatform.Services
             var firstName = post.User?.FirstName ?? "Unknown";
             var lastName = post.User?.LastName ?? "";
 
-            // Separate real comments from the system likes placeholder
             var realComments = post.Comments?
                 .Where(c => c.Content != LikesMarkerConst)
                 .ToList() ?? new List<ForumComment>();

@@ -179,8 +179,6 @@ namespace LanguageLearningPlatform.Services
             return NormalizeNumbers(normalized);
         }
 
-        // Maps number words to their digit equivalents.
-        // Covers 0-19, tens (20-90), and common large values.
         private static readonly Dictionary<string, string> WordToDigit =
             new(StringComparer.OrdinalIgnoreCase)
             {

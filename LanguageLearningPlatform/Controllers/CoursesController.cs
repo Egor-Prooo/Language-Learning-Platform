@@ -109,7 +109,6 @@ namespace LanguageLearningPlatform.Web.Controllers
 
             ViewBag.Progresses = progressDict;
 
-            // Split into active and completed
             var activeCourses = courses.Where(c =>
                 !progressDict.ContainsKey(c.Id) ||
                 progressDict[c.Id].CompletionPercentage < 100).ToList();

@@ -344,7 +344,6 @@ namespace LanguageLearningPlatform.Web.Controllers
             return View(courseGroups);
         }
 
-         //── ADD GetStudentMessages JSON API action ────────────────────────────────────
          [HttpGet]
         public async Task<IActionResult> GetStudentMessages(string studentId, Guid courseId)
         {
@@ -366,13 +365,10 @@ namespace LanguageLearningPlatform.Web.Controllers
             return Json(messages);
         }
 
-         //── REPLACE existing ReplyMessage() action with this ─────────────────────────
-         //(Remove existing ReplyMessage - hub handles sending now.Keep empty stub if needed.)
          [HttpPost, ValidateAntiForgeryToken]
         public IActionResult ReplyMessage(string studentId, Guid courseId, string message)
              => RedirectToAction(nameof(Messages), new { selectedStudentId = studentId, selectedCourseId = courseId });
 
-         //── ADD these static helper ───────────────────────────────────────────────────
 
          private static string GetInitialsStatic(string? first, string? last)
         {
@@ -381,7 +377,6 @@ namespace LanguageLearningPlatform.Web.Controllers
             return f + l;
         }
 
-        // ── Student progress ──────────────────────────────────────────
 
         // GET: /Teacher/StudentProgress/studentId
         public async Task<IActionResult> StudentProgress(string studentId)
@@ -412,7 +407,6 @@ namespace LanguageLearningPlatform.Web.Controllers
             return View(progresses);
         }
 
-        // ── Helpers ──────────────────────────────────────────────────
 
         private async Task<bool> IsTeacherOfCourseAsync(string teacherId, Guid courseId)
         {
@@ -575,8 +569,6 @@ namespace LanguageLearningPlatform.Web.Controllers
         }
     }
 
-    // ── View Models ────────────────────────────────────────────────────────
-
     public class TeacherConversationViewModel
     {
         public string StudentId { get; set; } = string.Empty;
@@ -613,10 +605,6 @@ namespace LanguageLearningPlatform.Web.Controllers
         public List<TeacherMessage> Messages { get; set; } = new();
     }
 
-    /// <summary>
-    /// Represents an enrolled student who doesn't yet have an active conversation
-    /// with this teacher — shown in the "Start New Conversation" sidebar section.
-    /// </summary>
     public class AvailableStudentForMessaging
     {
         public string StudentId { get; set; } = string.Empty;

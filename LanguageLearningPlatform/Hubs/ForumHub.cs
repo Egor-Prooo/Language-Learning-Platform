@@ -1,8 +1,4 @@
-﻿using LanguageLearningPlatform.Data;
-using LanguageLearningPlatform.Data.Models;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.SignalR;
-using System.Security.Claims;
+﻿using Microsoft.AspNetCore.SignalR;
 
 namespace LanguageLearningPlatform.Web.Hubs
 {
@@ -13,7 +9,6 @@ namespace LanguageLearningPlatform.Web.Hubs
             await Groups.AddToGroupAsync(Context.ConnectionId, PostGroup(postId));
         }
 
-        /// Leave the SignalR group for a specific post.
         public async Task LeavePost(string postId)
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, PostGroup(postId));

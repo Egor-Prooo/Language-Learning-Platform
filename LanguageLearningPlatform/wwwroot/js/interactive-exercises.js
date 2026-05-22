@@ -1,12 +1,8 @@
-﻿// ============================================================
-// LingoLearn – Interactive Exercise Handler
-// ============================================================
-
-class InteractiveExerciseHandler {
+﻿class InteractiveExerciseHandler {
     constructor() {
         this.exercises = [];
-        this.completedExercises = new Set();   // exerciseIds answered correctly
-        this.skippedExercises = new Map();     // exerciseId -> { element, title } skipped exercises
+        this.completedExercises = new Set();   
+        this.skippedExercises = new Map();     
         this.totalPoints = 0;
         this.streak = 0;
         this.init();
@@ -19,10 +15,9 @@ class InteractiveExerciseHandler {
         this.initializeSoundEffects();
         this.initMatchingExercises();
         this.renderFinishButton();
-        this.loadCompletedExercises(); // restore previously-done exercises on page load
+        this.loadCompletedExercises(); 
     }
 
-    // ── Load already-completed exercises from server on page load ──────────
     async loadCompletedExercises() {
         try {
             const container = document.getElementById('finish-lesson-container');
@@ -36,10 +31,8 @@ class InteractiveExerciseHandler {
 
             const history = await response.json();
 
-            // Build a map: exerciseId -> best result (prefer correct over incorrect)
             const resultMap = new Map();
             for (const result of history) {
-                // The API returns UserExerciseResult; camelCase: exerciseId, isCorrect, userAnswer, explanation
                 const exId = result.exerciseId;
                 if (!exId) continue;
                 if (!resultMap.has(exId) || result.isCorrect) {
@@ -47,16 +40,13 @@ class InteractiveExerciseHandler {
                 }
             }
 
-            // For each exercise card on the page, check if it was already attempted
             this.exercises.forEach(ex => {
                 const result = resultMap.get(ex.id);
                 if (!result) return;
 
                 if (result.isCorrect) {
-                    // Correctly answered previously — lock and show review state
                     this.restoreCompletedExercise(ex.element, ex.id, result);
                 }
-                // If incorrect previously, leave it interactive so the user can retry
             });
 
         } catch (e) {
@@ -64,7 +54,6 @@ class InteractiveExerciseHandler {
         }
     }
 
-    // ── Restore a previously-completed exercise into its locked "review" state ──
     restoreCompletedExercise(exItem, exId, result) {
         if (exItem.classList.contains('exercise-completed')) return;
 
@@ -94,9 +83,6 @@ class InteractiveExerciseHandler {
         this.disableExercise(exItem);
         this.completedExercises.add(exId);
         this.updateProgress();
-        // Don't call updateFinishButton here for every restored exercise;
-        // we'll do one final call after all are restored via the async loop completing.
-        // Instead, queue a deferred update:
         clearTimeout(this._finishBtnTimer);
         this._finishBtnTimer = setTimeout(() => this.updateFinishButton(), 0);
     }
@@ -138,7 +124,6 @@ class InteractiveExerciseHandler {
         });
     }
 
-    // ── Matching Exercise ─────────────────────────────────────
     initMatchingExercises() {
         document.querySelectorAll('.exercise-item[data-type="Matching"]').forEach(exItem => {
             const exId = exItem.dataset.exerciseId;
@@ -439,21 +424,18 @@ class InteractiveExerciseHandler {
         if (text) text.textContent = done;
     }
 
-    // ── Skip: marks as skipped, counts toward the finish unlock ──
     skipExercise(event) {
         const btn = event.currentTarget;
         const exItem = btn.closest('.exercise-item');
         const exId = exItem.dataset.exerciseId;
 
-        if (this.completedExercises.has(exId)) return; // already answered correctly
+        if (this.completedExercises.has(exId)) return; 
 
-        // Collect a readable title for the review modal later
         const titleEl = exItem.querySelector('.exercise-title');
         const title = titleEl ? titleEl.textContent.trim() : `Exercise ${exItem.dataset.exerciseId}`;
 
         this.skippedExercises.set(exId, { element: exItem, title });
 
-        // Visual: dim the exercise and show a "skipped" banner
         let indicator = exItem.querySelector('.skipped-indicator');
         if (!indicator) {
             indicator = document.createElement('div');
@@ -474,7 +456,6 @@ class InteractiveExerciseHandler {
                 </button>`;
             exItem.querySelector('.exercise-actions').insertAdjacentElement('afterend', indicator);
 
-            // Undo skip handler
             indicator.querySelector('.btn-undo-skip').addEventListener('click', () => {
                 this.skippedExercises.delete(exId);
                 indicator.remove();
@@ -487,7 +468,6 @@ class InteractiveExerciseHandler {
         this.updateFinishButton();
     }
 
-    // ── Finish Lesson Button ──────────────────────────────────
     renderFinishButton() {
         const container = document.getElementById('finish-lesson-container');
         if (!container) return;
@@ -547,7 +527,6 @@ class InteractiveExerciseHandler {
         }
     }
 
-    // ── Submit a skipped exercise with a blank answer to register it as attempted ──
     async submitSkippedAnswer(exId, info) {
         const exItem = info.element;
         const startTime = exItem.dataset.startTime ? parseInt(exItem.dataset.startTime) : Date.now();
@@ -580,7 +559,6 @@ class InteractiveExerciseHandler {
         }
     }
 
-    // ── Modal showing correct answers for all skipped exercises ──
     showReviewModal(reviews, courseUrl) {
         const rows = reviews.map(r => `
             <div style="
@@ -618,7 +596,6 @@ class InteractiveExerciseHandler {
         setTimeout(() => modal.classList.add('show'), 10);
     }
 
-    // ── Pure-completion modal (no skips) ─────────────────────
     showCompletionModal(courseUrl) {
         const modal = document.createElement('div');
         modal.className = 'completion-modal';
@@ -713,7 +690,6 @@ class InteractiveExerciseHandler {
     }
 }
 
-// ── Finish lesson global function ─────────────────────────────
 async function finishLesson() {
     const container = document.getElementById('finish-lesson-container');
     const lessonId = container?.dataset.lessonId;
@@ -731,7 +707,7 @@ async function finishLesson() {
     const handler = window.exerciseHandler;
     if (!handler) return;
 
-    // 1. Submit every skipped exercise with a blank answer so the server registers
+    //    Submit every skipped exercise with a blank answer so the server registers
     //    all exercises as attempted (required by TryCompleteLessonAsync).
     const reviews = [];
     for (const [exId, info] of handler.skippedExercises) {
@@ -739,7 +715,7 @@ async function finishLesson() {
         if (review) reviews.push(review);
     }
 
-    // 2. Show the appropriate completion UI.
+    // Show the appropriate completion UI.
     if (reviews.length > 0) {
         handler.showReviewModal(reviews, courseUrl);
     } else {
@@ -747,7 +723,6 @@ async function finishLesson() {
     }
 }
 
-// ── Init ──────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     if (document.querySelector('.exercise-item')) {
         window.exerciseHandler = new InteractiveExerciseHandler();

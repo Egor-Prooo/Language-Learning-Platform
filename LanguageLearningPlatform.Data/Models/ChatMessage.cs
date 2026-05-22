@@ -16,7 +16,7 @@ namespace LanguageLearningPlatform.Data.Models
         [Required]
         public string Message { get; set; } = string.Empty;
 
-        public bool IsFromUser { get; set; } = true; // true = user sent, false = tutor/system sent
+        public bool IsFromUser { get; set; } = true;
 
         public DateTime SentAt { get; set; } = DateTime.UtcNow;
 

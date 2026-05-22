@@ -11,7 +11,7 @@ namespace LanguageLearningPlatform.Data.Models
         [Required]
         public string Message { get; set; } = string.Empty;
 
-        public bool IsFromTeacher { get; set; } = false; // false = from student, true = teacher reply
+        public bool IsFromTeacher { get; set; } = false; 
 
         public bool IsRead { get; set; } = false;
 

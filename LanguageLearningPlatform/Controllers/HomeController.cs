@@ -29,12 +29,10 @@ namespace LanguageLearningPlatform.Controllers
 
         public async Task<IActionResult> Index()
         {
-            // Get platform statistics
             ViewBag.TotalCourses = await _context.Courses.CountAsync(c => c.IsPublished);
             ViewBag.TotalUsers = await _context.Users.CountAsync(u => u.IsActive);
             ViewBag.TotalLessons = await _context.Lessons.CountAsync();
 
-            // Get featured courses (top 3 most enrolled)
             var featuredCourses = await _context.Courses
                 .Where(c => c.IsPublished)
                 .Include(c => c.Enrollments)
@@ -45,7 +43,6 @@ namespace LanguageLearningPlatform.Controllers
 
             ViewBag.FeaturedCourses = featuredCourses;
 
-            // If user is authenticated, show their stats
             if (User.Identity?.IsAuthenticated == true)
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

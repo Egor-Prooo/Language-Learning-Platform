@@ -16,8 +16,6 @@ namespace LanguageLearningPlatform.Services
             _achievementService = achievementService;
         }
 
-        // ── Public API ────────────────────────────────────────────────────────────
-
         public async Task<bool> IsLessonCompletedAsync(string userId, Guid lessonId)
         {
             return await _context.UserLessonProgresses
@@ -26,11 +24,9 @@ namespace LanguageLearningPlatform.Services
 
         public async Task<bool> TryCompleteLessonAsync(string userId, Guid lessonId)
         {
-            // Already recorded as complete – nothing to do
             if (await IsLessonCompletedAsync(userId, lessonId))
                 return false;
 
-            // Load lesson with its content lists
             var lesson = await _context.Lessons
                 .Include(l => l.VideoLessons)
                 .Include(l => l.Exercises)
@@ -38,7 +34,6 @@ namespace LanguageLearningPlatform.Services
 
             if (lesson == null) return false;
 
-            // ── Check video condition ─────────────────────────────────────────────
             if (lesson.VideoLessons.Any())
             {
                 var videoIds = lesson.VideoLessons.Select(v => v.Id).ToList();
@@ -51,7 +46,7 @@ namespace LanguageLearningPlatform.Services
                 {
                     var vp = videoProgresses.FirstOrDefault(p => p.VideoLessonId == video.Id);
 
-                    if (vp == null) return false; // video never started
+                    if (vp == null) return false; 
 
                     if (!vp.IsCompleted)
                     {
@@ -64,7 +59,6 @@ namespace LanguageLearningPlatform.Services
                 }
             }
 
-            // ── Check exercise condition ──────────────────────────────────────────
             if (lesson.Exercises.Any())
             {
                 var exerciseIds = lesson.Exercises.Select(e => e.Id).ToList();
@@ -75,15 +69,12 @@ namespace LanguageLearningPlatform.Services
                     .Distinct()
                     .ToListAsync();
 
-                // Every exercise must have at least one attempt
                 if (attemptedIds.Count < exerciseIds.Count) return false;
             }
 
-            // ── If a lesson has neither videos nor exercises it cannot be auto-completed ──
             if (!lesson.VideoLessons.Any() && !lesson.Exercises.Any())
                 return false;
 
-            // ── All conditions met – record completion ────────────────────────────
             _context.UserLessonProgresses.Add(new UserLessonProgress
             {
                 Id = Guid.NewGuid(),
@@ -93,7 +84,6 @@ namespace LanguageLearningPlatform.Services
                 CompletedAt = DateTime.UtcNow
             });
 
-            // ── Update course progress record ─────────────────────────────────────
             var courseProgress = await _context.Progresses
                 .FirstOrDefaultAsync(p => p.UserId == userId && p.CourseId == lesson.CourseId);
 
@@ -109,14 +99,12 @@ namespace LanguageLearningPlatform.Services
                     ? (decimal)courseProgress.CompletedLessons / totalLessons * 100
                     : 0;
 
-                // Mark course as fully completed the first time it hits 100 %
                 if (courseProgress.CompletionPercentage >= 100 && courseProgress.CompletedAt == null)
                     courseProgress.CompletedAt = DateTime.UtcNow;
             }
 
             await _context.SaveChangesAsync();
 
-            // ── Trigger achievement / level checks ────────────────────────────────
             await _achievementService.CheckAndAwardAsync(userId);
 
             return true;

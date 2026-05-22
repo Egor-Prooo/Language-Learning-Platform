@@ -45,7 +45,6 @@ namespace LanguageLearningPlatform.Data.Models
 
         public bool IsVerifiedTeacher { get; set; } = false;
 
-        // Navigation properties
         public virtual ICollection<Course> EnrolledCourses { get; set; } = new List<Course>();
         public virtual ICollection<Course> CreatedCourses { get; set; } = new List<Course>();
         public virtual ICollection<Progress> Progresses { get; set; } = new List<Progress>();

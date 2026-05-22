@@ -38,7 +38,6 @@ namespace LanguageLearningPlatform.Web.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            // Run achievement check on every profile load so level/streaks stay current
             await _achievementService.CheckAndAwardAsync(userId!);
 
             var user = await _context.Users
@@ -163,7 +162,6 @@ namespace LanguageLearningPlatform.Web.Controllers
         {
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            // Aggregate total points per user from the Progress table
             var pointsPerUser = await _context.Progresses
                 .GroupBy(p => p.UserId)
                 .Select(g => new
@@ -186,7 +184,6 @@ namespace LanguageLearningPlatform.Web.Controllers
 
             var userDict = users.ToDictionary(u => u.Id);
 
-            // Calculate streaks for leaderboard entries
             var allResults = await _context.UserExerciseResults
                 .Where(r => userIds.Contains(r.UserId))
                 .GroupBy(r => new { r.UserId, Date = r.CompletedAt.Date })
@@ -229,8 +226,6 @@ namespace LanguageLearningPlatform.Web.Controllers
             return View(entries);
         }
 
-        // ── Helpers ──────────────────────────────────────────────────────────
-
         private async Task PopulateProfileViewBag(User user, string userId)
         {
             var totalPoints = await _progressService.GetUserTotalPointsAsync(userId);
@@ -254,7 +249,6 @@ namespace LanguageLearningPlatform.Web.Controllers
                 .Take(5)
                 .ToList();
 
-            // Streak: count distinct active days in the last 7 days
             var weekAgo = DateTime.UtcNow.AddDays(-7);
             var recentActivity = await _context.Progresses
                 .Where(p => p.UserId == userId && p.LastAccessedAt >= weekAgo)
@@ -359,7 +353,6 @@ namespace LanguageLearningPlatform.Web.Controllers
             var user = await _context.Users.FindAsync(userId);
             if (user == null) return NotFound();
 
-            // Only validate profile fields
             if (string.IsNullOrWhiteSpace(model.FirstName) ||
                 string.IsNullOrWhiteSpace(model.LastName))
             {

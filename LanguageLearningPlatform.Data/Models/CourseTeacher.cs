@@ -20,6 +20,6 @@ namespace LanguageLearningPlatform.Data.Models
 
         public DateTime AssignedAt { get; set; } = DateTime.UtcNow;
 
-        public bool IsPrimary { get; set; } = false; // marks the main teacher
+        public bool IsPrimary { get; set; } = false;
     }
 }

@@ -16,7 +16,6 @@ namespace LanguageLearningPlatform.Web.Hubs
             _context = context;
         }
 
-        // ── Lifecycle ─────────────────────────────────────────────────────────
         public override async Task OnConnectedAsync()
         {
             var userId = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -25,7 +24,6 @@ namespace LanguageLearningPlatform.Web.Hubs
             await base.OnConnectedAsync();
         }
 
-        // ── Conversation room management ──────────────────────────────────────
         public async Task JoinConversation(string teacherId, string studentId, string courseId)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, ConvGroup(teacherId, studentId, courseId));
@@ -36,7 +34,6 @@ namespace LanguageLearningPlatform.Web.Hubs
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, ConvGroup(teacherId, studentId, courseId));
         }
 
-        // ── Send a message ────────────────────────────────────────────────────
         public async Task SendMessage(string teacherId, string studentId, string courseId, string message)
         {
             message = message?.Trim() ?? "";
@@ -45,7 +42,6 @@ namespace LanguageLearningPlatform.Web.Hubs
             var senderId = Context.User!.FindFirstValue(ClaimTypes.NameIdentifier)!;
             var isFromTeacher = senderId == teacherId;
 
-            // Validate that sender is a participant
             if (senderId != teacherId && senderId != studentId) return;
 
             if (!Guid.TryParse(courseId, out var courseGuid)) return;
@@ -67,11 +63,9 @@ namespace LanguageLearningPlatform.Web.Hubs
 
             var payload = BuildPayload(msg);
 
-            // Push to everyone in the conversation room (both participants if online)
             await Clients.Group(ConvGroup(teacherId, studentId, courseId))
                 .SendAsync("ReceiveMessage", payload);
 
-            // Notify the other party's personal group (for sidebar badge updates)
             var notifyUserId = isFromTeacher ? studentId : teacherId;
             await Clients.Group(UserGroup(notifyUserId))
                 .SendAsync("NewMessageNotification", payload);

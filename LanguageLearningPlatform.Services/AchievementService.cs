@@ -9,8 +9,6 @@ namespace LanguageLearningPlatform.Services
     {
         private readonly ApplicationDbContext _context;
 
-        // ── Level definitions ─────────────────────────────────────────────────────
-        // Each entry: (Level number, display name, min points inclusive, max points exclusive, hex colour)
         private static readonly (int Level, string Name, int Min, int Max, string Color)[] LevelDefs =
         {
             (1, "Novice",        0,     100,    "#10B981"),
@@ -27,11 +25,9 @@ namespace LanguageLearningPlatform.Services
             _context = context;
         }
 
-        // ── Public API ────────────────────────────────────────────────────────────
 
         public async Task CheckAndAwardAsync(string userId)
         {
-            // ── Gather current stats ──────────────────────────────────────────────
             var totalPoints = await _context.Progresses
                 .Where(p => p.UserId == userId)
                 .SumAsync(p => p.PointsEarned);
@@ -56,7 +52,6 @@ namespace LanguageLearningPlatform.Services
 
             var streak = CalculateStreak(exerciseResults);
 
-            // ── Find achievements not yet earned ──────────────────────────────────
             var allAchievements = await _context.Achievements.ToListAsync();
 
             var earnedIds = (await _context.UserAchievements
@@ -74,7 +69,6 @@ namespace LanguageLearningPlatform.Services
                     "PointsReached" => totalPoints >= achievement.TriggerValue,
                     "LessonsCompleted" => completedLessons >= achievement.TriggerValue,
                     "StreakDays" => streak >= achievement.TriggerValue,
-                    // Require at least 10 exercises before judging accuracy
                     "AccuracyRate" => totalExercises >= 10 && accuracyRate >= achievement.TriggerValue,
                     "CoursesCompleted" => completedCourses >= achievement.TriggerValue,
                     _ => false
@@ -97,7 +91,6 @@ namespace LanguageLearningPlatform.Services
             {
                 _context.UserAchievements.AddRange(newAwards);
 
-                // If achievements carry bonus points, credit them to the first progress record.
                 if (bonusPoints > 0)
                 {
                     var firstProgress = await _context.Progresses
@@ -108,7 +101,6 @@ namespace LanguageLearningPlatform.Services
 
                 await _context.SaveChangesAsync();
 
-                // Recalculate total after bonus for level update
                 totalPoints += bonusPoints;
             }
 
@@ -122,11 +114,10 @@ namespace LanguageLearningPlatform.Services
 
             if (userLevel == null) return;
 
-            // Find the highest level definition the user has reached
             var def = LevelDefs.LastOrDefault(l => totalPoints >= l.Min);
             if (def == default) return;
 
-            if (userLevel.Level == def.Level) return; // nothing changed
+            if (userLevel.Level == def.Level) return;
 
             userLevel.Level = def.Level;
             userLevel.Name = def.Name;
@@ -138,7 +129,6 @@ namespace LanguageLearningPlatform.Services
             await _context.SaveChangesAsync();
         }
 
-        // ── Helpers ───────────────────────────────────────────────────────────────
 
         private static int CalculateStreak(List<UserExerciseResult> results)
         {
@@ -151,7 +141,6 @@ namespace LanguageLearningPlatform.Services
                 .OrderByDescending(g => g.Key)
                 .ToList();
 
-            // If the most recent activity is more than yesterday, streak is broken
             if ((today - byDate.First().Key).Days > 1) return 0;
 
             var streak = 0;

@@ -77,7 +77,6 @@ namespace LanguageLearningPlatform.Web.Controllers
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            // Check enrollment
             var isEnrolled = await _context.CourseEnrollments
                 .AnyAsync(e => e.UserId == userId && e.CourseId == lesson.CourseId && e.IsActive);
 
@@ -87,7 +86,6 @@ namespace LanguageLearningPlatform.Web.Controllers
                 return RedirectToAction("Details", "Courses", new { id = lesson.CourseId });
             }
 
-            // Map to InteractiveExerciseViewModel
             var exercises = lesson.Exercises.OrderBy(e => e.OrderIndex)
                 .Select(e => MapToInteractiveViewModel(e, lesson.Course.Language))
                 .ToList();
@@ -117,7 +115,6 @@ namespace LanguageLearningPlatform.Web.Controllers
                 Options = new List<string>()
             };
 
-            // Parse options based on exercise type
             if (!string.IsNullOrEmpty(e.Options))
             {
                 try
@@ -128,7 +125,6 @@ namespace LanguageLearningPlatform.Web.Controllers
                     }
                     else if (e.Type == "FillInBlank" || e.Type == "FillInTheBlank")
                     {
-                        // Word bank - expects JSON array of strings
                         var words = JsonSerializer.Deserialize<List<string>>(e.Options);
                         model.WordBank = words?.Select((w, index) => new WordBankItem
                         {
@@ -138,37 +134,32 @@ namespace LanguageLearningPlatform.Web.Controllers
                     }
                     else if (e.Type == "Matching")
                     {
-                        // For matching exercises, parse the MatchingPair objects
-                        // Expected format: [{"Left": "Hello", "Right": "Hola", "PairId": "guid"}, ...]
                         model.MatchingPairs = JsonSerializer.Deserialize<List<MatchingPair>>(e.Options);
                     }
                 }
                 catch (JsonException)
                 {
-                    // Handle malformed JSON gracefully
                     model.Options = new List<string>();
                 }
             }
 
-            // Setup speaking exercise data
             if (e.Type == "Speaking")
             {
                 model.SpeakingData = new SpeakingExerciseData
                 {
                     TargetPhrase = e.CorrectAnswer,
                     Language = MapLanguageToCode(courseLanguage),
-                    MinimumAccuracy = 0.8 // 80% accuracy required
+                    MinimumAccuracy = 0.8 
                 };
             }
 
-            // Setup listening exercise data
             if (e.Type == "Listening" && !string.IsNullOrEmpty(e.AudioUrl))
             {
                 model.ListeningData = new ListeningExerciseData
                 {
                     AudioUrl = e.AudioUrl,
                     Transcript = e.CorrectAnswer,
-                    Questions = new List<string>() // Can be populated from Options if needed
+                    Questions = new List<string>() 
                 };
             }
 

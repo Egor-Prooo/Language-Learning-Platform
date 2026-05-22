@@ -70,7 +70,6 @@ namespace LanguageLearningPlatform.Services
 
             if (existingEnrollment != null)
             {
-                // Re-activate if previously unenrolled
                 if (!existingEnrollment.IsActive)
                 {
                     existingEnrollment.IsActive = true;

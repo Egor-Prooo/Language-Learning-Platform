@@ -26,10 +26,22 @@ namespace LanguageLearningPlatform
                 options.Password.RequireUppercase = false;
                 options.Password.RequireLowercase = false;
             })
-            .AddRoles<IdentityRole>() // Add role support
+            .AddRoles<IdentityRole>() 
             .AddEntityFrameworkStores<ApplicationDbContext>();
 
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/Identity/Account/Login";
+                options.Events.OnRedirectToAccessDenied = context =>
+                {
+                    context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                    return Task.CompletedTask;
+                };
+            });
+
             // Register services
+            builder.Services.AddScoped<ICourseService, CourseService>();
+
             builder.Services.AddScoped<ICourseService, CourseService>();
             builder.Services.AddScoped<IProgressService, ProgressService>();
             builder.Services.AddScoped<IExerciseService, ExerciseService>();
@@ -65,12 +77,13 @@ namespace LanguageLearningPlatform
                 app.UseHsts();
             }
 
-            app.UseStatusCodePagesWithReExecute("/Error/{0}");
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseStatusCodePagesWithReExecute("/Error/{0}");
 
             app.UseAuthentication();
             app.UseAuthorization();

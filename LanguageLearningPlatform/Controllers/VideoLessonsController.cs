@@ -48,8 +48,6 @@ namespace LanguageLearningPlatform.Web.Controllers
 
             if (!success) return NotFound();
 
-            // ── After updating video progress, check whether the lesson is now complete ──
-            // We need the lesson ID that this video belongs to.
             var lessonId = await _context.VideoLessons
                 .Where(v => v.Id == request.VideoId)
                 .Select(v => v.LessonId)

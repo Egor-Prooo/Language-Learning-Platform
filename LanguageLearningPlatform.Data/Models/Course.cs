@@ -39,7 +39,6 @@ namespace LanguageLearningPlatform.Data.Models
         public string? CreatorId { get; set; }
         public virtual User? Creator { get; set; }
 
-        // Navigation properties
         public virtual ICollection<Lesson> Lessons { get; set; } = new List<Lesson>();
         public virtual ICollection<Progress> Progresses { get; set; } = new List<Progress>();
         public virtual ICollection<Exercise> Exercises { get; set; } = new List<Exercise>();

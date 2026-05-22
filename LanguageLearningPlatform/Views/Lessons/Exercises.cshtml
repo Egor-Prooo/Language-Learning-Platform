@@ -9,7 +9,6 @@
 @section Styles {
     <link rel="stylesheet" href="~/css/exercises.css" />
     <style>
-        /* ── Listening Exercise ─────────────────────────── */
         .listening-exercise {
             text-align: center;
         }
@@ -31,7 +30,6 @@
                 pointer-events: none;
             }
 
-        /* Waveform bars (CSS animation) */
         .waveform {
             display: flex;
             align-items: center;
@@ -195,7 +193,6 @@
                 color: white;
             }
 
-        /* Transcript reveal */
         .transcript-section {
             margin-top: 1.25rem;
         }
@@ -267,7 +264,6 @@
 
         }
 
-        /* Listening answer section */
         .listening-answer-section {
             margin-top: 1.5rem;
             text-align: left;
@@ -280,7 +276,6 @@
             margin-bottom: 0.6rem;
         }
 
-        /* ── Speaking Exercise ──────────────────────────── */
         .speaking-exercise {
             text-align: center;
         }
@@ -340,7 +335,6 @@
                 background: rgba(255,255,255,.18);
             }
 
-        /* Microphone record button */
         .mic-area {
             margin-bottom: 1.5rem;
         }
@@ -386,7 +380,6 @@
 
         }
 
-        /* Recording waveform (animated while recording) */
         .recording-waveform {
             display: flex;
             align-items: center;
@@ -461,7 +454,6 @@
                 color: #E11D48;
             }
 
-        /* Recognized text display */
         .recognized-text-box {
             background: #F7F6F3;
             border: 2px solid #E8E6E1;
@@ -572,7 +564,6 @@
             margin-top: 0.4rem;
         }
 
-        /* Browser unsupported warning */
         .speech-unsupported {
             display: none;
             background: rgba(217,119,6,.1);
@@ -586,7 +577,6 @@
     </style>
 }
 
-<!-- Back to Lesson Button -->
 <div class="container pt-4 mb-2">
     <div class="d-flex gap-2">
         <a href="@Url.Action("Details", "Lessons", new { id = ViewBag.LessonId })" class="btn btn-outline-secondary btn-sm">
@@ -599,7 +589,6 @@
 </div>
 
 <div class="exercise-container">
-    <!-- Progress Header -->
     <div class="lesson-progress">
         <div class="lesson-progress-text">
             <strong id="completed-count">0</strong> / <span id="total-count">@Model.Count()</span> Exercises Completed
@@ -646,7 +635,6 @@
                  data-attempts="1"
                  data-start-time="@startTimeMs">
 
-                <!-- Exercise Header -->
                 <div class="exercise-header">
                     <h3 class="exercise-title">
                         @switch (exercise.Type)
@@ -696,12 +684,10 @@
                 </div>
 
                 <div class="exercise-content">
-                    <!-- Question prompt -->
                     <div class="exercise-question">
                         @Html.Raw(exercise.Content)
                     </div>
 
-                    <!-- Image (if any) -->
                     @if (!string.IsNullOrEmpty(exercise.ImageUrl))
                     {
                         <div class="mb-4 text-center">
@@ -710,7 +696,6 @@
                         </div>
                     }
 
-                    <!-- ─── LISTENING EXERCISE ─────────────────── -->
                     @if (exercise.Type == "Listening")
                     {
                         <div class="listening-exercise">
@@ -773,7 +758,6 @@
                         </div>
                     }
 
-                    <!-- ─── SPEAKING EXERCISE ─────────────────── -->
                     @if (exercise.Type == "Speaking" && exercise.SpeakingData != null)
                     {
                         <div class="speaking-exercise"
@@ -845,7 +829,6 @@
                         <input type="hidden" class="exercise-input" id="speakingAnswer-@exercise.Id">
                     }
 
-                    <!-- ─── MULTIPLE CHOICE ────────────────────── -->
                     @if (exercise.Type == "MultipleChoice" && exercise.Options != null && exercise.Options.Any())
                     {
                         <div class="exercise-options">
@@ -856,7 +839,6 @@
                         </div>
                     }
 
-                    <!-- ─── FILL IN BLANK / TRANSLATION ──────── -->
                     @if (exercise.Type == "FillInBlank" || exercise.Type == "FillInTheBlank" || exercise.Type == "Translation")
                     {
                         <div class="mb-3">
@@ -865,7 +847,6 @@
                         </div>
                     }
 
-                    <!-- Word bank for fill-in-blank -->
                     @if ((exercise.Type == "FillInBlank" || exercise.Type == "FillInTheBlank") && exercise.WordBank != null && exercise.WordBank.Any())
                     {
                         <div class="word-bank mb-4">
@@ -879,7 +860,6 @@
                         </div>
                     }
 
-                    <!-- ─── MATCHING ───────────────────────────── -->
                     @if (exercise.Type == "Matching" && exercise.MatchingPairs != null && exercise.MatchingPairs.Any())
                     {
                         <div class="matching-exercise">
@@ -907,7 +887,6 @@
                         </div>
                     }
 
-                    <!-- Hint -->
                     @if (!string.IsNullOrEmpty(exercise.Hint))
                     {
                         <div class="exercise-hint">
@@ -917,7 +896,6 @@
                     }
                 </div>
 
-                <!-- Exercise Actions -->
                 <div class="exercise-actions">
                     @if (exercise.Type == "Listening" || exercise.Type == "Speaking")
                     {
@@ -947,18 +925,12 @@
         }
     }
 
-    <!-- ── Finish Lesson Container ───────────────────────────── -->
-    <!--
-        The JS renders the "Hand In Assignment" button here once all exercises
-        have been either answered correctly or skipped.
-    -->
     <div id="finish-lesson-container"
          data-lesson-id="@ViewBag.LessonId"
          data-course-id="@ViewBag.CourseId">
     </div>
 </div>
 
-<!-- Summary Card -->
 <div class="container pb-5">
     <div class="card shadow-sm">
         <div class="card-body text-center">
@@ -1005,7 +977,6 @@
             document.getElementById('total-count').textContent = @Model.Count();
             loadUserStats();
 
-            // Wire up listening inputs → enable check button
             document.querySelectorAll('.exercise-item[data-type="Listening"] .exercise-input, .exercise-item[data-type="Speaking"] .exercise-input').forEach(function(inp) {
                 inp.addEventListener('input', function () {
                     var btn = this.closest('.exercise-item').querySelector('.btn-check-answer');
@@ -1013,7 +984,6 @@
                 });
             });
 
-            // Speaking fallback text syncs to hidden answer
             document.querySelectorAll('[id^="speakingFallback-"]').forEach(function (inp) {
                 inp.addEventListener('input', function () {
                     var id = this.id.replace('speakingFallback-', '');
@@ -1250,8 +1220,9 @@
             }
         }
 
+
         function calcAccuracy(spoken, target) {
-            const numberWords = {
+            const wordToDigit = {
                 // English
                 'zero':'0','one':'1','two':'2','three':'3','four':'4',
                 'five':'5','six':'6','seven':'7','eight':'8','nine':'9',
@@ -1271,13 +1242,13 @@
                 'cuarenta':'40','cincuenta':'50','sesenta':'60',
                 'setenta':'70','ochenta':'80','noventa':'90',
                 'cien':'100','ciento':'100','mil':'1000',
-                // French
-                'un':'1','deux':'2','quatre':'4','cinq':'5',
+                // French (accent-stripped forms)
+                'un':'1','une':'1','deux':'2','quatre':'4','cinq':'5',
                 'sept':'7','huit':'8','neuf':'9','dix':'10',
                 'onze':'11','douze':'12','treize':'13','quatorze':'14',
                 'quinze':'15','seize':'16','vingt':'20','trente':'30',
                 'quarante':'40','soixante':'60','cent':'100','mille':'1000',
-                // German (umlauts stripped in normalise below)
+                // German (umlaut-stripped forms: ü→u, ö→o, ä→a, ß→ss)
                 'null':'0','ein':'1','eine':'1','einen':'1','zwei':'2',
                 'drei':'3','vier':'4','funf':'5','sechs':'6',
                 'sieben':'7','acht':'8','zehn':'10','elf':'11',
@@ -1294,31 +1265,54 @@
                 'diciassette':'17','diciotto':'18','diciannove':'19',
                 'venti':'20','trenta':'30','sessanta':'60',
                 'settanta':'70','ottanta':'80','novanta':'90',
-                'cento':'100'
+                'cento':'100',
+                // Japanese (romaji)
+                'ichi':'1','ni':'2','san':'3','shi':'4','yon':'4',
+                'go':'5','roku':'6','nana':'7','shichi':'7',
+                'hachi':'8','ku':'9','kyu':'9','juu':'10',
+                // Chinese (pinyin)
+                'yi':'1','er':'2','liang':'2','si':'4','wu':'5',
+                'liu':'6','qi':'7','ba':'8','jiu':'9','shi':'10',
             };
 
-            var norm = function (s) {
-                var out = s.toLowerCase().trim()
-                    .replace(/[áàä]/g,'a').replace(/[éèë]/g,'e')
-                    .replace(/[íìï]/g,'i').replace(/[óòö]/g,'o').replace(/[úùü]/g,'u')
-                    .replace(/[^a-z0-9\s]/g, '');
-                Object.keys(numberWords).forEach(function(word) {
-                    out = out.replace(new RegExp('\\b' + word + '\\b', 'gi'), numberWords[word]);
-                });
-                return out;
-            };
+            // ── 2. strip accents / umlauts, lower-case, remove punctuation ───────────
+            function stripAccents(s) {
+                return s
+                    .replace(/[áàâä]/g, 'a').replace(/[ÁÀÂÄ]/g, 'a')
+                    .replace(/[éèêë]/g, 'e').replace(/[ÉÈÊË]/g, 'e')
+                    .replace(/[íìîï]/g, 'i').replace(/[ÍÌÎÏ]/g, 'i')
+                    .replace(/[óòôö]/g, 'o').replace(/[ÓÒÔÖ]/g, 'o')
+                    .replace(/[úùûü]/g, 'u').replace(/[ÚÙÛÜ]/g, 'u')
+                    .replace(/[ñÑ]/g, 'n')
+                    .replace(/[ß]/g, 'ss')
+                    .replace(/[çÇ]/g, 'c');
+            }
 
-            var spokenWords = norm(spoken).split(/\s+/).filter(Boolean);
-            var targetWords = norm(target).split(/\s+/).filter(Boolean);
-            if (targetWords.length === 0) return 0;
+            // ── 3. tokenise a string into normalised word-tokens ─────────────────────
+            function tokenise(raw) {
+                let s = stripAccents(raw).toLowerCase();
+                s = s.replace(/[^a-z0-9\s]/g, ' ');
+                const words = s.split(/\s+/).filter(Boolean);
+                return words.map(w => wordToDigit[w] !== undefined ? wordToDigit[w] : w);
+            }
 
-            var matched = 0;
-            var remaining = targetWords.slice();
-            spokenWords.forEach(function (w) {
-                var idx = remaining.indexOf(w);
-                if (idx !== -1) { matched++; remaining.splice(idx, 1); }
-            });
-            return matched / targetWords.length;
+            // ── 4. compare token arrays ───────────────────────────────────────────────
+            const targetTokens = tokenise(target);
+            const spokenTokens = tokenise(spoken);
+
+            if (targetTokens.length === 0) return 0;
+
+            let matched = 0;
+            const remaining = targetTokens.slice();
+            for (const w of spokenTokens) {
+                const idx = remaining.indexOf(w);
+                if (idx !== -1) {
+                    matched++;
+                    remaining.splice(idx, 1);
+                }
+            }
+
+            return matched / targetTokens.length;
         }
     </script>
 }

@@ -91,7 +91,6 @@ namespace LanguageLearningPlatform.Services
             }
             else
             {
-                // Only update if new progress is greater
                 if (watchedSeconds > progress.WatchedSeconds)
                     progress.WatchedSeconds = watchedSeconds;
 
@@ -151,7 +150,7 @@ namespace LanguageLearningPlatform.Services
                 {
                     "YouTube" => BuildYouTubeEmbed(videoUrl),
                     "Vimeo" => BuildVimeoEmbed(videoUrl),
-                    _ => videoUrl // Direct URL — used in <video> tag
+                    _ => videoUrl 
                 };
             }
             catch
@@ -162,7 +161,6 @@ namespace LanguageLearningPlatform.Services
 
         private string BuildYouTubeEmbed(string url)
         {
-            // Handle youtu.be/ID and youtube.com/watch?v=ID and already-embed URLs
             if (url.Contains("embed/")) return url;
 
             string? videoId = null;

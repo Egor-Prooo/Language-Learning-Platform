@@ -1,7 +1,4 @@
-﻿// LanguageLearningPlatform/Controllers/LessonsApiController.cs
-// Add this new file alongside the existing LessonsController.cs
-
-using LanguageLearningPlatform.Data;
+﻿using LanguageLearningPlatform.Data;
 using LanguageLearningPlatform.Services.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -34,7 +31,6 @@ namespace LanguageLearningPlatform.Web.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-            // Check enrollment
             var lesson = await _context.Lessons
                 .Include(l => l.Exercises)
                 .Include(l => l.VideoLessons)
@@ -49,13 +45,10 @@ namespace LanguageLearningPlatform.Web.Controllers
             if (!isEnrolled)
                 return Forbid();
 
-            // Check if already completed
             var alreadyCompleted = await _lessonProgressService.IsLessonCompletedAsync(userId, lessonId);
 
-            // Try to mark complete (checks all conditions internally)
             var justCompleted = await _lessonProgressService.TryCompleteLessonAsync(userId, lessonId);
 
-            // Determine how many exercises were attempted vs total
             var totalExercises = lesson.Exercises.Count;
             var attemptedExercises = totalExercises > 0
                 ? await _context.UserExerciseResults
@@ -75,7 +68,6 @@ namespace LanguageLearningPlatform.Web.Controllers
                     .CountAsync() == totalExercises
                 : true;
 
-            // Build next lesson URL
             string? nextLessonUrl = null;
             var courseLessons = await _context.Lessons
                 .Where(l => l.CourseId == lesson.CourseId)
@@ -103,7 +95,6 @@ namespace LanguageLearningPlatform.Web.Controllers
                 });
             }
 
-            // Not fully completed — check why
             if (totalExercises > 0 && attemptedExercises < totalExercises)
             {
                 return Ok(new

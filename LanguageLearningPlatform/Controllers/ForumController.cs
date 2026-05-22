@@ -131,9 +131,6 @@ namespace LanguageLearningPlatform.Web.Controllers
         {
             var newCount = await _forumService.LikeCommentAsync(commentId);
 
-            // Broadcast the updated like count so other viewers see it immediately.
-            // We don't know the postId from this endpoint, so we broadcast to all
-            // clients and let each client ignore updates for comments it doesn't own.
             await _hub.Clients.All.SendAsync("CommentLikeUpdated", new
             {
                 commentId = commentId.ToString(),
@@ -188,7 +185,6 @@ namespace LanguageLearningPlatform.Web.Controllers
             var isAdmin = User.IsInRole("Admin");
             await _forumService.DeleteCommentAsync(commentId, userId, isAdmin);
 
-            // Notify viewers to remove the comment from the UI
             await _hub.Clients
                 .Group(ForumHub.PostGroup(postId.ToString()))
                 .SendAsync("CommentDeleted", commentId.ToString());

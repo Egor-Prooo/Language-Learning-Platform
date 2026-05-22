@@ -17,18 +17,10 @@ namespace LanguageLearningPlatform.Web.Controllers
             _context = context;
         }
 
-        // ── Student Messenger ─────────────────────────────────────────────────
-
-        /// <summary>
-        /// Main student messaging page.
-        /// Sidebar: courses the student is enrolled in, each containing ALL teachers of that course.
-        /// Right panel: the selected teacher ↔ student conversation.
-        /// </summary>
         public async Task<IActionResult> Index(string? teacherId = null, Guid? courseId = null)
         {
             var studentId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
-            // ── Load every message this student has sent or received ───────────
             var allMessages = await _context.TeacherMessages
                 .Where(m => m.StudentId == studentId)
                 .Include(m => m.Teacher)
@@ -36,12 +28,10 @@ namespace LanguageLearningPlatform.Web.Controllers
                 .OrderBy(m => m.SentAt)
                 .ToListAsync();
 
-            // Index messages by (teacherId, courseId) for fast lookup
             var msgByKey = allMessages
                 .GroupBy(m => (m.TeacherId, m.CourseId))
                 .ToDictionary(g => g.Key, g => g.ToList());
 
-            // ── Load enrollments with ALL teachers per course ─────────────────
             var enrollments = await _context.CourseEnrollments
                 .Where(e => e.UserId == studentId && e.IsActive)
                 .Include(e => e.Course)
@@ -51,7 +41,6 @@ namespace LanguageLearningPlatform.Web.Controllers
                     .ThenInclude(c => c.Creator)
                 .ToListAsync();
 
-            // ── Build course groups ───────────────────────────────────────────
             var courseGroups = new List<StudentCourseGroupViewModel>();
 
             foreach (var enrollment in enrollments)
@@ -59,7 +48,6 @@ namespace LanguageLearningPlatform.Web.Controllers
                 var course = enrollment.Course;
                 if (course == null) continue;
 
-                // Collect every unique teacher for this course
                 var teacherMap = new Dictionary<string, User>();
 
                 foreach (var ct in course.CourseTeachers)
@@ -110,7 +98,6 @@ namespace LanguageLearningPlatform.Web.Controllers
 
             courseGroups = courseGroups.OrderBy(cg => cg.CourseName).ToList();
 
-            // ── Auto-select first conversation that has messages ───────────────
             if (string.IsNullOrEmpty(teacherId))
             {
                 var first = courseGroups
@@ -126,7 +113,6 @@ namespace LanguageLearningPlatform.Web.Controllers
                 }
             }
 
-            // ── Mark incoming messages as read for the selected conversation ──
             if (!string.IsNullOrEmpty(teacherId) && courseId.HasValue)
             {
                 var unread = await _context.TeacherMessages
@@ -144,7 +130,6 @@ namespace LanguageLearningPlatform.Web.Controllers
                 }
             }
 
-            // ── Resolve the selected teacher item ─────────────────────────────
             StudentTeacherItemViewModel? selected = null;
             if (!string.IsNullOrEmpty(teacherId) && courseId.HasValue)
             {
@@ -162,7 +147,6 @@ namespace LanguageLearningPlatform.Web.Controllers
             return View(courseGroups);
         }
 
-        // ── Redirect from "Ask the Teacher" button on course page ─────────────
         public async Task<IActionResult> ContactTeacher(Guid courseId)
         {
             var course = await _context.Courses
@@ -172,7 +156,6 @@ namespace LanguageLearningPlatform.Web.Controllers
 
             if (course == null) return NotFound();
 
-            // Pick the primary teacher, falling back to creator
             var teacher = course.CourseTeachers
                               .OrderByDescending(ct => ct.IsPrimary)
                               .FirstOrDefault()?.Teacher
@@ -188,7 +171,6 @@ namespace LanguageLearningPlatform.Web.Controllers
                 new { teacherId = teacher.Id, courseId });
         }
 
-        // ── JSON API: paginated message history for a conversation ─────────────
         [HttpGet]
         public async Task<IActionResult> GetMessages(string teacherId, Guid courseId)
         {
@@ -212,7 +194,6 @@ namespace LanguageLearningPlatform.Web.Controllers
             return Json(messages);
         }
 
-        // ── Helpers ───────────────────────────────────────────────────────────
         private static string Initials(string? first, string? last)
         {
             var f = first?.Length > 0 ? first[0].ToString().ToUpper() : "?";
@@ -221,9 +202,6 @@ namespace LanguageLearningPlatform.Web.Controllers
         }
     }
 
-    // ── View-model types ──────────────────────────────────────────────────────
-
-    /// <summary>Represents one enrolled course with all its teachers in the sidebar.</summary>
     public class StudentCourseGroupViewModel
     {
         public Guid CourseId { get; set; }
@@ -234,7 +212,6 @@ namespace LanguageLearningPlatform.Web.Controllers
         public int TotalUnread => Teachers.Sum(t => t.UnreadCount);
     }
 
-    /// <summary>One teacher inside a course group on the student sidebar.</summary>
     public class StudentTeacherItemViewModel
     {
         public string TeacherId { get; set; } = "";
@@ -248,7 +225,6 @@ namespace LanguageLearningPlatform.Web.Controllers
         public List<TeacherMessage> Messages { get; set; } = new();
     }
 
-    // Kept for backwards-compat with any other views that might reference it
     public class StudentConversationViewModel
     {
         public string TeacherId { get; set; } = "";

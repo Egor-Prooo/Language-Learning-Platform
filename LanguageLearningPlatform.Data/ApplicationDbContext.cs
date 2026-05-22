@@ -117,7 +117,6 @@ namespace LanguageLearningPlatform.Data
                       .OnDelete(DeleteBehavior.NoAction);
             });
 
-            // Indexes
             modelBuilder.Entity<Exercise>()
                 .HasIndex(e => e.CourseId);
 

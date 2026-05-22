@@ -1,5 +1,4 @@
-﻿// Interactive Exercise Handler
-class ExerciseHandler {
+﻿class ExerciseHandler {
     constructor() {
         this.currentExercise = null;
         this.attempts = 0;
@@ -12,12 +11,10 @@ class ExerciseHandler {
     }
 
     bindEventListeners() {
-        // Multiple choice answers
         document.querySelectorAll('.exercise-option').forEach(option => {
             option.addEventListener('click', (e) => this.handleMultipleChoice(e));
         });
 
-        // Translation and fill-in-blank inputs
         document.querySelectorAll('.exercise-input').forEach(input => {
             input.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
@@ -187,20 +184,17 @@ class ExerciseHandler {
     }
 
     updateProgress(pointsEarned) {
-        // Update points display
         const pointsDisplay = document.querySelector('.user-points');
         if (pointsDisplay) {
             const currentPoints = parseInt(pointsDisplay.textContent);
             pointsDisplay.textContent = currentPoints + pointsEarned;
 
-            // Animate points
             pointsDisplay.classList.add('points-earned');
             setTimeout(() => pointsDisplay.classList.remove('points-earned'), 600);
         }
     }
 
     skipExercise() {
-        // Move to next exercise or show completion message
         console.log('Exercise skipped');
     }
 }
@@ -227,20 +221,18 @@ class PronunciationHelper {
 
         const utterance = new SpeechSynthesisUtterance(text);
 
-        // Find appropriate voice for language
         const voice = this.voices.find(v => v.lang.startsWith(language.split('-')[0]));
         if (voice) {
             utterance.voice = voice;
         }
 
         utterance.lang = language;
-        utterance.rate = 0.9; // Slightly slower for learning
+        utterance.rate = 0.9; 
 
         this.synth.speak(utterance);
     }
 }
 
-// Progress tracker
 class ProgressTracker {
     constructor() {
         this.completedExercises = 0;
@@ -271,7 +263,6 @@ class ProgressTracker {
     }
 
     showCompletionCelebration() {
-        // Show completion modal or message
         const modal = document.createElement('div');
         modal.className = 'completion-modal';
         modal.innerHTML = `
@@ -288,13 +279,11 @@ class ProgressTracker {
     }
 }
 
-// Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     const exerciseHandler = new ExerciseHandler();
     const pronunciationHelper = new PronunciationHelper();
     const progressTracker = new ProgressTracker();
 
-    // Add pronunciation buttons
     document.querySelectorAll('.pronunciation-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const text = e.target.dataset.text;

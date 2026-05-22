@@ -6,6 +6,11 @@
     var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
     var isAdmin = User.IsInRole("Admin");
     var isAuthor = currentUserId == Model.AuthorId;
+
+    // Safe helper: HTML-encode content, then restore only safe newline → <br/> conversion.
+    // This prevents XSS while still rendering line breaks the author intended.
+    string SafeContent(string raw)
+        => System.Net.WebUtility.HtmlEncode(raw ?? string.Empty).Replace("&#10;", "<br />");
 }
 
 <div class="container my-5">
@@ -89,9 +94,9 @@
                     </div>
                 </div>
 
-                <!-- Post Body -->
+                <!-- Post Body — SafeContent encodes all HTML then restores \n → <br /> only -->
                 <div class="fpd-body">
-                    @Html.Raw(Model.Content.Replace("\n", "<br/>"))
+                    @Html.Raw(SafeContent(Model.Content))
                 </div>
 
                 <!-- Post-level like button -->
@@ -180,8 +185,9 @@
                                         }
                                     </div>
                                 </div>
+                                <!-- Comment content — same SafeContent encoding applied -->
                                 <div class="forum-comment-content">
-                                    @Html.Raw(comment.Content.Replace("\n", "<br/>"))
+                                    @Html.Raw(SafeContent(comment.Content))
                                 </div>
                             </div>
                         </div>
@@ -381,30 +387,25 @@
         }
 
     @@keyframes commentSlideIn {
-        from
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
 
-    {
-        opacity: 0;
-        transform: translateY(12px);
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    }
     @@keyframes livePulse {
-        0%, 100%
+        0%, 100% {
+            opacity: 1;
+        }
 
-    {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 0.4;
-    }
-
+        50% {
+            opacity: 0.4;
+        }
     }
 
     .forum-comment-header {
@@ -570,19 +571,17 @@
         z-index: 9999;
         animation: toastIn .3s ease;
     }
+
     @@keyframes toastIn {
-        from
+        from {
+            opacity: 0;
+            transform: translate(-50%, 20px);
+        }
 
-    {
-        opacity: 0;
-        transform: translate(-50%, 20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translate(-50%, 0);
-    }
-
+        to {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
     }
 </style>
 
@@ -602,29 +601,26 @@
                 .build();
 
             conn.on('ReceiveComment', function (comment) {
-                // Don't double-render if the page already reloaded after form submit
                 if (document.getElementById('comment-' + comment.id)) return;
 
                 appendComment(comment);
                 incrementReplyCount();
                 if (comment.authorId !== CURRENT_USER) {
-                    showToast('💬 New reply from ' + comment.authorName);
+                    showToast('💬 New reply from ' + escHtml(comment.authorName));
                 }
             });
 
             conn.on('CommentLikeUpdated', function (data) {
-                // Update like button counts on this page for the relevant comment
                 const el = document.querySelector(`[data-comment-id="${data.commentId}"] .like-count`);
                 if (el) el.textContent = data.likes;
-                // Also update unauthenticated static span if present
                 const staticEl = document.querySelector(`.comment-like-count-${data.commentId}`);
                 if (staticEl) staticEl.textContent = data.likes;
             });
 
             conn.on('PostLikeUpdated', function (data) {
                 if (data.postId !== POST_ID) return;
-                document.getElementById('post-likes')?.textContent != null &&
-                    (document.getElementById('post-likes').textContent = data.likes);
+                const postLikes = document.getElementById('post-likes');
+                if (postLikes) postLikes.textContent = data.likes;
                 const sidebar = document.getElementById('sidebar-post-likes');
                 if (sidebar) sidebar.textContent = data.likes;
             });
@@ -683,7 +679,6 @@
                 const container = document.getElementById('comments-container');
                 if (!container) return;
 
-                // Build initials from authorName as fallback
                 const initials = comment.authorInitials ||
                     comment.authorName.split(' ').slice(0, 2).map(w => w[0].toUpperCase()).join('');
 
@@ -691,10 +686,10 @@
                 const deleteHtml = canDelete
                     ? `<form action="/Forum/DeleteComment" method="post" class="d-inline"
                            onsubmit="return confirm('Delete this reply?')">
-                           <input type="hidden" name="commentId" value="${comment.id}" />
-                           <input type="hidden" name="postId"    value="${POST_ID}" />
+                           <input type="hidden" name="commentId" value="${escHtml(comment.id)}" />
+                           <input type="hidden" name="postId"    value="${escHtml(POST_ID)}" />
                            <input type="hidden" name="__RequestVerificationToken"
-                                  value="${getAntiForgeryToken()}" />
+                                  value="${escHtml(getAntiForgeryToken())}" />
                            <button type="submit" class="btn btn-xs btn-link text-danger p-0" title="Delete">
                                <i class="fas fa-times"></i>
                            </button>
@@ -703,19 +698,22 @@
 
                 const likeHtml = IS_AUTH
                     ? `<button class="btn-like btn-like-sm"
-                               onclick="likeComment('${comment.id}', this)" title="Like">
+                               onclick="likeComment('${escHtml(comment.id)}', this)" title="Like">
                            <i class="fas fa-heart"></i>
-                           <span class="like-count">${comment.likes}</span>
+                           <span class="like-count">${escHtml(String(comment.likes))}</span>
                        </button>`
                     : `<span class="text-muted" style="font-size:0.75rem;">
                            <i class="fas fa-heart text-danger me-1"></i>
-                           <span class="comment-like-count-${comment.id}">${comment.likes}</span>
+                           <span class="comment-like-count-${escHtml(comment.id)}">${escHtml(String(comment.likes))}</span>
                        </span>`;
 
                 const div = document.createElement('div');
                 div.className = 'forum-comment';
                 div.id = 'comment-' + comment.id;
                 div.dataset.commentId = comment.id;
+                // Content is text-only here — the server already HTML-encoded it on save;
+                // we use escHtml on the SignalR payload values so no raw HTML can slip in
+                // through the real-time path either.
                 div.innerHTML = `
                     <div class="forum-avatar-sm">${escHtml(initials)}</div>
                     <div class="forum-comment-body flex-grow-1">
@@ -727,7 +725,7 @@
                                 ${deleteHtml}
                             </div>
                         </div>
-                        <div class="forum-comment-content">${escHtml(comment.content).replace(/\n/g, '<br/>')}</div>
+                        <div class="forum-comment-content">${escHtml(comment.content).replace(/\n/g, '<br />')}</div>
                     </div>`;
                 container.appendChild(div);
             }
@@ -736,6 +734,7 @@
             function showToast(message) {
                 const t = document.createElement('div');
                 t.className = 'new-comment-toast';
+                // message is already produced by escHtml above, safe to set as text
                 t.textContent = message;
                 document.body.appendChild(t);
                 setTimeout(() => {
@@ -747,11 +746,13 @@
             }
 
             // ── Helpers ───────────────────────────────────────────────────────
+            // escHtml: convert a plain string to HTML-safe text for insertion into innerHTML
             function escHtml(str) {
                 const d = document.createElement('div');
-                d.textContent = str || '';
+                d.textContent = String(str ?? '');
                 return d.innerHTML;
             }
+
             function getAntiForgeryToken() {
                 return document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '';
             }
